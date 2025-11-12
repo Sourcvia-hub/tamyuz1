@@ -146,7 +146,7 @@ class Vendor(BaseModel):
     # System fields
     risk_score: float = 0.0
     risk_category: RiskCategory = RiskCategory.LOW
-    status: VendorStatus = VendorStatus.PENDING
+    status: VendorStatus = VendorStatus.APPROVED  # Auto-approved
     evaluation_notes: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
