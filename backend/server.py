@@ -990,10 +990,25 @@ async def award_tender(tender_id: str, vendor_id: str, request: Request):
 # ==================== CONTRACT ENDPOINTS ====================
 @api_router.post("/contracts")
 async def create_contract(contract: Contract, request: Request):
-    """Create new contract"""
+    """Create new contract - Auto-approved with generated number"""
     user = await require_role(request, [UserRole.PROCUREMENT_OFFICER])
     
+    # Verify tender exists
+    tender = await db.tenders.find_one({"id": contract.tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    
+    # Verify vendor exists
+    vendor = await db.vendors.find_one({"id": contract.vendor_id})
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
     contract.created_by = user.id
+    
+    # Auto-approve and generate contract number
+    contract.status = ContractStatus.APPROVED
+    contract.contract_number = await generate_number("Contract")
+    
     contract_doc = contract.model_dump()
     contract_doc["start_date"] = contract_doc["start_date"].isoformat()
     contract_doc["end_date"] = contract_doc["end_date"].isoformat()
