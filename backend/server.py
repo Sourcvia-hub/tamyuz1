@@ -259,6 +259,18 @@ class Notification(BaseModel):
     read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class AuditLog(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    entity_type: str  # "vendor", "tender", "contract", etc.
+    entity_id: str
+    action: str  # "created", "updated", "deleted"
+    user_id: str
+    user_name: str
+    changes: Dict[str, Any] = {}  # What changed
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # ==================== AUTH HELPERS ====================
 def hash_password(password: str) -> str:
     """Simple password hashing (in production, use bcrypt or passlib)"""
