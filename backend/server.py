@@ -451,16 +451,42 @@ async def update_user_role(user_id: str, role: UserRole, request: Request):
 @api_router.post("/vendors")
 async def create_vendor(vendor: Vendor, request: Request):
     """Create a new vendor (Procurement Officer only) - Auto-approved"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
     
-    # Calculate risk score (simple example)
+    # Calculate detailed risk assessment
+    risk_details = {}
     risk_score = 0.0
-    if not vendor.documents:
+    
+    # Documents check (30 points)
+    if not vendor.documents or len(vendor.documents) == 0:
         risk_score += 30
-    if not vendor.bank_name:
+        risk_details["missing_documents"] = {"score": 30, "reason": "No documents uploaded"}
+    
+    # Bank information check (20 points)
+    if not vendor.bank_name or not vendor.iban:
         risk_score += 20
+        risk_details["incomplete_banking"] = {"score": 20, "reason": "Missing bank information"}
+    
+    # CR expiry check (15 points if expiring soon)
+    if vendor.cr_expiry_date:
+        days_to_expiry = (vendor.cr_expiry_date - datetime.now(timezone.utc)).days
+        if days_to_expiry < 90:
+            risk_score += 15
+            risk_details["cr_expiring_soon"] = {"score": 15, "reason": f"CR expires in {days_to_expiry} days"}
+    
+    # License check (10 points)
+    if not vendor.license_number:
+        risk_score += 10
+        risk_details["missing_license"] = {"score": 10, "reason": "No license number provided"}
+    
+    # Number of employees check (10 points if < 5)
+    if vendor.number_of_employees < 5:
+        risk_score += 10
+        risk_details["small_team"] = {"score": 10, "reason": f"Only {vendor.number_of_employees} employees"}
     
     vendor.risk_score = risk_score
+    vendor.risk_assessment_details = risk_details
+    
     if risk_score >= 50:
         vendor.risk_category = RiskCategory.HIGH
     elif risk_score >= 25:
@@ -470,6 +496,7 @@ async def create_vendor(vendor: Vendor, request: Request):
     
     # Auto-approve vendor
     vendor.status = VendorStatus.APPROVED
+    vendor.created_by = user.id
     
     vendor_doc = vendor.model_dump()
     vendor_doc["created_at"] = vendor_doc["created_at"].isoformat()
@@ -480,6 +507,19 @@ async def create_vendor(vendor: Vendor, request: Request):
         vendor_doc["license_expiry_date"] = vendor_doc["license_expiry_date"].isoformat()
     
     await db.vendors.insert_one(vendor_doc)
+    
+    # Create audit log
+    audit_log = AuditLog(
+        entity_type="vendor",
+        entity_id=vendor.id,
+        action="created",
+        user_id=user.id,
+        user_name=user.name,
+        changes={"vendor_name": vendor.name_english, "risk_score": risk_score}
+    )
+    audit_doc = audit_log.model_dump()
+    audit_doc["timestamp"] = audit_doc["timestamp"].isoformat()
+    await db.audit_logs.insert_one(audit_doc)
     
     return vendor.model_dump()
 
