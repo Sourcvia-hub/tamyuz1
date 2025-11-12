@@ -24,8 +24,9 @@ const Invoices = () => {
 
   useEffect(() => {
     fetchInvoices();
-    if (user?.role === 'vendor') {
+    if (user?.role === 'procurement_officer') {
       fetchContracts();
+      fetchVendors();
     }
   }, []);
 
