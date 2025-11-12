@@ -967,7 +967,7 @@ async def create_contract(contract: Contract, request: Request):
 @api_router.get("/contracts")
 async def get_contracts(request: Request, status: Optional[ContractStatus] = None):
     """Get all contracts"""
-    user = await require_auth(request)
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
     
     query = {}
     if status:
