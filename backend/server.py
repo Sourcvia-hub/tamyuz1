@@ -285,6 +285,119 @@ class Invoice(BaseModel):
     approved_by: Optional[str] = None  # user ID
     documents: List[str] = []
 
+class DueDiligenceQuestionnaire(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    contract_id: str
+    vendor_id: str
+    
+    # Ownership Structure / General
+    ownership_change_last_year: Optional[bool] = None
+    location_moved_or_closed: Optional[bool] = None
+    new_branches_opened: Optional[bool] = None
+    financial_obligations_default: Optional[bool] = None
+    shareholding_in_bank: Optional[bool] = None
+    
+    # Business Continuity (27 questions)
+    bc_rely_on_third_parties: Optional[bool] = None
+    bc_intend_to_outsource: Optional[bool] = None
+    bc_business_stopped_over_week: Optional[bool] = None
+    bc_alternative_locations: Optional[bool] = None
+    bc_site_readiness_test_frequency: Optional[str] = None
+    bc_certified_standard: Optional[bool] = None
+    bc_staff_assigned: Optional[bool] = None
+    bc_risks_assessed: Optional[bool] = None
+    bc_threats_identified: Optional[bool] = None
+    bc_essential_activities_identified: Optional[bool] = None
+    bc_strategy_exists: Optional[bool] = None
+    bc_emergency_responders_engaged: Optional[bool] = None
+    bc_arrangements_updated: Optional[bool] = None
+    bc_documented_strategy: Optional[bool] = None
+    bc_can_provide_exercise_info: Optional[bool] = None
+    bc_exercise_results_used: Optional[bool] = None
+    bc_management_trained: Optional[bool] = None
+    bc_staff_aware: Optional[bool] = None
+    bc_it_continuity_plan: Optional[bool] = None
+    bc_critical_data_backed_up: Optional[bool] = None
+    bc_vital_documents_offsite: Optional[bool] = None
+    bc_critical_suppliers_identified: Optional[bool] = None
+    bc_suppliers_consulted: Optional[bool] = None
+    bc_communication_method: Optional[bool] = None
+    bc_public_relations_capability: Optional[bool] = None
+    
+    # Anti-Fraud
+    fraud_whistle_blowing_mechanism: Optional[bool] = None
+    fraud_prevention_procedures: Optional[bool] = None
+    fraud_internal_last_year: Optional[bool] = None
+    fraud_burglary_theft_last_year: Optional[bool] = None
+    
+    # Operational Risks
+    op_criminal_cases_last_3years: Optional[bool] = None
+    op_financial_issues_last_3years: Optional[bool] = None
+    op_documented_procedures: Optional[bool] = None
+    op_internal_audit: Optional[bool] = None
+    op_specific_license_required: Optional[bool] = None
+    op_services_outside_ksa: Optional[bool] = None
+    op_conflict_of_interest_policy: Optional[bool] = None
+    op_complaint_handling_procedures: Optional[bool] = None
+    op_customer_complaints_last_year: Optional[bool] = None
+    op_insurance_contracts: Optional[bool] = None
+    
+    # Cyber Security
+    cyber_cloud_services: Optional[bool] = None
+    cyber_data_outside_ksa: Optional[bool] = None
+    cyber_remote_access_outside_ksa: Optional[bool] = None
+    cyber_digital_channels: Optional[bool] = None
+    cyber_card_payments: Optional[bool] = None
+    cyber_third_party_access: Optional[bool] = None
+    
+    # Safety and Security
+    safety_procedures_exist: Optional[bool] = None
+    safety_security_24_7: Optional[bool] = None
+    safety_security_equipment: Optional[bool] = None
+    safety_equipment: Optional[bool] = None
+    
+    # Human Resources
+    hr_localization_policy: Optional[bool] = None
+    hr_hiring_standards: Optional[bool] = None
+    hr_background_investigation: Optional[bool] = None
+    hr_academic_verification: Optional[bool] = None
+    
+    # Judicial / Legal
+    legal_formal_representation: Optional[bool] = None
+    
+    # Regulatory Authorities
+    reg_regulated_by_authority: Optional[bool] = None
+    reg_audited_by_independent: Optional[bool] = None
+    
+    # Conflict of Interest
+    coi_relationship_with_bank: Optional[bool] = None
+    
+    # Data Management
+    data_customer_data_policy: Optional[bool] = None
+    
+    # Financial Consumer Protection
+    fcp_read_and_understood: Optional[bool] = None
+    fcp_will_comply: Optional[bool] = None
+    
+    # Additional Details
+    additional_details: Optional[str] = None
+    
+    # Final Checklist
+    checklist_supporting_documents: Optional[bool] = None
+    checklist_related_party_checked: Optional[bool] = None
+    checklist_sanction_screening: Optional[bool] = None
+    
+    # Status and timestamps
+    status: str = "pending"  # pending, completed, approved
+    completed_by: Optional[str] = None  # user ID
+    completed_at: Optional[datetime] = None
+    approved_by: Optional[str] = None  # user ID
+    approved_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class Notification(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
