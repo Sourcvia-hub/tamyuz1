@@ -120,6 +120,17 @@ const Tenders = () => {
           )}
         </div>
 
+        {/* Search Bar */}
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <input
+            type="text"
+            placeholder="Search by tender number, title, or project name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
         {/* Tenders List */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
