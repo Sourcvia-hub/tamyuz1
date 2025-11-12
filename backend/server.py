@@ -510,10 +510,19 @@ async def get_vendor(vendor_id: str, request: Request):
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
     
+    # Remove MongoDB _id
+    if '_id' in vendor:
+        del vendor['_id']
+    
+    # Convert datetime strings
     if isinstance(vendor.get('created_at'), str):
         vendor['created_at'] = datetime.fromisoformat(vendor['created_at'])
     if isinstance(vendor.get('updated_at'), str):
         vendor['updated_at'] = datetime.fromisoformat(vendor['updated_at'])
+    if isinstance(vendor.get('cr_expiry_date'), str):
+        vendor['cr_expiry_date'] = datetime.fromisoformat(vendor['cr_expiry_date'])
+    if vendor.get('license_expiry_date') and isinstance(vendor.get('license_expiry_date'), str):
+        vendor['license_expiry_date'] = datetime.fromisoformat(vendor['license_expiry_date'])
     
     return vendor
 
