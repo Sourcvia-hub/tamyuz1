@@ -186,14 +186,21 @@ class EvaluationCriteria(BaseModel):
     cost_weighted: float = 0.0  # 10% weight
     total_score: float = 0.0  # Sum of weighted scores
     
+class ProposalStatus(str, Enum):
+    SUBMITTED = "submitted"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
 class Proposal(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    proposal_number: Optional[str] = None  # Auto-generated (e.g., PRO-2025-0001)
     tender_id: str
     vendor_id: str
     technical_proposal: str
     financial_proposal: float
+    status: ProposalStatus = ProposalStatus.APPROVED  # Auto-approved
     
     # Evaluation scores
     evaluation: Optional[EvaluationCriteria] = None
