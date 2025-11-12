@@ -239,8 +239,9 @@ const Vendors = () => {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{vendor.company_name}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{vendor.contact_email}</p>
+                    <h3 className="text-xl font-bold text-gray-900">{vendor.name_english || vendor.company_name}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{vendor.commercial_name || vendor.company_name}</p>
+                    <p className="text-sm text-gray-600">{vendor.email || vendor.contact_email}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(vendor.status)}`}>
                     {vendor.status.toUpperCase()}
