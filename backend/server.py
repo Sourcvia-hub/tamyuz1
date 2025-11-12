@@ -1185,13 +1185,20 @@ async def submit_invoice(invoice: Invoice, request: Request):
     return invoice.model_dump()
 
 @api_router.get("/invoices")
-async def get_invoices(request: Request, status: Optional[InvoiceStatus] = None):
-    """Get all invoices"""
+async def get_invoices(request: Request, status: Optional[InvoiceStatus] = None, search: Optional[str] = None):
+    """Get all invoices with optional search by invoice_number"""
     await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
     
     query = {}
     if status:
         query["status"] = status.value
+    
+    # Add search functionality
+    if search:
+        query["$or"] = [
+            {"invoice_number": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}}
+        ]
     
     invoices = await db.invoices.find(query).to_list(1000)
     
