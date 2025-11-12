@@ -220,9 +220,9 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    tender_id: Optional[str] = None
+    contract_number: Optional[str] = None  # Auto-generated (e.g., Contract-25-0001)
+    tender_id: str  # Required - must select approved tender
     vendor_id: str
-    contract_number: str
     title: str
     sow: str  # Statement of Work
     sla: str  # Service Level Agreement
