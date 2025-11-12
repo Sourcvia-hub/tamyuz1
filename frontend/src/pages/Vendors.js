@@ -48,6 +48,29 @@ const Vendors = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
+  const handleCreateVendor = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/vendors`, formData, { withCredentials: true });
+      setShowCreateModal(false);
+      setFormData({
+        company_name: '',
+        cr_number: '',
+        vat_number: '',
+        address: '',
+        contact_person: '',
+        contact_email: '',
+        contact_phone: '',
+        bank_name: '',
+        bank_account: '',
+      });
+      fetchVendors();
+    } catch (error) {
+      console.error('Error creating vendor:', error);
+      alert('Failed to create vendor: ' + (error.response?.data?.detail || error.message));
+    }
+  };
+
   const getStatusBadgeColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-800',
