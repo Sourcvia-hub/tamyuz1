@@ -437,6 +437,15 @@ const VendorDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Due Diligence Questionnaire Modal */}
+      {showDueDiligenceModal && vendor && (
+        <DueDiligenceQuestionnaire
+          vendor={vendor}
+          onClose={() => setShowDueDiligenceModal(false)}
+          onSubmit={handleDueDiligenceSubmit}
+        />
+      )}
     </Layout>
   );
 };
