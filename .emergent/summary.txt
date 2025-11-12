@@ -1,0 +1,93 @@
+<analysis>
+The trajectory outlines the development of a Sourcevia Procurement Management System from scratch. The initial phase involved understanding a Business Requirements Document (BRD), exploring a boilerplate full-stack (FastAPI, React, MongoDB) application, and setting up the initial architecture. The AI engineer first implemented a version with Google OAuth and multiple user roles, including external vendors.
+
+Following user feedback, the project underwent significant changes. Authentication was switched from OAuth to a simpler email/password system, and the external vendor login was removed. The user then requested iterative enhancements: expanding vendor registration fields based on a document, implementing a detailed tender evaluation system from an Excel sheet, and removing the vendor approval workflow.
+
+Throughout the process, the AI engineer faced and resolved several technical challenges. A recurring issue was the   not being JSON serializable, which required repeatedly patching API endpoints to convert IDs and dates to strings. Other bugs included blank pages due to React rendering errors, incorrect form data handling, and data visibility issues, all of which were debugged and fixed.
+
+The most recent work involves another round of feature requests focused on the tender and contract modules, including auto-approval, auto-generated numbering, and search functionality. The engineer had just started implementing these changes by modifying the backend  model.
+</analysis>
+
+<product_requirements>
+The goal is to build the Sourcevia Procurement Management System, an internal enterprise application for managing the procurement lifecycle.
+
+**Core Modules:**
+1.  **Vendor Management:** Internal staff (Procurement Officers) can register, view, and update vendors. Vendor registration includes extensive company, financial, and compliance details. Vendors are automatically approved upon creation. The system calculates and displays a risk assessment score for each vendor and maintains an audit log of changes.
+2.  **Tender Management:** Procurement Officers can create tenders. Proposals are automatically approved to start the evaluation process. A detailed evaluation page allows for scoring based on technical and financial criteria. Tenders will have auto-generated numbers and be searchable.
+3.  **Contract Management:** Procurement Officers can create contracts linked to vendors.
+4.  **Invoice Management:** Users can submit and track invoices associated with contracts.
+
+**User Roles (Internal Only):**
+*   **Procurement Officer:** Primary user with rights to create/update vendors, tenders, contracts, and invoices.
+*   **Project Manager:** Can view and approve items.
+
+**Authentication:**
+*   Users log in via email and password.
+
+The system was initially designed with external vendor logins and approval workflows, but these were explicitly removed per user requests. The focus is now on streamlining the internal procurement process.
+</product_requirements>
+
+<key_technical_concepts>
+- **Full-Stack Application:** FastAPI (Python) backend, React (JavaScript) frontend.
+- **Database:** MongoDB with  for asynchronous access.
+- **Authentication:** Custom JWT-based email and password authentication. Session tokens are stored in secure,  cookies.
+- **Data Modeling:** Pydantic models for data validation and serialization in the backend.
+- **Key Bug Pattern:** Repeated  due to non-serializable MongoDB  and  objects in API responses, requiring manual conversion to .
+</key_technical_concepts>
+
+<code_architecture>
+The application follows a standard monorepo structure with separate directories for the backend and frontend.
+
+
+
+   - ****
+      - **Importance:** This is the single-file FastAPI backend containing all application logic: API endpoints, Pydantic data models (e.g., , , , ), database connection (), and authentication logic.
+      - **Changes:** It has been extensively modified to:
+         - Switch from Google OAuth to email/password authentication.
+         - Add/remove endpoints to align with changing requirements (e.g., removing vendor approval routes).
+         - Expand Pydantic models to include new fields from user-provided documents (e.g., detailed vendor info, tender evaluation scores).
+         - Implement business logic like vendor risk assessment.
+         - Repeatedly fix  serialization errors by converting database objects to dictionaries and casting  to  before returning JSON responses.
+         - The  model was just updated to include an optional .
+
+   - ****
+      - **Importance:** The main entry point for the React application. It sets up the router, manages global state like the current user, and handles the initial authentication flow.
+      - **Changes:** It was rewritten to remove the Google OAuth logic and implement a protected route structure based on a local . It now contains routes for all pages, including , , , , and the new  page.
+
+   - ****
+      - **Importance:** This page displays the list of all vendors and contains the modal for creating a new vendor.
+      - **Changes:** Updated to remove status filters and approval-related UI. It now uses the  component within its modal to handle the creation of vendors with a large number of fields.
+
+   - ****
+      - **Importance:** A large, reusable form component created to handle the extensive fields required for vendor registration and updates, as specified by the user.
+      - **Changes:** Created from scratch to encapsulate the complex vendor creation/edit form, separating it from the  and  pages.
+
+   - ****
+        - **Importance:** Displays the full details of a single vendor, including the calculated risk assessment and an audit log of changes.
+        - **Changes:** Evolved from a simple display page to a comprehensive dashboard for a vendor. It now includes an Edit button that launches a modal with the  component to update vendor information.
+
+   - ** & **
+      - **Importance:** These pages list existing tenders/contracts and allow for their creation.
+      - **Changes:** They were debugged to fix creation errors (caused by backend serialization issues) and to correctly display vendor names in dropdowns after the  model was updated. An Evaluate button was added to the tenders list.
+</code_architecture>
+
+<pending_tasks>
+- Fix the issue where newly created Tenders and Contracts are not appearing on their respective list pages.
+- When creating a Contract, display the selected Vendor's risk assessment score.
+- Implement auto-generated, searchable numbers for all request types (Tenders, Contracts).
+- Ensure Tender proposals are automatically approved to begin the evaluation process immediately.
+- Make Tender details visible to all authenticated users.
+</pending_tasks>
+
+<current_work>
+The most recent task was a multi-part request to enhance the tender process. The user wants:
+1.  Tender requests to be automatically approved.
+2.  Tender details to be visible to all users.
+3.  Auto-generated, searchable numbers for all requests (tenders, contracts, etc.).
+
+The AI engineer acknowledged these requirements and began implementation. The last action taken was editing the  file to add a  field to the  Pydantic model. This is the first step towards implementing the auto-generated numbering system. The work is currently paused right after this initial backend model modification, with the rest of the backend and frontend logic for these features yet to be implemented.
+</current_work>
+
+<optional_next_step>
+Continue implementing the auto-generation and search functionality for tenders by updating the  endpoint in  to generate and save a unique .
+</optional_next_step>
