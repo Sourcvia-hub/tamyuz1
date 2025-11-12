@@ -33,9 +33,10 @@ const Contracts = () => {
     fetchTenders();
   }, []);
 
-  const fetchContracts = async () => {
+  const fetchContracts = async (search = '') => {
     try {
-      const response = await axios.get(`${API}/contracts`, { withCredentials: true });
+      const url = search ? `${API}/contracts?search=${encodeURIComponent(search)}` : `${API}/contracts`;
+      const response = await axios.get(url, { withCredentials: true });
       setContracts(response.data);
     } catch (error) {
       console.error('Error fetching contracts:', error);
