@@ -913,13 +913,19 @@ async def submit_proposal(tender_id: str, proposal: Proposal, request: Request):
     await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
     
     proposal.tender_id = tender_id
-    # vendor_id should be provided in the proposal object
     
+    # Generate proposal number
+    proposal.proposal_number = await generate_number("Proposal")
+    
+    # vendor_id should be provided in the proposal object
     proposal_doc = proposal.model_dump()
     proposal_doc["submitted_at"] = proposal_doc["submitted_at"].isoformat()
     
     await db.proposals.insert_one(proposal_doc)
-    return proposal.model_dump()
+    
+    # Return without MongoDB _id
+    result = proposal.model_dump()
+    return result
 
 @api_router.get("/tenders/{tender_id}/proposals")
 async def get_tender_proposals(tender_id: str, request: Request):
