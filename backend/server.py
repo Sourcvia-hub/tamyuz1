@@ -917,6 +917,74 @@ async def get_vendor_audit_log(vendor_id: str, request: Request):
     
     return result
 
+# ==================== DUE DILIGENCE ENDPOINTS ====================
+
+@api_router.put("/vendors/{vendor_id}/due-diligence")
+async def update_vendor_due_diligence(vendor_id: str, dd_data: dict, request: Request):
+    """Update vendor due diligence questionnaire"""
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    
+    vendor = await db.vendors.find_one({"id": vendor_id})
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
+    # Update all dd_ prefixed fields
+    update_fields = {
+        "dd_completed": True,
+        "dd_completed_by": user.id,
+        "dd_completed_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Add all dd_ fields from dd_data
+    for key, value in dd_data.items():
+        if key.startswith('dd_'):
+            update_fields[key] = value
+    
+    await db.vendors.update_one(
+        {"id": vendor_id},
+        {"$set": update_fields}
+    )
+    
+    return {"message": "Due diligence questionnaire updated successfully"}
+
+@api_router.post("/vendors/{vendor_id}/due-diligence/approve")
+async def approve_vendor_due_diligence(vendor_id: str, request: Request):
+    """Approve vendor due diligence and change status back to approved"""
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    
+    vendor = await db.vendors.find_one({"id": vendor_id})
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
+    if not vendor.get('dd_completed'):
+        raise HTTPException(status_code=400, detail="Due diligence not completed yet")
+    
+    # Update vendor status to approved and set approval info
+    await db.vendors.update_one(
+        {"id": vendor_id},
+        {"$set": {
+            "status": VendorStatus.APPROVED.value,
+            "dd_approved_by": user.id,
+            "dd_approved_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Update all contracts for this vendor from pending_due_diligence to approved
+    await db.contracts.update_many(
+        {
+            "vendor_id": vendor_id,
+            "status": ContractStatus.PENDING_DUE_DILIGENCE.value
+        },
+        {"$set": {
+            "status": ContractStatus.APPROVED.value,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Due diligence approved successfully. Vendor and contracts status updated."}
+
 # ==================== TENDER ENDPOINTS ====================
 @api_router.post("/tenders")
 async def create_tender(tender: Tender, request: Request):
