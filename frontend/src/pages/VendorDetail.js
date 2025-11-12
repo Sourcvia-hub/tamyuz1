@@ -20,16 +20,54 @@ const VendorDetail = () => {
 
   useEffect(() => {
     fetchVendor();
+    fetchAuditLog();
   }, [id]);
 
   const fetchVendor = async () => {
     try {
       const response = await axios.get(`${API}/vendors/${id}`, { withCredentials: true });
       setVendor(response.data);
+      
+      // Fetch creator info if available
+      if (response.data.created_by) {
+        try {
+          const userRes = await axios.get(`${API}/users/${response.data.created_by}`, { withCredentials: true });
+          setCreatedByUser(userRes.data);
+        } catch (err) {
+          console.log('Could not fetch creator info');
+        }
+      }
     } catch (error) {
       console.error('Error fetching vendor:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAuditLog = async () => {
+    try {
+      const response = await axios.get(`${API}/vendors/${id}/audit-log`, { withCredentials: true });
+      setAuditLog(response.data);
+    } catch (error) {
+      console.error('Error fetching audit log:', error);
+    }
+  };
+
+  const handleEdit = () => {
+    setEditFormData({ ...vendor });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateVendor = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`${API}/vendors/${id}`, editFormData, { withCredentials: true });
+      setShowEditModal(false);
+      fetchVendor();
+      fetchAuditLog();
+    } catch (error) {
+      console.error('Error updating vendor:', error);
+      alert('Failed to update vendor: ' + (error.response?.data?.detail || error.message));
     }
   };
 
