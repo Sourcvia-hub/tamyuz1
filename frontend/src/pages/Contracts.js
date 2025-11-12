@@ -9,6 +9,19 @@ const API = `${BACKEND_URL}/api`;
 const Contracts = () => {
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [vendors, setVendors] = useState([]);
+  const [formData, setFormData] = useState({
+    vendor_id: '',
+    contract_number: '',
+    title: '',
+    sow: '',
+    sla: '',
+    value: '',
+    start_date: '',
+    end_date: '',
+    is_outsourcing: false,
+  });
 
   useEffect(() => {
     fetchContracts();
