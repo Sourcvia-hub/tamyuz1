@@ -33,7 +33,6 @@ class UserRole(str, Enum):
     PROCUREMENT_OFFICER = "procurement_officer"
     PROJECT_MANAGER = "project_manager"
     SYSTEM_ADMIN = "system_admin"
-    VENDOR = "vendor"
 
 class VendorStatus(str, Enum):
     PENDING = "pending"
