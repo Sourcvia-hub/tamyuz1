@@ -545,16 +545,11 @@ async def publish_tender(tender_id: str, request: Request):
 
 @api_router.post("/tenders/{tender_id}/proposals")
 async def submit_proposal(tender_id: str, proposal: Proposal, request: Request):
-    """Submit proposal for tender"""
-    user = await require_role(request, [UserRole.VENDOR])
-    
-    # Get vendor for this user
-    vendor = await db.vendors.find_one({"contact_email": user.email})
-    if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor profile not found")
+    """Submit proposal for tender (Procurement Officer can submit on behalf of vendor)"""
+    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
     
     proposal.tender_id = tender_id
-    proposal.vendor_id = vendor["id"]
+    # vendor_id should be provided in the proposal object
     
     proposal_doc = proposal.model_dump()
     proposal_doc["submitted_at"] = proposal_doc["submitted_at"].isoformat()
