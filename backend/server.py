@@ -237,6 +237,33 @@ class Contract(BaseModel):
     created_by: Optional[str] = None  # user ID who created
     approved_by: Optional[str] = None  # user ID
     documents: List[str] = []
+    
+    # Outsourcing Assessment Questionnaire
+    contractor_name: Optional[str] = None
+    goods_services_description: Optional[str] = None
+    multiple_activities_same_provider: Optional[bool] = None
+    other_outsourced_activities: Optional[str] = None
+    
+    # Section A: Outsourcing Determination
+    a1_continuing_basis: Optional[bool] = None
+    a1_period: Optional[str] = None
+    a2_could_be_undertaken_by_bank: Optional[bool] = None
+    a3_is_insourcing_contract: Optional[bool] = None
+    a4_market_data_providers: Optional[bool] = None
+    a4_clearing_settlement: Optional[bool] = None
+    a4_correspondent_banking: Optional[bool] = None
+    a4_utilities: Optional[bool] = None
+    
+    # Section B: Materiality Determination
+    b1_material_impact_if_disrupted: Optional[bool] = None
+    b2_financial_impact: Optional[bool] = None
+    b3_reputational_impact: Optional[bool] = None
+    b4_outside_ksa: Optional[bool] = None
+    b5_difficult_alternative: Optional[bool] = None
+    b6_data_transfer: Optional[bool] = None
+    b7_affiliation_relationship: Optional[bool] = None
+    b8_regulated_activity: Optional[bool] = None
+    
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
