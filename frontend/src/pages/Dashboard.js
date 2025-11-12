@@ -185,41 +185,6 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              {user?.role === 'vendor' && (
-                <>
-                  <Link
-                    to="/tenders"
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">📋</span>
-                      <div>
-                        <p className="font-medium text-gray-900">View Available Tenders</p>
-                        <p className="text-sm text-gray-600">Browse and submit proposals</p>
-                      </div>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                  <Link
-                    to="/invoices"
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition-colors"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">💰</span>
-                      <div>
-                        <p className="font-medium text-gray-900">Submit Invoice</p>
-                        <p className="text-sm text-gray-600">Upload and track invoices</p>
-                      </div>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                </>
-              )}
-
               {user?.role === 'procurement_officer' && (
                 <>
                   <Link
