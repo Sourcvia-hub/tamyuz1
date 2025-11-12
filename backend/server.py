@@ -247,43 +247,62 @@ async def require_role(request: Request, allowed_roles: List[UserRole]) -> User:
     return user
 
 # ==================== AUTH ENDPOINTS ====================
-@api_router.post("/auth/session")
-async def create_session(request: Request, response: Response):
-    """Process session_id and create session"""
-    body = await request.json()
-    session_id = body.get("session_id")
-    
-    if not session_id:
-        raise HTTPException(status_code=400, detail="session_id required")
-    
-    # Get user data from Emergent Auth
-    user_data = await get_session_data(session_id)
-    if not user_data:
-        raise HTTPException(status_code=401, detail="Invalid session")
-    
-    # Check if user exists
-    existing_user = await db.users.find_one({"email": user_data["email"]})
-    
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    role: UserRole
+
+@api_router.post("/auth/register")
+async def register(register_data: RegisterRequest):
+    """Register a new user (admin only endpoint for creating users)"""
+    # Check if user already exists
+    existing_user = await db.users.find_one({"email": register_data.email})
     if existing_user:
-        # Convert datetime strings back to datetime objects
-        if isinstance(existing_user.get('created_at'), str):
-            existing_user['created_at'] = datetime.fromisoformat(existing_user['created_at'])
-        user = User(**existing_user)
-    else:
-        # Create new user with default vendor role
-        user = User(
-            id=user_data["id"],
-            email=user_data["email"],
-            name=user_data["name"],
-            picture=user_data.get("picture"),
-            role=UserRole.VENDOR
-        )
-        user_doc = user.model_dump()
-        user_doc["created_at"] = user_doc["created_at"].isoformat()
-        await db.users.insert_one(user_doc)
+        raise HTTPException(status_code=400, detail="User already exists")
+    
+    # Create new user
+    user = User(
+        email=register_data.email,
+        name=register_data.name,
+        password=hash_password(register_data.password),
+        role=register_data.role
+    )
+    
+    user_doc = user.model_dump()
+    user_doc["created_at"] = user_doc["created_at"].isoformat()
+    await db.users.insert_one(user_doc)
+    
+    # Remove password from response
+    user_dict = user.model_dump()
+    user_dict.pop('password', None)
+    
+    return {"message": "User created successfully", "user": user_dict}
+
+@api_router.post("/auth/login")
+async def login(login_data: LoginRequest, response: Response):
+    """Login with email and password"""
+    # Find user
+    user_doc = await db.users.find_one({"email": login_data.email})
+    if not user_doc:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Verify password
+    if not verify_password(login_data.password, user_doc.get("password", "")):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    
+    # Convert datetime strings
+    if isinstance(user_doc.get('created_at'), str):
+        user_doc['created_at'] = datetime.fromisoformat(user_doc['created_at'])
+    
+    user = User(**user_doc)
     
     # Create session
-    session_token = user_data["session_token"]
+    session_token = str(uuid.uuid4()) + str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(days=7)
     
     session = UserSession(
@@ -298,18 +317,21 @@ async def create_session(request: Request, response: Response):
     await db.user_sessions.insert_one(session_doc)
     
     # Set cookie
-    # Note: In production, secure should be True. For development, it depends on HTTPS setup.
     response.set_cookie(
         key="session_token",
         value=session_token,
         httponly=True,
-        secure=False,  # Changed to False for development - set to True in production with HTTPS
-        samesite="lax",  # Changed from "none" to "lax" for better compatibility
+        secure=False,
+        samesite="lax",
         path="/",
         max_age=7 * 24 * 60 * 60
     )
     
-    return {"user": user.model_dump()}
+    # Remove password from response
+    user_dict = user.model_dump()
+    user_dict.pop('password', None)
+    
+    return {"user": user_dict}
 
 @api_router.get("/auth/me")
 async def get_me(request: Request):
