@@ -86,18 +86,56 @@ const Vendors = () => {
   const handleCreateVendor = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/vendors`, formData, { withCredentials: true });
+      const payload = {
+        ...formData,
+        number_of_employees: parseInt(formData.number_of_employees) || 0,
+        cr_expiry_date: new Date(formData.cr_expiry_date).toISOString(),
+        license_expiry_date: formData.license_expiry_date ? new Date(formData.license_expiry_date).toISOString() : null,
+        owners_managers: [],
+        authorized_persons: [],
+        documents: [],
+      };
+      
+      await axios.post(`${API}/vendors`, payload, { withCredentials: true });
       setShowCreateModal(false);
       setFormData({
-        company_name: '',
-        cr_number: '',
+        name_english: '',
+        commercial_name: '',
+        entity_type: '',
         vat_number: '',
-        address: '',
-        contact_person: '',
-        contact_email: '',
-        contact_phone: '',
+        unified_number: '',
+        cr_number: '',
+        cr_expiry_date: '',
+        cr_country_city: '',
+        license_number: '',
+        license_expiry_date: '',
+        activity_description: '',
+        number_of_employees: '',
+        street: '',
+        building_no: '',
+        city: '',
+        district: '',
+        country: '',
+        mobile: '',
+        landline: '',
+        fax: '',
+        email: '',
+        representative_name: '',
+        representative_designation: '',
+        representative_id_type: '',
+        representative_id_number: '',
+        representative_nationality: '',
+        representative_mobile: '',
+        representative_residence_tel: '',
+        representative_phone_area_code: '',
+        representative_email: '',
+        bank_account_name: '',
         bank_name: '',
-        bank_account: '',
+        bank_branch: '',
+        bank_country: '',
+        iban: '',
+        currency: '',
+        swift_code: '',
       });
       fetchVendors();
     } catch (error) {
