@@ -88,6 +88,7 @@ class Vendor(BaseModel):
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    vendor_number: Optional[str] = None  # Auto-generated (e.g., Vendor-25-0001)
     
     # Company Information
     name_english: str
