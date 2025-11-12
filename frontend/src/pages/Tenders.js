@@ -32,9 +32,10 @@ const Tenders = () => {
     }
   }, []);
 
-  const fetchTenders = async () => {
+  const fetchTenders = async (search = '') => {
     try {
-      const response = await axios.get(`${API}/tenders`, { withCredentials: true });
+      const url = search ? `${API}/tenders?search=${encodeURIComponent(search)}` : `${API}/tenders`;
+      const response = await axios.get(url, { withCredentials: true });
       setTenders(response.data);
     } catch (error) {
       console.error('Error fetching tenders:', error);
