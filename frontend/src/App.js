@@ -196,6 +196,7 @@ import Vendors from './pages/Vendors';
 import VendorDetail from './pages/VendorDetail';
 import Tenders from './pages/Tenders';
 import TenderDetail from './pages/TenderDetail';
+import TenderEvaluation from './pages/TenderEvaluation';
 import Contracts from './pages/Contracts';
 import ContractDetail from './pages/ContractDetail';
 import Invoices from './pages/Invoices';
