@@ -825,6 +825,31 @@ async def get_tender(tender_id: str, request: Request):
     
     return tender
 
+@api_router.get("/tenders/approved/list")
+async def get_approved_tenders(request: Request):
+    """Get list of approved tenders for contract creation"""
+    await require_auth(request)
+    
+    tenders = await db.tenders.find({"status": TenderStatus.PUBLISHED.value}).to_list(1000)
+    
+    result = []
+    for tender in tenders:
+        # Remove MongoDB _id
+        if '_id' in tender:
+            del tender['_id']
+        
+        # Only return essential fields for dropdown
+        result.append({
+            "id": tender.get("id"),
+            "tender_number": tender.get("tender_number"),
+            "title": tender.get("title"),
+            "project_name": tender.get("project_name"),
+            "requirements": tender.get("requirements"),
+            "budget": tender.get("budget")
+        })
+    
+    return result
+
 @api_router.put("/tenders/{tender_id}/publish")
 async def publish_tender(tender_id: str, request: Request):
     """Publish tender"""
