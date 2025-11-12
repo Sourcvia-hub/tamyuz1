@@ -157,6 +157,9 @@ const Tenders = () => {
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-900">{tender.title}</h3>
                     <p className="text-sm text-gray-600 mt-1">{tender.project_name}</p>
+                    {tender.tender_number && (
+                      <p className="text-xs text-blue-600 font-medium mt-1">#{tender.tender_number}</p>
+                    )}
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(tender.status)}`}>
                     {tender.status.toUpperCase()}
