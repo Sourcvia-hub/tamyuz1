@@ -739,15 +739,10 @@ async def get_expiring_contracts(request: Request, days: int = 30):
 # ==================== INVOICE ENDPOINTS ====================
 @api_router.post("/invoices")
 async def submit_invoice(invoice: Invoice, request: Request):
-    """Submit invoice"""
-    user = await require_role(request, [UserRole.VENDOR])
+    """Submit invoice (Procurement Officer can submit on behalf of vendor)"""
+    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
     
-    # Get vendor for this user
-    vendor = await db.vendors.find_one({"contact_email": user.email})
-    if not vendor:
-        raise HTTPException(status_code=404, detail="Vendor profile not found")
-    
-    invoice.vendor_id = vendor["id"]
+    # vendor_id should be provided in the invoice object
     invoice_doc = invoice.model_dump()
     invoice_doc["submitted_at"] = invoice_doc["submitted_at"].isoformat()
     if invoice_doc.get("verified_at"):
