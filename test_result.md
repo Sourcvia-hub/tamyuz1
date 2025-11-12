@@ -157,15 +157,18 @@ backend:
   
   - task: "Auto-number generation for Invoices"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Made invoice_number optional (auto-generated). Added contract validation. Generate Invoice-YY-NNNN format numbers and auto-approve (status=APPROVED). Fixed notification code."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Invoice auto-numbering works perfectly. Creates invoices with Invoice-25-NNNN format (e.g., Invoice-25-0001). Auto-approved status working. Minor: Invoice search endpoints have MongoDB ObjectId serialization issue (500 error) but core functionality works."
   
   - task: "Search functionality for all entities"
     implemented: true
