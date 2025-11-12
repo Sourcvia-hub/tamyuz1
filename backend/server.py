@@ -391,6 +391,40 @@ async def generate_number(entity_type: str) -> str:
     # Format: Type-YY-NNNN (e.g., Vendor-25-0001)
     return f"{entity_type}-{year_suffix}-{sequence:04d}"
 
+def determine_outsourcing_classification(contract_data: dict) -> str:
+    """
+    Determine outsourcing classification based on Section A questionnaire responses.
+    
+    Priority order:
+    1. If A5 = YES → "cloud_computing"
+    2. If any A4 checkbox = YES → "exempted"
+    3. If A3 = YES → "insourcing"
+    4. If A1 = YES AND A2 = YES → "outsourcing"
+    5. If all Section A = NO → "not_outsourcing"
+    """
+    # Priority 1: Cloud Computing (overrides everything)
+    if contract_data.get('a5_cloud_hosted') is True:
+        return "cloud_computing"
+    
+    # Priority 2: Exempted (any A4 checkbox is True)
+    if (contract_data.get('a4_market_data_providers') is True or
+        contract_data.get('a4_clearing_settlement') is True or
+        contract_data.get('a4_correspondent_banking') is True or
+        contract_data.get('a4_utilities') is True):
+        return "exempted"
+    
+    # Priority 3: Insourcing (overrides A1 and A2)
+    if contract_data.get('a3_is_insourcing_contract') is True:
+        return "insourcing"
+    
+    # Priority 4: Outsourcing (A1 AND A2 both YES)
+    if (contract_data.get('a1_continuing_basis') is True and
+        contract_data.get('a2_could_be_undertaken_by_bank') is True):
+        return "outsourcing"
+    
+    # Default: Not outsourcing
+    return "not_outsourcing"
+
 # ==================== AUTH ENDPOINTS ====================
 class LoginRequest(BaseModel):
     email: EmailStr
