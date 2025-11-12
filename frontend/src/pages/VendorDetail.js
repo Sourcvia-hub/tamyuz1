@@ -243,12 +243,109 @@ const VendorDetail = () => {
             </div>
 
             <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Risk Assessment Details</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Total Risk Score:</span>
+                  <span className="text-2xl font-bold text-gray-900">{vendor.risk_score.toFixed(1)}</span>
+                </div>
+                {vendor.risk_assessment_details && Object.keys(vendor.risk_assessment_details).length > 0 ? (
+                  <div className="space-y-2 mt-4">
+                    <p className="text-sm font-semibold text-gray-700">Risk Factors:</p>
+                    {Object.entries(vendor.risk_assessment_details).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-start p-2 bg-gray-50 rounded">
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-700">{value.reason}</p>
+                        </div>
+                        <span className="text-sm font-semibold text-red-600 ml-2">+{value.score}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-green-600 mt-2">✓ No risk factors identified</p>
+                )}
+                <div className="mt-4 p-3 bg-gray-50 rounded">
+                  <p className="text-xs text-gray-600 font-semibold mb-2">Assessment Criteria:</p>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Missing Documents: +30 points</li>
+                    <li>• Incomplete Banking Info: +20 points</li>
+                    <li>• CR Expiring Soon (&lt;90 days): +15 points</li>
+                    <li>• Missing License: +10 points</li>
+                    <li>• Small Team (&lt;5 employees): +10 points</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Registration Date</h2>
               <p className="text-gray-700">{new Date(vendor.created_at).toLocaleDateString()}</p>
+              {vendor.updated_at && vendor.updated_at !== vendor.created_at && (
+                <p className="text-sm text-gray-500 mt-2">Last updated: {new Date(vendor.updated_at).toLocaleDateString()}</p>
+              )}
             </div>
           </div>
         </div>
+
+        {/* Audit Log */}
+        {auditLog.length > 0 && (
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Change History</h2>
+            <div className="space-y-3">
+              {auditLog.map((log) => (
+                <div key={log.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {log.action === 'created' ? '📝 Created' : '✏️ Updated'}
+                      </p>
+                      <p className="text-sm text-gray-600">by {log.user_name}</p>
+                      {log.changes && Object.keys(log.changes).length > 0 && (
+                        <div className="mt-2 text-sm">
+                          {Object.entries(log.changes).map(([field, change]) => (
+                            <div key={field} className="text-gray-700">
+                              <span className="font-medium">{field}:</span>{' '}
+                              {change.old ? (
+                                <>
+                                  <span className="text-red-600 line-through">{change.old}</span>
+                                  {' → '}
+                                  <span className="text-green-600">{change.new}</span>
+                                </>
+                              ) : (
+                                <span>{JSON.stringify(change)}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(log.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editFormData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[95vh] p-6 overflow-y-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Vendor</h2>
+            <form onSubmit={handleUpdateVendor}>
+              <VendorForm
+                formData={editFormData}
+                setFormData={setEditFormData}
+                onSubmit={handleUpdateVendor}
+                onCancel={() => setShowEditModal(false)}
+              />
+            </form>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
