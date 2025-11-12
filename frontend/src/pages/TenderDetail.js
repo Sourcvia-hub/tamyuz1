@@ -112,7 +112,11 @@ const TenderDetail = () => {
       alert('Proposal submitted successfully!');
     } catch (error) {
       console.error('Error submitting proposal:', error);
-      alert('Failed to submit proposal: ' + (error.response?.data?.detail || error.message));
+      const errorMessage = error.response?.data?.detail 
+        || (typeof error.response?.data === 'string' ? error.response?.data : null)
+        || error.message 
+        || 'Unknown error occurred';
+      alert('Failed to submit proposal: ' + errorMessage);
     }
   };
 
