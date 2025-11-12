@@ -165,7 +165,7 @@ class Tender(BaseModel):
     deadline: datetime
     invited_vendors: List[str] = []  # vendor IDs
     status: TenderStatus = TenderStatus.DRAFT
-    created_by: str  # user ID
+    created_by: Optional[str] = None  # user ID who created
     awarded_to: Optional[str] = None  # vendor ID
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
