@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -9,6 +9,7 @@ const API = `${BACKEND_URL}/api`;
 
 const Tenders = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tenders, setTenders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
