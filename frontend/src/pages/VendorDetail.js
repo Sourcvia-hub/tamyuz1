@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
+import VendorForm from '../components/VendorForm';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 
