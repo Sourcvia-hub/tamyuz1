@@ -84,12 +84,9 @@ const VendorDetail = () => {
               </svg>
               Back to Vendors
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">{vendor.company_name}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{vendor.name_english || vendor.company_name}</h1>
             <p className="text-gray-600 mt-1">Vendor Details</p>
           </div>
-          <span className={`px-4 py-2 rounded-lg text-sm font-medium ${getStatusBadgeColor(vendor.status)}`}>
-            {vendor.status.toUpperCase()}
-          </span>
         </div>
 
         {/* Main Content */}
