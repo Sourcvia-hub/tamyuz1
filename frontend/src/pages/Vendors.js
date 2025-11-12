@@ -198,11 +198,11 @@ const Vendors = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm">
                     <span className="text-gray-600 w-24">Contact:</span>
-                    <span className="text-gray-900 font-medium">{vendor.contact_person}</span>
+                    <span className="text-gray-900 font-medium">{vendor.representative_name || vendor.contact_person}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="text-gray-600 w-24">Phone:</span>
-                    <span className="text-gray-900 font-medium">{vendor.contact_phone}</span>
+                    <span className="text-gray-900 font-medium">{vendor.mobile || vendor.contact_phone}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="text-gray-600 w-24">CR Number:</span>
@@ -211,6 +211,10 @@ const Vendors = () => {
                   <div className="flex items-center text-sm">
                     <span className="text-gray-600 w-24">VAT Number:</span>
                     <span className="text-gray-900 font-medium">{vendor.vat_number}</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="text-gray-600 w-24">City:</span>
+                    <span className="text-gray-900 font-medium">{vendor.city || 'N/A'}</span>
                   </div>
                 </div>
 
