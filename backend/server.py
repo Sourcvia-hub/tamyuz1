@@ -197,7 +197,7 @@ class Proposal(BaseModel):
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     proposal_number: Optional[str] = None  # Auto-generated (e.g., PRO-2025-0001)
-    tender_id: str
+    tender_id: Optional[str] = None  # Set automatically by endpoint
     vendor_id: str
     technical_proposal: str
     financial_proposal: float
