@@ -36,6 +36,7 @@ class UserRole(str, Enum):
 
 class VendorStatus(str, Enum):
     PENDING = "pending"
+    PENDING_DUE_DILIGENCE = "pending_due_diligence"
     APPROVED = "approved"
     REJECTED = "rejected"
 
