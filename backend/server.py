@@ -716,7 +716,10 @@ async def create_tender(tender: Tender, request: Request):
     tender_doc["updated_at"] = tender_doc["updated_at"].isoformat()
     
     await db.tenders.insert_one(tender_doc)
-    return tender.model_dump()
+    
+    # Return without MongoDB _id
+    result = tender.model_dump()
+    return result
 
 @api_router.get("/tenders")
 async def get_tenders(request: Request, status: Optional[TenderStatus] = None):
