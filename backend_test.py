@@ -75,7 +75,7 @@ class ProcurementTester:
             "entity_type": "LLC",
             "vat_number": "300123456789003",
             "cr_number": "1010123456",
-            "cr_expiry_date": (datetime.now(datetime.timezone.utc) + timedelta(days=365)).isoformat(),
+            "cr_expiry_date": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
             "cr_country_city": "Riyadh, Saudi Arabia",
             "activity_description": "Software Development",
             "number_of_employees": 25,
