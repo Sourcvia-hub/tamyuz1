@@ -56,7 +56,7 @@ const AuthProvider = ({ children }) => {
 const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { checkAuth } = useAuth();
+  const { checkAuth, user, loading } = useAuth();
   const [processingSession, setProcessingSession] = useState(false);
 
   useEffect(() => {
@@ -66,6 +66,13 @@ const LandingPage = () => {
       processSession(sessionId);
     }
   }, [location]);
+
+  useEffect(() => {
+    // If user is already authenticated, redirect to dashboard
+    if (!loading && user && !processingSession) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, processingSession]);
 
   const processSession = async (sessionId) => {
     setProcessingSession(true);
