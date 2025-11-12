@@ -54,6 +54,13 @@ const Vendors = () => {
             <h1 className="text-3xl font-bold text-gray-900">Vendor Management</h1>
             <p className="text-gray-600 mt-1">Review and manage vendor registrations</p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            data-testid="create-vendor-btn"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            Create Vendor
+          </button>
         </div>
 
         {/* Filters */}
