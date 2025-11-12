@@ -338,6 +338,31 @@ async def require_role(request: Request, allowed_roles: List[UserRole]) -> User:
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
 
+# ==================== NUMBER GENERATION HELPERS ====================
+async def generate_number(entity_type: str) -> str:
+    """
+    Generate sequential number for entities in format: {Type}-{YY}-{NNNN}
+    Examples: Vendor-25-0001, Tender-25-0002, Contract-25-0001
+    """
+    current_year = datetime.now(timezone.utc).year
+    year_suffix = str(current_year)[-2:]  # Last 2 digits of year
+    
+    # Get or create counter for this entity type and year
+    counter_id = f"{entity_type}_{current_year}"
+    
+    # Use findOneAndUpdate with upsert to atomically increment
+    result = await db.counters.find_one_and_update(
+        {"_id": counter_id},
+        {"$inc": {"sequence": 1}},
+        upsert=True,
+        return_document=True
+    )
+    
+    sequence = result.get("sequence", 1)
+    
+    # Format: Type-YY-NNNN (e.g., Vendor-25-0001)
+    return f"{entity_type}-{year_suffix}-{sequence:04d}"
+
 # ==================== AUTH ENDPOINTS ====================
 class LoginRequest(BaseModel):
     email: EmailStr
