@@ -171,7 +171,7 @@ class ProcurementTester:
             "project_name": "Digital Transformation Project",
             "requirements": "Full-stack development, mobile app, web portal",
             "budget": 500000.0,
-            "deadline": (datetime.now() + timedelta(days=30)).isoformat(),
+            "deadline": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
             "invited_vendors": []
         }
         
