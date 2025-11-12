@@ -1277,14 +1277,46 @@ async def create_contract(contract: Contract, request: Request):
     
     contract.created_by = user.id
     
-    # Auto-approve and generate contract number
-    contract.status = ContractStatus.APPROVED
+    # Generate contract number
     contract.contract_number = await generate_number("Contract")
     
     # Calculate outsourcing classification based on questionnaire
     contract_doc = contract.model_dump()
     contract.outsourcing_classification = determine_outsourcing_classification(contract_doc)
     contract_doc["outsourcing_classification"] = contract.outsourcing_classification
+    
+    # Check if Due Diligence is required
+    vendor_risk = vendor.get('risk_category', 'low')
+    classification = contract.outsourcing_classification
+    
+    requires_due_diligence = (
+        vendor_risk == 'high' or 
+        classification == 'outsourcing' or 
+        classification == 'cloud_computing'
+    )
+    
+    if requires_due_diligence:
+        # Set contract and vendor to pending_due_diligence status
+        contract.status = ContractStatus.PENDING_DUE_DILIGENCE
+        
+        # Update vendor status to pending_due_diligence
+        await db.vendors.update_one(
+            {"id": contract.vendor_id},
+            {"$set": {"status": VendorStatus.PENDING_DUE_DILIGENCE.value}}
+        )
+        
+        # Create Due Diligence Questionnaire record
+        dd_quest = DueDiligenceQuestionnaire(
+            contract_id=contract.id,
+            vendor_id=contract.vendor_id
+        )
+        dd_doc = dd_quest.model_dump()
+        dd_doc["created_at"] = dd_doc["created_at"].isoformat()
+        dd_doc["updated_at"] = dd_doc["updated_at"].isoformat()
+        await db.due_diligence.insert_one(dd_doc)
+    else:
+        # Auto-approve if no due diligence required
+        contract.status = ContractStatus.APPROVED
     contract_doc["start_date"] = contract_doc["start_date"].isoformat()
     contract_doc["end_date"] = contract_doc["end_date"].isoformat()
     contract_doc["created_at"] = contract_doc["created_at"].isoformat()
