@@ -1,9 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 const OutsourcingQuestionnaire = ({ formData, setFormData }) => {
+  const [classification, setClassification] = useState(null);
+
   const handleCheckboxChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
+
+  // Calculate classification based on Section A responses
+  useEffect(() => {
+    const calculateClassification = () => {
+      // Priority 1: Cloud Computing
+      if (formData.a5_cloud_hosted === true) {
+        return { type: 'cloud_computing', label: 'Cloud Computing', color: 'bg-cyan-100 text-cyan-800 border-cyan-300' };
+      }
+      
+      // Priority 2: Exempted (any A4 checkbox)
+      if (formData.a4_market_data_providers || formData.a4_clearing_settlement || 
+          formData.a4_correspondent_banking || formData.a4_utilities) {
+        return { type: 'exempted', label: 'Exempted', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' };
+      }
+      
+      // Priority 3: Insourcing
+      if (formData.a3_is_insourcing_contract === true) {
+        return { type: 'insourcing', label: 'Insourcing', color: 'bg-green-100 text-green-800 border-green-300' };
+      }
+      
+      // Priority 4: Outsourcing (A1 AND A2)
+      if (formData.a1_continuing_basis === true && formData.a2_could_be_undertaken_by_bank === true) {
+        return { type: 'outsourcing', label: 'Outsourcing', color: 'bg-orange-100 text-orange-800 border-orange-300' };
+      }
+      
+      // Default: Not Outsourcing
+      if (formData.a1_continuing_basis === false && formData.a2_could_be_undertaken_by_bank === false &&
+          formData.a3_is_insourcing_contract === false && !formData.a4_market_data_providers &&
+          !formData.a4_clearing_settlement && !formData.a4_correspondent_banking && !formData.a4_utilities &&
+          formData.a5_cloud_hosted === false) {
+        return { type: 'not_outsourcing', label: 'Not Outsourcing', color: 'bg-gray-100 text-gray-800 border-gray-300' };
+      }
+      
+      return null;
+    };
+    
+    setClassification(calculateClassification());
+  }, [formData]);
 
   return (
     <div className="space-y-6">
@@ -11,6 +51,19 @@ const OutsourcingQuestionnaire = ({ formData, setFormData }) => {
         <h3 className="text-lg font-semibold text-purple-900 mb-2">📋 Outsourcing Assessment Questionnaire</h3>
         <p className="text-sm text-purple-700">All contracts must complete this assessment</p>
       </div>
+      
+      {/* Classification Result */}
+      {classification && (
+        <div className={`p-4 rounded-lg border-2 ${classification.color}`}>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🏷️</span>
+            <div>
+              <p className="font-semibold text-sm">Contract Classification:</p>
+              <p className="text-lg font-bold">{classification.label}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Section A: Outsourcing Determination */}
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
