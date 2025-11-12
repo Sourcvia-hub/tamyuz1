@@ -29,23 +29,7 @@ const VendorDetail = () => {
     }
   };
 
-  const handleApprove = async () => {
-    try {
-      await axios.put(`${API}/vendors/${id}/approve`, {}, { withCredentials: true });
-      fetchVendor();
-    } catch (error) {
-      console.error('Error approving vendor:', error);
-    }
-  };
-
-  const handleReject = async () => {
-    try {
-      await axios.put(`${API}/vendors/${id}/reject`, {}, { withCredentials: true });
-      fetchVendor();
-    } catch (error) {
-      console.error('Error rejecting vendor:', error);
-    }
-  };
+  // Approval removed - all vendors are auto-approved
 
   const getRiskBadgeColor = (category) => {
     const colors = {
