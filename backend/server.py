@@ -305,12 +305,13 @@ async def create_session(request: Request, response: Response):
     await db.user_sessions.insert_one(session_doc)
     
     # Set cookie
+    # Note: In production, secure should be True. For development, it depends on HTTPS setup.
     response.set_cookie(
         key="session_token",
         value=session_token,
         httponly=True,
-        secure=True,
-        samesite="none",
+        secure=False,  # Changed to False for development - set to True in production with HTTPS
+        samesite="lax",  # Changed from "none" to "lax" for better compatibility
         path="/",
         max_age=7 * 24 * 60 * 60
     )
