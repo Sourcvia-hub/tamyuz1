@@ -967,18 +967,19 @@ async def evaluate_proposal(tender_id: str, proposal_id: str, evaluation: Propos
     if not proposal:
         raise HTTPException(status_code=404, detail="Proposal not found")
     
-    # Calculate weighted scores (weights: 20%, 20%, 10%, 10% = 60% total)
-    # Remaining 40% could be for other criteria or reserved
+    # Calculate weighted scores (weights: 20%, 20%, 10%, 10%, 40% = 100% total)
     vendor_reliability_weighted = evaluation.vendor_reliability_stability * 0.20
     delivery_warranty_weighted = evaluation.delivery_warranty_backup * 0.20
     technical_experience_weighted = evaluation.technical_experience * 0.10
     cost_weighted = evaluation.cost_score * 0.10
+    meets_requirements_weighted = evaluation.meets_requirements * 0.40
     
     total_score = (
         vendor_reliability_weighted + 
         delivery_warranty_weighted + 
         technical_experience_weighted + 
-        cost_weighted
+        cost_weighted +
+        meets_requirements_weighted
     )
     
     # Create evaluation object
@@ -987,10 +988,12 @@ async def evaluate_proposal(tender_id: str, proposal_id: str, evaluation: Propos
         "delivery_warranty_backup": evaluation.delivery_warranty_backup,
         "technical_experience": evaluation.technical_experience,
         "cost_score": evaluation.cost_score,
+        "meets_requirements": evaluation.meets_requirements,
         "vendor_reliability_weighted": vendor_reliability_weighted,
         "delivery_warranty_weighted": delivery_warranty_weighted,
         "technical_experience_weighted": technical_experience_weighted,
         "cost_weighted": cost_weighted,
+        "meets_requirements_weighted": meets_requirements_weighted,
         "total_score": total_score
     }
     
