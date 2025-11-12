@@ -53,6 +53,15 @@ const Contracts = () => {
     }
   };
 
+  const fetchTenders = async () => {
+    try {
+      const response = await axios.get(`${API}/tenders/approved/list`, { withCredentials: true });
+      setTenders(response.data);
+    } catch (error) {
+      console.error('Error fetching tenders:', error);
+    }
+  };
+
   const handleCreateContract = async (e) => {
     e.preventDefault();
     try {
