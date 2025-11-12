@@ -1258,6 +1258,10 @@ async def get_invoice(invoice_id: str, request: Request):
     if not invoice:
         raise HTTPException(status_code=404, detail="Invoice not found")
     
+    # Remove MongoDB _id
+    if '_id' in invoice:
+        del invoice['_id']
+    
     if isinstance(invoice.get('submitted_at'), str):
         invoice['submitted_at'] = datetime.fromisoformat(invoice['submitted_at'])
     if invoice.get('verified_at') and isinstance(invoice['verified_at'], str):
