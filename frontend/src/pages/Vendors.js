@@ -12,15 +12,50 @@ const Vendors = () => {
   const [filter, setFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
-    company_name: '',
-    cr_number: '',
+    // Company Information
+    name_english: '',
+    commercial_name: '',
+    entity_type: '',
     vat_number: '',
-    address: '',
-    contact_person: '',
-    contact_email: '',
-    contact_phone: '',
+    unified_number: '',
+    cr_number: '',
+    cr_expiry_date: '',
+    cr_country_city: '',
+    license_number: '',
+    license_expiry_date: '',
+    activity_description: '',
+    number_of_employees: '',
+    
+    // Address and Contact
+    street: '',
+    building_no: '',
+    city: '',
+    district: '',
+    country: '',
+    mobile: '',
+    landline: '',
+    fax: '',
+    email: '',
+    
+    // Representative Information
+    representative_name: '',
+    representative_designation: '',
+    representative_id_type: '',
+    representative_id_number: '',
+    representative_nationality: '',
+    representative_mobile: '',
+    representative_residence_tel: '',
+    representative_phone_area_code: '',
+    representative_email: '',
+    
+    // Bank Account Information
+    bank_account_name: '',
     bank_name: '',
-    bank_account: '',
+    bank_branch: '',
+    bank_country: '',
+    iban: '',
+    currency: '',
+    swift_code: '',
   });
 
   useEffect(() => {
