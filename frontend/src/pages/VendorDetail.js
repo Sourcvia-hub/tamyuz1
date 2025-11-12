@@ -336,14 +336,13 @@ const VendorDetail = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-5xl w-full max-h-[95vh] p-6 overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Vendor</h2>
-            <form onSubmit={handleUpdateVendor}>
-              <VendorForm
-                formData={editFormData}
-                setFormData={setEditFormData}
-                onSubmit={handleUpdateVendor}
-                onCancel={() => setShowEditModal(false)}
-              />
-            </form>
+            <VendorForm
+              formData={editFormData}
+              setFormData={setEditFormData}
+              onSubmit={handleUpdateVendor}
+              onCancel={() => setShowEditModal(false)}
+              isEdit={true}
+            />
           </div>
         </div>
       )}
