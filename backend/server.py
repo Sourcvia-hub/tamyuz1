@@ -952,7 +952,10 @@ async def create_contract(contract: Contract, request: Request):
     contract_doc["updated_at"] = contract_doc["updated_at"].isoformat()
     
     await db.contracts.insert_one(contract_doc)
-    return contract.model_dump()
+    
+    # Return without MongoDB _id
+    result = contract.model_dump()
+    return result
 
 @api_router.get("/contracts")
 async def get_contracts(request: Request, status: Optional[ContractStatus] = None):
