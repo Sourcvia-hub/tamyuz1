@@ -432,6 +432,27 @@ async def logout(request: Request, response: Response):
     response.delete_cookie(key="session_token", path="/")
     return {"message": "Logged out"}
 
+@api_router.get("/users/{user_id}")
+async def get_user(user_id: str, request: Request):
+    """Get user by ID"""
+    await require_auth(request)
+    
+    user_doc = await db.users.find_one({"id": user_id})
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Remove MongoDB _id and password
+    if '_id' in user_doc:
+        del user_doc['_id']
+    if 'password' in user_doc:
+        del user_doc['password']
+    
+    # Convert datetime
+    if isinstance(user_doc.get('created_at'), str):
+        user_doc['created_at'] = datetime.fromisoformat(user_doc['created_at'])
+    
+    return user_doc
+
 @api_router.put("/users/{user_id}/role")
 async def update_user_role(user_id: str, role: UserRole, request: Request):
     """Update user role (admin only)"""
