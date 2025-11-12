@@ -32,6 +32,13 @@ const Tenders = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      fetchTenders(searchQuery);
+    }, 300);
+    return () => clearTimeout(debounce);
+  }, [searchQuery]);
+
   const fetchTenders = async (search = '') => {
     try {
       const url = search ? `${API}/tenders?search=${encodeURIComponent(search)}` : `${API}/tenders`;
