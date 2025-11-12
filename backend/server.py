@@ -239,11 +239,6 @@ class Contract(BaseModel):
     documents: List[str] = []
     
     # Outsourcing Assessment Questionnaire
-    contractor_name: Optional[str] = None
-    goods_services_description: Optional[str] = None
-    multiple_activities_same_provider: Optional[bool] = None
-    other_outsourced_activities: Optional[str] = None
-    
     # Section A: Outsourcing Determination
     a1_continuing_basis: Optional[bool] = None
     a1_period: Optional[str] = None
