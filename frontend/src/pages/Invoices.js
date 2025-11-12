@@ -64,6 +64,7 @@ const Invoices = () => {
       setFormData({
         invoice_number: '',
         contract_id: '',
+        vendor_id: '',
         amount: '',
         description: '',
       });
