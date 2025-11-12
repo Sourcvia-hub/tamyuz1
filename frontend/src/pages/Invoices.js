@@ -236,7 +236,7 @@ const Invoices = () => {
                   <option value="">Select a vendor</option>
                   {vendors.map((vendor) => (
                     <option key={vendor.id} value={vendor.id}>
-                      {vendor.company_name}
+                      {vendor.name_english || vendor.commercial_name || vendor.company_name || 'Unknown Vendor'}
                     </option>
                   ))}
                 </select>
