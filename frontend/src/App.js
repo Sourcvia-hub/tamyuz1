@@ -257,6 +257,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/tenders/:id/evaluate"
+        element={
+          <ProtectedRoute>
+            <TenderEvaluation />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/contracts"
         element={
           <ProtectedRoute>
