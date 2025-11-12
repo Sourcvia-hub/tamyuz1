@@ -772,13 +772,21 @@ async def create_tender(tender: Tender, request: Request):
     return result
 
 @api_router.get("/tenders")
-async def get_tenders(request: Request, status: Optional[TenderStatus] = None):
-    """Get all tenders"""
+async def get_tenders(request: Request, status: Optional[TenderStatus] = None, search: Optional[str] = None):
+    """Get all tenders with optional search by tender_number or title"""
     user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
     
     query = {}
     if status:
         query["status"] = status.value
+    
+    # Add search functionality
+    if search:
+        query["$or"] = [
+            {"tender_number": {"$regex": search, "$options": "i"}},
+            {"title": {"$regex": search, "$options": "i"}},
+            {"project_name": {"$regex": search, "$options": "i"}}
+        ]
     
     tenders = await db.tenders.find(query).to_list(1000)
     
