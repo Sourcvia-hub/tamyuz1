@@ -151,7 +151,8 @@ const Tenders = () => {
             {tenders.map((tender) => (
               <div
                 key={tender.id}
-                className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(`/tenders/${tender.id}`)}
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
