@@ -128,7 +128,18 @@ const VendorDetail = () => {
             </button>
             <h1 className="text-3xl font-bold text-gray-900">{vendor.name_english || vendor.company_name}</h1>
             <p className="text-gray-600 mt-1">Vendor Details</p>
+            {vendor.created_at && (
+              <p className="text-sm text-gray-500 mt-2">
+                Created by <strong>{createdByUser?.name || 'System'}</strong> on {new Date(vendor.created_at).toLocaleDateString()}
+              </p>
+            )}
           </div>
+          <button
+            onClick={handleEdit}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            Edit Vendor
+          </button>
         </div>
 
         {/* Main Content */}
