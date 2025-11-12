@@ -724,7 +724,7 @@ async def create_tender(tender: Tender, request: Request):
 @api_router.get("/tenders")
 async def get_tenders(request: Request, status: Optional[TenderStatus] = None):
     """Get all tenders"""
-    user = await require_auth(request)
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
     
     query = {}
     if status:
