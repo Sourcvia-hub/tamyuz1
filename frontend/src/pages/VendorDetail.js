@@ -18,6 +18,7 @@ const VendorDetail = () => {
   const [createdByUser, setCreatedByUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState(null);
+  const [showDueDiligenceModal, setShowDueDiligenceModal] = useState(false);
 
   useEffect(() => {
     fetchVendor();
