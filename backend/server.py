@@ -671,6 +671,89 @@ async def update_user_role(user_id: str, role: UserRole, request: Request):
     
     return {"message": "Role updated"}
 
+# ==================== DASHBOARD ENDPOINT ====================
+
+@api_router.get("/dashboard")
+async def get_dashboard_stats(request: Request):
+    """Get dashboard statistics for all modules"""
+    await require_auth(request)
+    
+    # Vendor Statistics
+    all_vendors = await db.vendors.count_documents({})
+    active_vendors = await db.vendors.count_documents({"status": VendorStatus.APPROVED.value})
+    high_risk_vendors = await db.vendors.count_documents({"risk_category": "high"})
+    waiting_due_diligence = await db.vendors.count_documents({"status": VendorStatus.PENDING_DUE_DILIGENCE.value})
+    inactive_vendors = await db.vendors.count_documents({"status": VendorStatus.REJECTED.value})
+    # Note: blacklisted vendors - assuming we use rejected status for now
+    blacklisted_vendors = await db.vendors.count_documents({"status": VendorStatus.REJECTED.value})
+    
+    # Tender Statistics
+    all_tenders = await db.tenders.count_documents({})
+    active_tenders = await db.tenders.count_documents({"status": TenderStatus.PUBLISHED.value})
+    
+    # Waiting for proposals - published tenders with no proposals or few proposals
+    published_tenders = await db.tenders.find({"status": TenderStatus.PUBLISHED.value}).to_list(1000)
+    waiting_proposals_count = 0
+    waiting_evaluation_count = 0
+    
+    for tender in published_tenders:
+        proposals = await db.proposals.find({"tender_id": tender["id"]}).to_list(1000)
+        if len(proposals) == 0:
+            waiting_proposals_count += 1
+        else:
+            # Check if any proposals are not evaluated
+            unevaluated = [p for p in proposals if not p.get('evaluation')]
+            if len(unevaluated) > 0:
+                waiting_evaluation_count += 1
+    
+    approved_tenders = await db.tenders.count_documents({"status": TenderStatus.AWARDED.value})
+    
+    # Contract Statistics
+    all_contracts = await db.contracts.count_documents({})
+    active_contracts = await db.contracts.count_documents({"status": ContractStatus.ACTIVE.value})
+    
+    # Outsourcing and Cloud contracts
+    outsourcing_contracts = await db.contracts.count_documents({"outsourcing_classification": "outsourcing"})
+    cloud_contracts = await db.contracts.count_documents({"outsourcing_classification": "cloud_computing"})
+    expired_contracts = await db.contracts.count_documents({"status": ContractStatus.EXPIRED.value})
+    
+    # Invoice Statistics
+    all_invoices = await db.invoices.count_documents({})
+    
+    # Due invoices - pending or verified status
+    due_invoices = await db.invoices.count_documents({
+        "status": {"$in": [InvoiceStatus.PENDING.value, InvoiceStatus.VERIFIED.value, InvoiceStatus.APPROVED.value]}
+    })
+    
+    return {
+        "vendors": {
+            "all": all_vendors,
+            "active": active_vendors,
+            "high_risk": high_risk_vendors,
+            "waiting_due_diligence": waiting_due_diligence,
+            "inactive": inactive_vendors,
+            "blacklisted": blacklisted_vendors
+        },
+        "tenders": {
+            "all": all_tenders,
+            "active": active_tenders,
+            "waiting_proposals": waiting_proposals_count,
+            "waiting_evaluation": waiting_evaluation_count,
+            "approved": approved_tenders
+        },
+        "contracts": {
+            "all": all_contracts,
+            "active": active_contracts,
+            "outsourcing": outsourcing_contracts,
+            "cloud": cloud_contracts,
+            "expired": expired_contracts
+        },
+        "invoices": {
+            "all": all_invoices,
+            "due": due_invoices
+        }
+    }
+
 # ==================== VENDOR ENDPOINTS ====================
 @api_router.post("/vendors")
 async def create_vendor(vendor: Vendor, request: Request):
