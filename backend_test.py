@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import sys
 
 # Configuration
-BASE_URL = "https://procure-portal.preview.emergentagent.com/api"
+BASE_URL = "https://procurement-sys-1.preview.emergentagent.com/api"
 TEST_USERS = {
     "procurement": {"email": "procurement@test.com", "password": "password"},
     "manager": {"email": "manager@test.com", "password": "password"}
