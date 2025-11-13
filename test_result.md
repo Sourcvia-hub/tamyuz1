@@ -272,7 +272,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Auto-number generation for all entities"
+    - "Dashboard functionality"
     - "Contract creation with tender selection and validation"
     - "Search functionality on all pages"
   stuck_tasks: []
