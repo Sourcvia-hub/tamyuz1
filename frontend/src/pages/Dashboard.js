@@ -169,13 +169,14 @@ const Dashboard = () => {
             <span className="text-3xl">📄</span>
             <h2 className="text-2xl font-bold text-gray-900">Contracts</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <StatCard
               icon="✅"
               label="Active"
               value={stats?.contracts.active || 0}
               color="bg-green-50 border-green-200"
               link="/contracts"
+              filterType="active"
             />
             <StatCard
               icon="🔄"
@@ -183,6 +184,7 @@ const Dashboard = () => {
               value={stats?.contracts.outsourcing || 0}
               color="bg-orange-50 border-orange-200"
               link="/contracts"
+              filterType="outsourcing"
             />
             <StatCard
               icon="☁️"
@@ -190,6 +192,15 @@ const Dashboard = () => {
               value={stats?.contracts.cloud || 0}
               color="bg-cyan-50 border-cyan-200"
               link="/contracts"
+              filterType="cloud"
+            />
+            <StatCard
+              icon="📜"
+              label="NOC"
+              value={stats?.contracts.noc || 0}
+              color="bg-purple-50 border-purple-200"
+              link="/contracts"
+              filterType="noc"
             />
             <StatCard
               icon="⏰"
@@ -197,6 +208,7 @@ const Dashboard = () => {
               value={stats?.contracts.expired || 0}
               color="bg-red-50 border-red-200"
               link="/contracts"
+              filterType="expired"
             />
             <StatCard
               icon="📄"
