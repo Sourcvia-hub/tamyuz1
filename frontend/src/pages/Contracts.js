@@ -86,6 +86,49 @@ const Contracts = () => {
     }
   };
 
+  const applyFilter = () => {
+    if (activeFilter === 'all') {
+      setFilteredContracts(contracts);
+      return;
+    }
+
+    const filtered = contracts.filter(contract => {
+      switch (activeFilter) {
+        case 'active':
+          return contract.status === 'active';
+        case 'outsourcing':
+          return contract.outsourcing_classification === 'outsourcing';
+        case 'cloud':
+          return contract.outsourcing_classification === 'cloud_computing';
+        case 'noc':
+          return contract.is_noc === true;
+        case 'expired':
+          return contract.status === 'expired';
+        default:
+          return true;
+      }
+    });
+    setFilteredContracts(filtered);
+  };
+
+  const handleTerminateContract = async (contractId) => {
+    if (!window.confirm('Are you sure you want to terminate this contract?')) {
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/contracts/${contractId}/terminate`, 
+        { reason: 'Manual termination by user' },
+        { withCredentials: true }
+      );
+      alert('Contract terminated successfully');
+      fetchContracts();
+    } catch (error) {
+      console.error('Error terminating contract:', error);
+      alert('Failed to terminate contract');
+    }
+  };
+
   const handleTenderSelect = async (tenderId) => {
     const tender = tenders.find(t => t.id === tenderId);
     setSelectedTender(tender);
