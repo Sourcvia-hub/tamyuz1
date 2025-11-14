@@ -399,6 +399,18 @@ frontend:
           agent: "testing"
           comment: "✅ TESTED: Contract creation logic properly checks vendor DD status as per review request. All three test scenarios passed: 1) Contract with pending DD vendor → contract status 'pending_due_diligence', 2) Contract with completed DD vendor → contract status 'approved', 3) DD completion auto-updates contract status to 'approved'. Fixed vendor creation logic to properly handle DD fields during creation and contract status persistence bug. API endpoint POST /api/contracts now correctly evaluates vendor DD status and sets appropriate contract status based on outsourcing classification and vendor DD completion status."
 
+  - task: "View Vendor Details Button in Contract Detail Page"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/ContractDetail.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: View Vendor Details button functionality working perfectly. Successfully verified: 1) Login with procurement@test.com/password credentials, 2) Navigation to /contracts page, 3) Contract detail page access via 'View Details' button, 4) 'View Vendor Details →' button found in Vendor Information section top-right corner, 5) Button styling matches 'View Tender' button (text-blue-600 hover:text-blue-800 classes), 6) Button click successfully navigates to vendor detail page (/vendors/{vendor_id}), 7) Vendor detail page loads correctly showing vendor name 'test'. All test steps completed successfully with proper screenshots captured. The button is positioned correctly, styled appropriately, and provides seamless navigation from contract details to vendor details as requested."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
