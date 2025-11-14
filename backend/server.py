@@ -1669,6 +1669,8 @@ async def get_contracts(request: Request, status: Optional[ContractStatus] = Non
     contracts = await db.contracts.find(query).to_list(1000)
     
     result = []
+    now = datetime.now(timezone.utc)
+    
     for contract in contracts:
         # Remove MongoDB _id
         if '_id' in contract:
@@ -1682,6 +1684,20 @@ async def get_contracts(request: Request, status: Optional[ContractStatus] = Non
             contract['created_at'] = datetime.fromisoformat(contract['created_at'])
         if isinstance(contract.get('updated_at'), str):
             contract['updated_at'] = datetime.fromisoformat(contract['updated_at'])
+        
+        # Auto-mark expired contracts
+        if (contract.get('end_date') and 
+            contract['end_date'] < now and 
+            contract.get('status') not in [ContractStatus.EXPIRED.value] and
+            not contract.get('terminated')):
+            await db.contracts.update_one(
+                {"id": contract['id']},
+                {"$set": {
+                    "status": ContractStatus.EXPIRED.value,
+                    "updated_at": now.isoformat()
+                }}
+            )
+            contract['status'] = ContractStatus.EXPIRED.value
         
         result.append(contract)
     
