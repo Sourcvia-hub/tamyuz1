@@ -2350,6 +2350,18 @@ async def update_resource(resource_id: str, resource_data: dict, request: Reques
         if not isinstance(update_data['end_date'], str):
             update_data['end_date'] = update_data['end_date'].isoformat()
     
+    # Check if end_date is in the past and auto-update status
+    if 'end_date' in update_data:
+        end_date = update_data['end_date']
+        if isinstance(end_date, str):
+            end_date = datetime.fromisoformat(end_date)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
+        
+        now = datetime.now(timezone.utc)
+        if end_date < now and resource.get('status') == ResourceStatus.ACTIVE.value:
+            update_data['status'] = ResourceStatus.INACTIVE.value
+    
     update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
     
     await db.resources.update_one(
