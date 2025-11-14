@@ -243,6 +243,16 @@ const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false 
         </div>
       </div>
 
+      {/* Due Diligence Questionnaire */}
+      {!isEdit && (
+        <div className="mt-6">
+          <DueDiligenceQuestionnaire 
+            formData={formData} 
+            setFormData={setFormData} 
+          />
+        </div>
+      )}
+
       {/* Form Actions */}
       <div className="flex space-x-4 pt-4 sticky bottom-0 bg-white border-t pb-2">
         <button type="button" onClick={onCancel}
