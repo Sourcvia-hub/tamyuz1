@@ -282,6 +282,44 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Purchase Orders Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-3xl">📝</span>
+            <h2 className="text-2xl font-bold text-gray-900">Purchase Orders</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard
+              icon="📊"
+              label="Total POs"
+              value={stats?.purchase_orders?.all || 0}
+              color="bg-blue-50 border-blue-200"
+              link="/purchase-orders"
+            />
+            <StatCard
+              icon="✅"
+              label="Issued"
+              value={stats?.purchase_orders?.issued || 0}
+              color="bg-green-50 border-green-200"
+              link="/purchase-orders"
+            />
+            <StatCard
+              icon="🔄"
+              label="Converted"
+              value={stats?.purchase_orders?.converted || 0}
+              color="bg-purple-50 border-purple-200"
+              link="/purchase-orders"
+            />
+            <StatCard
+              icon="💰"
+              label="Total Value"
+              value={`$${(stats?.purchase_orders?.total_value || 0).toLocaleString()}`}
+              color="bg-orange-50 border-orange-200"
+              link="/purchase-orders"
+            />
+          </div>
+        </div>
+
         {/* Quick Actions */}
         {(user?.role === 'procurement_officer' || user?.role === 'requester' || user?.role === 'pd_officer') && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6 border-2 border-blue-200">
