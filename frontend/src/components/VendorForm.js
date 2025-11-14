@@ -17,6 +17,14 @@ const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false 
         <h3 className="text-lg font-semibold text-gray-900 mb-4 sticky top-0 bg-white py-2">Company Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Vendor Type *</label>
+            <select name="vendor_type" value={formData.vendor_type || 'local'} onChange={handleChange} required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="local">Local</option>
+              <option value="international">International</option>
+            </select>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Name in English *</label>
             <input type="text" name="name_english" value={formData.name_english} onChange={handleChange} required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
