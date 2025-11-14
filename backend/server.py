@@ -101,6 +101,7 @@ class Vendor(BaseModel):
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     vendor_number: Optional[str] = None  # Auto-generated (e.g., Vendor-25-0001)
+    vendor_type: VendorType = VendorType.LOCAL  # International or Local
     
     # Company Information
     name_english: str
