@@ -477,6 +477,158 @@ class ProcurementTester:
         
         return all_passed
     
+    def test_vendor_creation_with_dd_integration(self):
+        """Test vendor creation with Due Diligence questionnaire integration"""
+        print(f"\n=== VENDOR CREATION WITH DD INTEGRATION TEST ===")
+        
+        # Create vendor with DD fields included as per review request
+        vendor_data_with_dd = {
+            # Basic vendor info
+            "name_english": "Test Vendor DD",
+            "commercial_name": "Test Vendor Commercial",
+            "vendor_type": "local",
+            "entity_type": "LLC",
+            "vat_number": "300123456789005",
+            "cr_number": "1010123458",
+            "cr_expiry_date": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
+            "cr_country_city": "Riyadh, Saudi Arabia",
+            "activity_description": "Software Development and Consulting",
+            "number_of_employees": 15,
+            "street": "Prince Sultan Road",
+            "building_no": "456",
+            "city": "Riyadh",
+            "district": "Al Malaz",
+            "country": "Saudi Arabia",
+            "mobile": "+966501234568",
+            "email": "contact@testvendordd.com",
+            "representative_name": "Sarah Al-Mahmoud",
+            "representative_designation": "General Manager",
+            "representative_id_type": "National ID",
+            "representative_id_number": "2345678901",
+            "representative_nationality": "Saudi",
+            "representative_mobile": "+966501234568",
+            "representative_email": "sarah@testvendordd.com",
+            "bank_account_name": "Test Vendor DD",
+            "bank_name": "Riyad Bank",
+            "bank_branch": "Riyadh Branch",
+            "bank_country": "Saudi Arabia",
+            "iban": "SA0320000000123456789013",
+            "currency": "SAR",
+            "swift_code": "RIBLSARI",
+            
+            # DD fields as specified in review request
+            "dd_ownership_change_last_year": True,
+            "dd_location_moved_or_closed": False,
+            "dd_bc_rely_on_third_parties": True,
+            
+            # Additional DD fields to ensure comprehensive testing
+            "dd_bc_strategy_exists": True,
+            "dd_bc_certified_standard": True,
+            "dd_bc_it_continuity_plan": True,
+            "dd_fraud_internal_last_year": False,
+            "dd_op_criminal_cases_last_3years": False,
+            "dd_op_documented_procedures": True,
+            "dd_hr_background_investigation": True,
+            "dd_safety_procedures_exist": True
+        }
+        
+        try:
+            print("Creating vendor with DD fields...")
+            response = self.session.post(f"{BASE_URL}/vendors", json=vendor_data_with_dd)
+            print(f"Create Vendor with DD Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                vendor = response.json()
+                vendor_id = vendor.get('id')
+                vendor_number = vendor.get('vendor_number')
+                dd_completed = vendor.get('dd_completed')
+                dd_required = vendor.get('dd_required')
+                
+                print(f"✅ Vendor created successfully")
+                print(f"Vendor ID: {vendor_id}")
+                print(f"Vendor Number: {vendor_number}")
+                print(f"DD Completed: {dd_completed}")
+                print(f"DD Required: {dd_required}")
+                print(f"Status: {vendor.get('status')}")
+                
+                # Verify DD completion status
+                if dd_completed is True:
+                    print(f"✅ DD marked as completed when DD fields provided during creation")
+                else:
+                    print(f"❌ DD not marked as completed despite DD fields being provided")
+                    return False
+                
+                # Verify vendor number format
+                if vendor_number and vendor_number.startswith('Vendor-25-'):
+                    print(f"✅ Vendor number format is correct: {vendor_number}")
+                else:
+                    print(f"❌ Vendor number format incorrect: {vendor_number}")
+                    return False
+                
+                # Get the created vendor to verify DD fields are saved correctly
+                print(f"\nRetrieving created vendor to verify DD fields...")
+                get_response = self.session.get(f"{BASE_URL}/vendors/{vendor_id}")
+                print(f"Get Vendor Status: {get_response.status_code}")
+                
+                if get_response.status_code == 200:
+                    retrieved_vendor = get_response.json()
+                    
+                    # Verify specific DD fields from review request
+                    dd_fields_to_check = {
+                        "dd_ownership_change_last_year": True,
+                        "dd_location_moved_or_closed": False,
+                        "dd_bc_rely_on_third_parties": True
+                    }
+                    
+                    all_dd_fields_correct = True
+                    for field, expected_value in dd_fields_to_check.items():
+                        actual_value = retrieved_vendor.get(field)
+                        if actual_value == expected_value:
+                            print(f"✅ {field}: {actual_value} (correct)")
+                        else:
+                            print(f"❌ {field}: expected {expected_value}, got {actual_value}")
+                            all_dd_fields_correct = False
+                    
+                    # Verify DD completion metadata
+                    dd_completed_by = retrieved_vendor.get('dd_completed_by')
+                    dd_completed_at = retrieved_vendor.get('dd_completed_at')
+                    dd_approved_by = retrieved_vendor.get('dd_approved_by')
+                    dd_approved_at = retrieved_vendor.get('dd_approved_at')
+                    
+                    if dd_completed_by and dd_completed_at and dd_approved_by and dd_approved_at:
+                        print(f"✅ DD completion metadata properly set")
+                        print(f"  - Completed by: {dd_completed_by}")
+                        print(f"  - Completed at: {dd_completed_at}")
+                        print(f"  - Approved by: {dd_approved_by}")
+                        print(f"  - Approved at: {dd_approved_at}")
+                    else:
+                        print(f"❌ DD completion metadata missing or incomplete")
+                        all_dd_fields_correct = False
+                    
+                    # Check risk score adjustment due to DD
+                    risk_score = retrieved_vendor.get('risk_score', 0)
+                    risk_category = retrieved_vendor.get('risk_category')
+                    print(f"Risk Score: {risk_score}")
+                    print(f"Risk Category: {risk_category}")
+                    
+                    if all_dd_fields_correct:
+                        print(f"✅ All DD fields saved correctly")
+                        self.created_entities['vendors'].append(vendor_id)
+                        return True
+                    else:
+                        print(f"❌ Some DD fields not saved correctly")
+                        return False
+                else:
+                    print(f"❌ Failed to retrieve created vendor: {get_response.text}")
+                    return False
+            else:
+                print(f"❌ Failed to create vendor with DD: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Vendor DD integration test error: {str(e)}")
+            return False
+    
     def run_all_tests(self):
         """Run all backend tests"""
         print("=" * 60)
