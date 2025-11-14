@@ -1109,18 +1109,41 @@ async def get_vendor_audit_log(vendor_id: str, request: Request):
 
 @api_router.put("/vendors/{vendor_id}/due-diligence")
 async def update_vendor_due_diligence(vendor_id: str, dd_data: dict, request: Request):
-    """Update vendor due diligence questionnaire"""
+    """Update vendor due diligence questionnaire - Auto-approves and recalculates risk"""
     user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
     
     vendor = await db.vendors.find_one({"id": vendor_id})
     if not vendor:
         raise HTTPException(status_code=404, detail="Vendor not found")
     
-    # Update all dd_ prefixed fields
+    # Add all dd_ fields from dd_data
+    for key, value in dd_data.items():
+        if key.startswith('dd_'):
+            vendor[key] = value
+    
+    # Recalculate risk score based on DD responses
+    base_risk = vendor.get('risk_score', 0.0)
+    dd_adjustment = calculate_dd_risk_adjustment(vendor)
+    new_risk_score = max(0, base_risk + dd_adjustment)
+    
+    # Determine new risk category
+    if new_risk_score >= 50:
+        new_risk_category = RiskCategory.HIGH.value
+    elif new_risk_score >= 25:
+        new_risk_category = RiskCategory.MEDIUM.value
+    else:
+        new_risk_category = RiskCategory.LOW.value
+    
+    # Update all dd_ prefixed fields and auto-approve
     update_fields = {
         "dd_completed": True,
         "dd_completed_by": user.id,
         "dd_completed_at": datetime.now(timezone.utc).isoformat(),
+        "dd_approved_by": user.id,
+        "dd_approved_at": datetime.now(timezone.utc).isoformat(),
+        "status": VendorStatus.APPROVED.value,
+        "risk_score": new_risk_score,
+        "risk_category": new_risk_category,
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
@@ -1134,7 +1157,23 @@ async def update_vendor_due_diligence(vendor_id: str, dd_data: dict, request: Re
         {"$set": update_fields}
     )
     
-    return {"message": "Due diligence questionnaire updated successfully"}
+    # Auto-approve all pending contracts for this vendor
+    await db.contracts.update_many(
+        {
+            "vendor_id": vendor_id,
+            "status": ContractStatus.PENDING_DUE_DILIGENCE.value
+        },
+        {"$set": {
+            "status": ContractStatus.APPROVED.value,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": "Due diligence completed and auto-approved. Vendor and contracts status updated.",
+        "new_risk_score": new_risk_score,
+        "new_risk_category": new_risk_category
+    }
 
 @api_router.post("/vendors/{vendor_id}/due-diligence/approve")
 async def approve_vendor_due_diligence(vendor_id: str, request: Request):
