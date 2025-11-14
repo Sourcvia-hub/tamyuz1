@@ -509,7 +509,9 @@ const DueDiligenceQuestionnaire = ({ vendor, formData: externalFormData, setForm
           <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Due Diligence Questionnaire</h2>
-              <p className="text-sm text-gray-600 mt-1">Vendor: {vendor.name_english || vendor.commercial_name}</p>
+              {vendor && (
+                <p className="text-sm text-gray-600 mt-1">Vendor: {vendor.name_english || vendor.commercial_name}</p>
+              )}
             </div>
             <button
               onClick={onClose}
