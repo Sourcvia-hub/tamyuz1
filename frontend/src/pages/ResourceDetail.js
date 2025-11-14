@@ -49,6 +49,8 @@ const ResourceDetail = () => {
         id_number: response.data.id_number || '',
         education_qualification: response.data.education_qualification || '',
         years_of_experience: response.data.years_of_experience || 0,
+        start_date: response.data.start_date ? new Date(response.data.start_date).toISOString().split('T')[0] : '',
+        end_date: response.data.end_date ? new Date(response.data.end_date).toISOString().split('T')[0] : '',
         scope_of_work: response.data.scope_of_work || '',
         has_relatives: response.data.has_relatives || false,
         relatives: response.data.relatives || [],
