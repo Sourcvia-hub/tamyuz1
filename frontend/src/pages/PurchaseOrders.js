@@ -405,6 +405,18 @@ const PurchaseOrders = () => {
                 </select>
               </div>
 
+              {/* Delivery Time */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Time</label>
+                <input
+                  type="text"
+                  placeholder="e.g., 30 days, 2 weeks"
+                  value={formData.delivery_time}
+                  onChange={(e) => setFormData({ ...formData, delivery_time: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               {/* Items Section */}
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Items</h3>
@@ -412,15 +424,17 @@ const PurchaseOrders = () => {
                 {/* Current Item Input */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                   <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Item Name *</label>
                     <input
                       type="text"
-                      placeholder="Item Name *"
+                      placeholder="Item Name"
                       value={currentItem.name}
                       onChange={(e) => setCurrentItem({ ...currentItem, name: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
                     <input
                       type="text"
                       placeholder="Description"
@@ -430,9 +444,10 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Quantity *</label>
                     <input
                       type="number"
-                      placeholder="Quantity"
+                      placeholder="Qty"
                       value={currentItem.quantity}
                       onChange={(e) => setCurrentItem({ ...currentItem, quantity: parseFloat(e.target.value) })}
                       min="1"
@@ -441,9 +456,10 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Price (SAR) *</label>
                     <input
                       type="number"
-                      placeholder="Price *"
+                      placeholder="Price"
                       value={currentItem.price}
                       onChange={(e) => setCurrentItem({ ...currentItem, price: parseFloat(e.target.value) })}
                       min="0"
@@ -454,7 +470,7 @@ const PurchaseOrders = () => {
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium mt-5"
                   >
                     + Add
                   </button>
