@@ -1732,6 +1732,30 @@ async def approve_contract(contract_id: str, request: Request):
     
     return {"message": "Contract approved"}
 
+@api_router.post("/contracts/{contract_id}/terminate")
+async def terminate_contract(contract_id: str, request: Request, reason: str = "Manual termination"):
+    """Terminate a contract - PD Officer or Admin only"""
+    user = await require_role(request, [UserRole.PD_OFFICER, UserRole.ADMIN, UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    # Update contract to terminated and expired
+    result = await db.contracts.update_one(
+        {"id": contract_id},
+        {"$set": {
+            "terminated": True,
+            "terminated_by": user.id,
+            "terminated_at": datetime.now(timezone.utc).isoformat(),
+            "termination_reason": reason,
+            "status": ContractStatus.EXPIRED.value,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Contract terminated successfully"}
+
 @api_router.get("/contracts/expiring")
 async def get_expiring_contracts(request: Request, days: int = 30):
     """Get contracts expiring soon"""
