@@ -1734,6 +1734,28 @@ class ProcurementTester:
                     contract_id = self.created_entities['contracts'][0]
                     vendor_id = self.created_entities['vendors'][0]
                     
+                    # First get the contract to check its end date
+                    contract_response = self.session.get(f"{BASE_URL}/contracts/{contract_id}")
+                    if contract_response.status_code == 200:
+                        contract_data = contract_response.json()
+                        contract_end_date = contract_data.get('end_date')
+                        
+                        # Parse contract end date and set resource end date to be before it
+                        if contract_end_date:
+                            if isinstance(contract_end_date, str):
+                                contract_end = datetime.fromisoformat(contract_end_date.replace('Z', '+00:00'))
+                            else:
+                                contract_end = contract_end_date
+                            
+                            # Set resource end date to be 30 days before contract end date
+                            resource_end = contract_end - timedelta(days=30)
+                        else:
+                            # Fallback if no contract end date
+                            resource_end = datetime.now(timezone.utc) + timedelta(days=90)
+                    else:
+                        # Fallback if can't get contract
+                        resource_end = datetime.now(timezone.utc) + timedelta(days=90)
+                    
                     resource_data = {
                         "contract_id": contract_id,
                         "vendor_id": vendor_id,
@@ -1744,7 +1766,7 @@ class ProcurementTester:
                         "years_of_experience": 5.5,
                         "work_type": "on_premises",
                         "start_date": datetime.now(timezone.utc).isoformat(),
-                        "end_date": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
+                        "end_date": resource_end.isoformat(),
                         "access_development": True,
                         "access_production": False,
                         "access_uat": True,
