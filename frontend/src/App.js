@@ -200,6 +200,7 @@ import TenderEvaluation from './pages/TenderEvaluation';
 import Contracts from './pages/Contracts';
 import ContractDetail from './pages/ContractDetail';
 import Invoices from './pages/Invoices';
+import InvoiceDetail from './pages/InvoiceDetail';
 
 // ==================== MAIN APP ====================
 const AppRoutes = () => {
