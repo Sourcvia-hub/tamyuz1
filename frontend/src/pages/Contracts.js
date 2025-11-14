@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import OutsourcingQuestionnaire from '../components/OutsourcingQuestionnaire';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -9,6 +9,7 @@ const API = `${BACKEND_URL}/api`;
 
 const Contracts = () => {
   const [contracts, setContracts] = useState([]);
+  const [filteredContracts, setFilteredContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [vendors, setVendors] = useState([]);
@@ -16,12 +17,15 @@ const Contracts = () => {
   const [selectedTender, setSelectedTender] = useState(null);
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
+  const location = useLocation();
   const [formData, setFormData] = useState({
     tender_id: '',
     vendor_id: '',
     title: '',
     sow: '',
     sla: '',
+    milestones: [],
     value: '',
     start_date: '',
     end_date: '',
@@ -32,7 +36,14 @@ const Contracts = () => {
     fetchContracts();
     fetchVendors();
     fetchTenders();
-  }, []);
+    
+    // Check for filter parameter from dashboard
+    const params = new URLSearchParams(location.search);
+    const filter = params.get('filter');
+    if (filter) {
+      setActiveFilter(filter);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     const debounce = setTimeout(() => {
@@ -40,6 +51,10 @@ const Contracts = () => {
     }, 300);
     return () => clearTimeout(debounce);
   }, [searchQuery]);
+  
+  useEffect(() => {
+    applyFilter();
+  }, [contracts, activeFilter]);
 
   const fetchContracts = async (search = '') => {
     try {
