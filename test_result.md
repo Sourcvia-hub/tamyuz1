@@ -392,7 +392,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Vendor Creation Form - Verification Checklist Implementation"
+    - "Updated Due Diligence Workflow - Backend Logic"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
