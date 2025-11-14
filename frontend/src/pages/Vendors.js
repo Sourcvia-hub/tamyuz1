@@ -14,6 +14,7 @@ const Vendors = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     // Company Information
+    vendor_type: 'local',
     name_english: '',
     commercial_name: '',
     entity_type: '',
