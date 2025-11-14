@@ -30,15 +30,25 @@ api_router = APIRouter(prefix="/api")
 
 # ==================== ENUMS ====================
 class UserRole(str, Enum):
+    REQUESTER = "requester"
+    PD_OFFICER = "pd_officer"
+    PD_MANAGER = "pd_manager"
+    ADMIN = "admin"
+    # Legacy roles (keeping for backwards compatibility)
     PROCUREMENT_OFFICER = "procurement_officer"
     PROJECT_MANAGER = "project_manager"
     SYSTEM_ADMIN = "system_admin"
+
+class VendorType(str, Enum):
+    LOCAL = "local"
+    INTERNATIONAL = "international"
 
 class VendorStatus(str, Enum):
     PENDING = "pending"
     PENDING_DUE_DILIGENCE = "pending_due_diligence"
     APPROVED = "approved"
     REJECTED = "rejected"
+    BLACKLISTED = "blacklisted"
 
 class RiskCategory(str, Enum):
     LOW = "low"
