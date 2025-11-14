@@ -167,6 +167,30 @@ const PurchaseOrders = () => {
     const totalAmount = calculateTotalAmount();
     const amountOverMillion = totalAmount > 1000000;
 
+    // Check if contract is required BEFORE creating PO
+    const requiresContract = (
+      formData.has_data_access || 
+      formData.has_onsite_presence || 
+      formData.has_implementation || 
+      formData.duration_more_than_year || 
+      amountOverMillion
+    );
+
+    if (requiresContract) {
+      alert(
+        'Based on the provided answers, this request requires a contract.\n\n' +
+        'Please update your PO or create a contract instead.\n\n' +
+        'Reasons:\n' +
+        (formData.has_data_access ? '- Vendor requires data access\n' : '') +
+        (formData.has_onsite_presence ? '- Vendor requires onsite presence\n' : '') +
+        (formData.has_implementation ? '- Implementation services needed\n' : '') +
+        (formData.duration_more_than_year ? '- Duration more than one year\n' : '') +
+        (amountOverMillion ? '- Amount exceeds 1,000,000 SAR\n' : '')
+      );
+      return; // Don't create PO, let user update the form
+    }
+
+    // Only create PO if no contract is required
     const poData = {
       ...formData,
       risk_level: selectedVendor?.risk_category || 'low',
@@ -176,35 +200,23 @@ const PurchaseOrders = () => {
     try {
       const response = await axios.post(`${API}/purchase-orders`, poData, { withCredentials: true });
       
-      if (response.data.requires_contract) {
-        const convertToContract = window.confirm(
-          'Based on the provided answers, this request requires a contract. Do you want to convert it to a contract?'
-        );
-        
-        if (convertToContract) {
-          navigate(`/contracts/create-from-po/${response.data.po_number}`);
-        } else {
-          alert('Purchase order created but requires contract conversion');
-          setShowCreateModal(false);
-          fetchPOs();
-        }
-      } else {
-        alert('Purchase order issued successfully!');
-        setShowCreateModal(false);
-        fetchPOs();
-      }
+      alert('Purchase order issued successfully!');
+      setShowCreateModal(false);
+      fetchPOs();
       
       // Reset form
       setFormData({
         tender_id: '',
         vendor_id: '',
         items: [],
+        delivery_time: '',
         has_data_access: false,
         has_onsite_presence: false,
         has_implementation: false,
         duration_more_than_year: false,
       });
       setSelectedVendor(null);
+      setSelectedTender(null);
     } catch (error) {
       console.error('Error creating PO:', error);
       alert('Failed to create purchase order: ' + (error.response?.data?.detail || error.message));
