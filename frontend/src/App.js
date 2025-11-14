@@ -203,6 +203,7 @@ import Invoices from './pages/Invoices';
 import InvoiceDetail from './pages/InvoiceDetail';
 import PurchaseOrders from './pages/PurchaseOrders';
 import Resources from './pages/Resources';
+import ResourceDetail from './pages/ResourceDetail';
 
 // ==================== MAIN APP ====================
 const AppRoutes = () => {
