@@ -1970,8 +1970,8 @@ async def approve_invoice(invoice_id: str, request: Request):
 
 # ==================== DASHBOARD ENDPOINTS ====================
 @api_router.get("/dashboard/stats")
-async def get_dashboard_stats(request: Request):
-    """Get dashboard statistics"""
+async def get_dashboard_summary_stats(request: Request):
+    """Get dashboard summary statistics"""
     await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
     
     total_vendors = await db.vendors.count_documents({})
