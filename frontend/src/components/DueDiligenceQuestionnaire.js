@@ -40,7 +40,7 @@ const DueDiligenceQuestionnaire = ({ vendor, formData: externalFormData, setForm
     { id: 'data', title: 'Data Management', icon: '💾' },
     { id: 'fcp', title: 'Financial Consumer Protection', icon: '💰' },
     { id: 'additional', title: 'Additional Details', icon: '📝' },
-    { id: 'checklist', title: 'Final Checklist', icon: '✅' }
+    { id: 'summary', title: 'Review & Submit', icon: '✅' }
   ];
 
   const YesNoQuestion = ({ label, field, required = false }) => (
