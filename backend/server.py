@@ -930,6 +930,15 @@ async def get_dashboard_stats(request: Request):
         "status": {"$in": [InvoiceStatus.PENDING.value, InvoiceStatus.VERIFIED.value, InvoiceStatus.APPROVED.value]}
     })
     
+    # Purchase Order Statistics
+    all_pos = await db.purchase_orders.count_documents({})
+    issued_pos = await db.purchase_orders.count_documents({"status": "issued"})
+    converted_pos = await db.purchase_orders.count_documents({"status": "converted_to_contract"})
+    
+    # Calculate total PO value
+    pos = await db.purchase_orders.find({}).to_list(1000)
+    total_po_value = sum(po.get('total_amount', 0) for po in pos)
+    
     return {
         "vendors": {
             "all": all_vendors,
@@ -963,6 +972,12 @@ async def get_dashboard_stats(request: Request):
             "active": await db.resources.count_documents({"status": ResourceStatus.ACTIVE.value}),
             "offshore": await db.resources.count_documents({"work_type": WorkType.OFFSHORE.value}),
             "on_premises": await db.resources.count_documents({"work_type": WorkType.ON_PREMISES.value})
+        },
+        "purchase_orders": {
+            "all": all_pos,
+            "issued": issued_pos,
+            "converted": converted_pos,
+            "total_value": total_po_value
         }
     }
 
