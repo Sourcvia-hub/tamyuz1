@@ -323,14 +323,15 @@ const Contracts = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredContracts.map((contract) => (
-              <Link
+              <div
                 key={contract.id}
-                to={`/contracts/${contract.id}`}
                 className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">{contract.title}</h3>
+                    <Link to={`/contracts/${contract.id}`}>
+                      <h3 className="text-xl font-bold text-gray-900 hover:text-blue-600">{contract.title}</h3>
+                    </Link>
                     <p className="text-sm text-gray-600 mt-1">Contract #{contract.contract_number}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(contract.status)}`}>
@@ -338,7 +339,7 @@ const Contracts = () => {
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm">
                     <span className="text-gray-600 w-24">Value:</span>
                     <span className="text-gray-900 font-medium">${contract.value.toLocaleString()}</span>
@@ -351,8 +352,38 @@ const Contracts = () => {
                     <span className="text-gray-600 w-24">End Date:</span>
                     <span className="text-gray-900 font-medium">{new Date(contract.end_date).toLocaleDateString()}</span>
                   </div>
+                  {contract.is_noc && (
+                    <div className="flex items-center text-sm">
+                      <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs font-medium">NOC Required</span>
+                    </div>
+                  )}
+                  {contract.terminated && (
+                    <div className="flex items-center text-sm">
+                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs font-medium">Terminated</span>
+                    </div>
+                  )}
                 </div>
-              </Link>
+
+                <div className="flex gap-2">
+                  <Link
+                    to={`/contracts/${contract.id}`}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white text-center rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    View Details
+                  </Link>
+                  {!contract.terminated && contract.status !== 'expired' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTerminateContract(contract.id);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                    >
+                      Terminate
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
