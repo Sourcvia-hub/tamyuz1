@@ -37,22 +37,25 @@ const Dashboard = () => {
     );
   }
 
-  const StatCard = ({ icon, label, value, color, link }) => (
-    <Link
-      to={link}
-      className={`block p-4 rounded-lg border-2 ${color} hover:shadow-lg transition-all transform hover:-translate-y-1`}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">{icon}</span>
-          <div>
-            <p className="text-xs text-gray-600 font-medium">{label}</p>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
+  const StatCard = ({ icon, label, value, color, link, filterType }) => {
+    const linkWithFilter = filterType ? `${link}?filter=${filterType}` : link;
+    return (
+      <Link
+        to={linkWithFilter}
+        className={`block p-4 rounded-lg border-2 ${color} hover:shadow-lg transition-all transform hover:-translate-y-1`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{icon}</span>
+            <div>
+              <p className="text-xs text-gray-600 font-medium">{label}</p>
+              <p className="text-2xl font-bold text-gray-900">{value}</p>
+            </div>
           </div>
         </div>
-      </div>
-    </Link>
-  );
+      </Link>
+    );
+  };
 
   return (
     <Layout>
