@@ -655,3 +655,44 @@ agent_communication:
         5. Contract status updates work correctly ✓
         
         SUMMARY: The updated Due Diligence workflow is working correctly as specified. Vendor creation logic properly flags vendors with checklist items as "pending_due_diligence" instead of auto-approving them. DD questionnaire completion successfully updates vendor status to "approved" and recalculates risk scores. Contract status updates work as expected. All backend API endpoints tested successfully with real authentication.
+
+    - agent: "testing"
+      message: |
+        CONTRACT VENDOR DD STATUS CHECKING TESTING COMPLETED - Comprehensive testing of updated contract creation logic as per review request:
+        
+        ✅ CONTRACT DD STATUS TEST RESULTS (API BASE URL: https://sourcevia-mgmt.preview.emergentagent.com/api):
+        - Authentication: Successfully logged in with procurement@test.com/password credentials
+        - All three test scenarios from review request completed successfully
+        
+        ✅ SCENARIO 1 - Contract with Pending DD Vendor: ✅ PASSED
+          * Created vendor with checklist items (dd_checklist_supporting_documents=true, dd_checklist_related_party_checked=true, dd_checklist_sanction_screening=true)
+          * VERIFIED: Vendor status = "pending_due_diligence", dd_completed = false
+          * Created outsourcing contract (a1_continuing_basis=true, a2_could_be_undertaken_by_bank=true)
+          * VERIFIED: Contract status = "pending_due_diligence" (correct behavior)
+          * Contract classification: "outsourcing" triggers DD requirements
+        
+        ✅ SCENARIO 2 - Contract with Completed DD Vendor: ✅ PASSED
+          * Created vendor with DD fields provided during creation (dd_ownership_change_last_year=false, dd_bc_strategy_exists=true, etc.)
+          * VERIFIED: Vendor status = "approved", dd_completed = true (auto-completed during creation)
+          * Created outsourcing contract with same DD-triggering conditions
+          * VERIFIED: Contract status = "approved" (correct behavior since vendor DD is complete)
+        
+        ✅ SCENARIO 3 - DD Completion Updates Contract: ✅ PASSED
+          * Completed DD questionnaire for pending vendor using PUT /api/vendors/{id}/due-diligence
+          * VERIFIED: Vendor status updated to "approved", dd_completed = true
+          * VERIFIED: Existing contract status auto-updated from "pending_due_diligence" to "approved"
+          * Message: "Due diligence completed and auto-approved. Vendor and contracts status updated."
+        
+        ✅ CRITICAL FIXES IMPLEMENTED:
+        - Fixed vendor creation logic to properly handle DD fields during creation (lines 1023-1055 in server.py)
+        - Fixed contract status persistence bug where status wasn't saved to database (lines 1789, 1802 in server.py)
+        - Enhanced vendor creation to auto-complete DD when DD fields provided and recalculate risk scores
+        - Contract creation now properly evaluates vendor DD status and outsourcing classification
+        
+        ✅ BACKEND LOGIC VERIFICATION:
+        - Contract Creation Logic: Properly checks vendor DD status and outsourcing classification (lines 1769-1802 in server.py)
+        - DD Requirements: Triggered by high-risk vendors OR outsourcing contracts OR cloud computing contracts
+        - Status Updates: DD completion automatically updates all pending contracts for that vendor
+        - Risk Assessment: DD fields provided during vendor creation trigger risk score recalculation
+        
+        SUMMARY: Contract creation logic now properly checks vendor DD status as specified in review request. All three scenarios working correctly: pending DD vendor → pending contract, completed DD vendor → approved contract, DD completion → contract status update. Fixed critical bugs in vendor creation and contract status persistence. The system correctly handles the complete DD workflow integration with contract management.
