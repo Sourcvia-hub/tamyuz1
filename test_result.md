@@ -657,41 +657,81 @@ agent_communication:
 
     - agent: "testing"
       message: |
-        CONTRACT VENDOR DD STATUS CHECKING TESTING COMPLETED - Comprehensive testing of updated contract creation logic as per review request:
+        COMPREHENSIVE BACKEND TESTING COMPLETED - Full testing of Sourcevia Procurement Management System as per review request:
         
-        ✅ CONTRACT DD STATUS TEST RESULTS (API BASE URL: https://sourcevia-mgmt.preview.emergentagent.com/api):
-        - Authentication: Successfully logged in with procurement@test.com/password credentials
-        - All three test scenarios from review request completed successfully
+        ✅ AUTHENTICATION & USER MANAGEMENT:
+        - Login successful with procurement@test.com/password credentials
+        - User session and role verification working correctly
+        - /auth/me endpoint returns proper user data (email: procurement@test.com, role: procurement_officer)
         
-        ✅ SCENARIO 1 - Contract with Pending DD Vendor: ✅ PASSED
-          * Created vendor with checklist items (dd_checklist_supporting_documents=true, dd_checklist_related_party_checked=true, dd_checklist_sanction_screening=true)
-          * VERIFIED: Vendor status = "pending_due_diligence", dd_completed = false
-          * Created outsourcing contract (a1_continuing_basis=true, a2_could_be_undertaken_by_bank=true)
-          * VERIFIED: Contract status = "pending_due_diligence" (correct behavior)
-          * Contract classification: "outsourcing" triggers DD requirements
+        ✅ VENDOR MANAGEMENT:
+        - List all vendors: Retrieved 67+ vendors successfully
+        - Create vendor with checklist items: Correctly flagged as 'pending_due_diligence' status
+        - Create vendor without checklist: Auto-approved with 'approved' status
+        - Complete DD questionnaire: Successfully updates vendor to 'approved' and recalculates risk scores
+        - Vendor blacklisting: Successfully blacklists vendors and terminates active contracts
+        - Vendor search: Works by vendor_number, name_english, and commercial_name
+        - Auto-numbering: Vendor-25-NNNN format working with sequential increments
         
-        ✅ SCENARIO 2 - Contract with Completed DD Vendor: ✅ PASSED
-          * Created vendor with DD fields provided during creation (dd_ownership_change_last_year=false, dd_bc_strategy_exists=true, etc.)
-          * VERIFIED: Vendor status = "approved", dd_completed = true (auto-completed during creation)
-          * Created outsourcing contract with same DD-triggering conditions
-          * VERIFIED: Contract status = "approved" (correct behavior since vendor DD is complete)
+        ✅ TENDER MANAGEMENT:
+        - List all tenders: Retrieved 24+ tenders successfully
+        - Create new tender: Auto-published with Tender-25-NNNN format
+        - Submit proposals: Successfully creates proposals with auto-numbering
+        - Tender evaluation: Comprehensive evaluation system with weighted scoring (20%, 20%, 10%, 10%, 40%)
+        - Tender search: Works by tender_number, title, and project_name
         
-        ✅ SCENARIO 3 - DD Completion Updates Contract: ✅ PASSED
-          * Completed DD questionnaire for pending vendor using PUT /api/vendors/{id}/due-diligence
-          * VERIFIED: Vendor status updated to "approved", dd_completed = true
-          * VERIFIED: Existing contract status auto-updated from "pending_due_diligence" to "approved"
-          * Message: "Due diligence completed and auto-approved. Vendor and contracts status updated."
+        ✅ CONTRACT MANAGEMENT:
+        - List contracts with filters: All, Active, Outsourcing, Cloud, NOC, Expired filters working
+        - Create contract with pending DD vendor: Contract status = 'pending_due_diligence'
+        - Create contract with approved vendor: Contract status = 'approved'
+        - Contract milestones: Properly stored and retrieved
+        - Contract termination: Working correctly for blacklisted vendors
+        - Contract search: Works by contract_number and title
+        - Auto-numbering: Contract-25-NNNN format working
         
-        ✅ CRITICAL FIXES IMPLEMENTED:
-        - Fixed vendor creation logic to properly handle DD fields during creation (lines 1023-1055 in server.py)
-        - Fixed contract status persistence bug where status wasn't saved to database (lines 1789, 1802 in server.py)
-        - Enhanced vendor creation to auto-complete DD when DD fields provided and recalculate risk scores
-        - Contract creation now properly evaluates vendor DD status and outsourcing classification
+        ✅ PURCHASE ORDERS:
+        - List all purchase orders: Retrieved existing POs successfully
+        - Create new PO: Successfully creates with PO-25-NNNN format
+        - PO validation: Correctly flags POs requiring contracts based on risk assessment
+        - Risk assessment: Evaluates data access, onsite presence, implementation requirements
         
-        ✅ BACKEND LOGIC VERIFICATION:
-        - Contract Creation Logic: Properly checks vendor DD status and outsourcing classification (lines 1769-1802 in server.py)
-        - DD Requirements: Triggered by high-risk vendors OR outsourcing contracts OR cloud computing contracts
-        - Status Updates: DD completion automatically updates all pending contracts for that vendor
-        - Risk Assessment: DD fields provided during vendor creation trigger risk score recalculation
+        ✅ INVOICES:
+        - List all invoices: Retrieved 11+ invoices successfully
+        - Create invoice linked to contract: Successfully creates with Invoice-25-NNNN format
+        - Invoice detail retrieval: Working correctly with all fields
+        - Invoice editing: Update functionality working properly
+        - Milestone auto-population: References populated from contract data
         
-        SUMMARY: Contract creation logic now properly checks vendor DD status as specified in review request. All three scenarios working correctly: pending DD vendor → pending contract, completed DD vendor → approved contract, DD completion → contract status update. Fixed critical bugs in vendor creation and contract status persistence. The system correctly handles the complete DD workflow integration with contract management.
+        ✅ RESOURCES:
+        - List all resources: Retrieved existing resources successfully
+        - Create resource linked to contract/vendor: Successfully creates with RES-25-NNNN format
+        - Resource status: Active status for approved contracts and vendors
+        - Resource duration validation: Properly validates against contract end dates
+        - Resource expiry detection: Working correctly based on contract duration
+        
+        ✅ DUE DILIGENCE WORKFLOW (Critical):
+        - Complete DD workflow end-to-end: All scenarios working correctly
+        - Checklist items in vendor creation: Triggers 'pending_due_diligence' status
+        - DD questionnaire completion: Updates vendor to 'approved' and recalculates risk
+        - Contract status updates: Auto-updates contracts after DD completion
+        - Risk score recalculation: Working based on DD responses (17.0-22.0 range observed)
+        
+        ✅ DASHBOARD:
+        - Dashboard stats for all modules: Working correctly
+        - Vendor stats: Total: 67, Active: 54, High Risk: 4, Waiting DD: 6, Blacklisted: 1
+        - Tender stats: Total: 24, Active: 22, Waiting Proposals: 16
+        - Contract stats: Total: 29, Outsourcing: 13, NOC: 4, Expired: 3
+        - Invoice stats: Total: 11, Due: 11
+        - Resource stats: Total: 5, Active: 1, Offshore: 0, On-premises: 1
+        
+        ✅ DATA INTEGRITY:
+        - Auto-numbering for all entities: Vendor-25-NNNN, Tender-25-NNNN, Contract-25-NNNN, Invoice-25-NNNN, RES-25-NNNN
+        - MongoDB ObjectId handling: No serialization errors across all endpoints
+        - Date/datetime conversions: Proper ISO format handling with timezone awareness
+        
+        🎉 COMPREHENSIVE TEST RESULTS: 19/19 TESTS PASSED
+        
+        API BASE URL TESTED: https://sourcevia-mgmt.preview.emergentagent.com/api
+        AUTHENTICATION: procurement@test.com / password ✅
+        
+        SUMMARY: All major modules of the Sourcevia Procurement Management System are working correctly. The system demonstrates robust functionality across authentication, vendor management, tender management, contract management, purchase orders, invoices, resources, due diligence workflows, and dashboard analytics. Auto-numbering, search functionality, data integrity, and complex business logic (DD workflows, contract status management) are all functioning as designed. No critical issues found.
