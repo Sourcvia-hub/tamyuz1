@@ -634,7 +634,6 @@ const ContractDetail = () => {
             </div>
           </div>
         </div>
-        )}
       </div>
     </Layout>
   );
