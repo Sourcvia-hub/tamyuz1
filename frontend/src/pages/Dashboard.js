@@ -245,7 +245,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        {user?.role === 'procurement_officer' && (
+        {(user?.role === 'procurement_officer' || user?.role === 'requester' || user?.role === 'pd_officer') && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6 border-2 border-blue-200">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
