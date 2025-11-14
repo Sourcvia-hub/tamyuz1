@@ -72,6 +72,53 @@ const PurchaseOrders = () => {
     }
   };
 
+  const handleTenderSelect = async (tenderId) => {
+    if (!tenderId) {
+      setSelectedTender(null);
+      setFormData({ ...formData, tender_id: '', vendor_id: '' });
+      setSelectedVendor(null);
+      return;
+    }
+
+    const tender = tenders.find(t => t.id === tenderId);
+    setSelectedTender(tender);
+    
+    // Fetch tender evaluation to get #1 ranked vendor
+    try {
+      const evalResponse = await axios.post(`${API}/tenders/${tenderId}/evaluate`, {}, { withCredentials: true });
+      
+      // Find the proposal with highest score (rank 1)
+      const topProposal = evalResponse.data.proposals
+        .filter(p => p.evaluated)
+        .sort((a, b) => b.final_score - a.final_score)[0];
+      
+      if (topProposal) {
+        // Auto-select the winning vendor
+        const winningVendor = vendors.find(v => v.id === topProposal.vendor_id);
+        setSelectedVendor(winningVendor);
+        
+        setFormData({
+          ...formData,
+          tender_id: tenderId,
+          vendor_id: topProposal.vendor_id
+        });
+      } else {
+        setFormData({
+          ...formData,
+          tender_id: tenderId,
+          vendor_id: ''
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching tender evaluation:', error);
+      setFormData({
+        ...formData,
+        tender_id: tenderId,
+        vendor_id: ''
+      });
+    }
+  };
+
   const handleVendorSelect = (vendorId) => {
     const vendor = vendors.find(v => v.id === vendorId);
     setSelectedVendor(vendor);
