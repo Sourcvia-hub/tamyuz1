@@ -1889,6 +1889,27 @@ async def get_invoice(invoice_id: str, request: Request):
     
     return invoice
 
+@api_router.put("/invoices/{invoice_id}")
+async def update_invoice(invoice_id: str, invoice_data: dict, request: Request):
+    """Update invoice details"""
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    
+    invoice = await db.invoices.find_one({"id": invoice_id})
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    # Only allow updating certain fields
+    allowed_fields = ['amount', 'description', 'milestone_reference', 'documents']
+    update_data = {k: v for k, v in invoice_data.items() if k in allowed_fields}
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    await db.invoices.update_one(
+        {"id": invoice_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Invoice updated successfully"}
+
 @api_router.put("/invoices/{invoice_id}/verify")
 async def verify_invoice(invoice_id: str, request: Request):
     """Verify invoice (Procurement Officer)"""
