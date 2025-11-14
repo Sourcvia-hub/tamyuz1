@@ -1212,6 +1212,42 @@ async def approve_vendor_due_diligence(vendor_id: str, request: Request):
     
     return {"message": "Due diligence approved successfully. Vendor and contracts status updated."}
 
+@api_router.post("/vendors/{vendor_id}/blacklist")
+async def blacklist_vendor(vendor_id: str, request: Request):
+    """Blacklist a vendor - PD Officer or Admin only"""
+    user = await require_role(request, [UserRole.PD_OFFICER, UserRole.ADMIN, UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    
+    vendor = await db.vendors.find_one({"id": vendor_id})
+    if not vendor:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    
+    # Update vendor status to blacklisted
+    await db.vendors.update_one(
+        {"id": vendor_id},
+        {"$set": {
+            "status": VendorStatus.BLACKLISTED.value,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Terminate all active contracts for this vendor
+    await db.contracts.update_many(
+        {
+            "vendor_id": vendor_id,
+            "status": {"$in": [ContractStatus.ACTIVE.value, ContractStatus.APPROVED.value]}
+        },
+        {"$set": {
+            "terminated": True,
+            "terminated_by": user.id,
+            "terminated_at": datetime.now(timezone.utc).isoformat(),
+            "termination_reason": "Vendor blacklisted",
+            "status": ContractStatus.EXPIRED.value,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"message": "Vendor blacklisted and all active contracts terminated"}
+
 # ==================== TENDER ENDPOINTS ====================
 @api_router.post("/tenders")
 async def create_tender(tender: Tender, request: Request):
