@@ -21,11 +21,14 @@ const PurchaseOrders = () => {
     tender_id: '',
     vendor_id: '',
     items: [],
+    delivery_time: '',
     has_data_access: false,
     has_onsite_presence: false,
     has_implementation: false,
     duration_more_than_year: false,
   });
+  
+  const [selectedTender, setSelectedTender] = useState(null);
 
   const [currentItem, setCurrentItem] = useState({
     name: '',
