@@ -222,18 +222,29 @@ const Vendors = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {vendors.map((vendor) => (
-              <Link
+              <div
                 key={vendor.id}
-                to={`/vendors/${vendor.id}`}
                 className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">{vendor.name_english || vendor.company_name}</h3>
+                  <Link to={`/vendors/${vendor.id}`}>
+                    <h3 className="text-xl font-bold text-gray-900 hover:text-blue-600">{vendor.name_english || vendor.company_name}</h3>
+                  </Link>
                   {vendor.vendor_number && (
                     <p className="text-xs text-blue-600 font-medium mt-1">#{vendor.vendor_number}</p>
                   )}
                   <p className="text-sm text-gray-600 mt-1">{vendor.commercial_name || vendor.company_name}</p>
                   <p className="text-sm text-gray-600">{vendor.email || vendor.contact_email}</p>
+                  <div className="mt-2">
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadgeColor(vendor.status)}`}>
+                      {vendor.status.replace('_', ' ').toUpperCase()}
+                    </span>
+                    {vendor.vendor_type && (
+                      <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                        {vendor.vendor_type === 'international' ? '🌍 International' : '🏠 Local'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2 mb-4">
@@ -259,7 +270,7 @@ const Vendors = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t">
+                <div className="flex items-center justify-between pt-4 border-t mb-4">
                   <div>
                     <span className="text-sm text-gray-600">Risk Score: </span>
                     <span className="text-sm font-bold text-gray-900">{vendor.risk_score.toFixed(1)}</span>
@@ -268,7 +279,35 @@ const Vendors = () => {
                     {vendor.risk_category.toUpperCase()} RISK
                   </span>
                 </div>
-              </Link>
+
+                <div className="flex gap-2">
+                  <Link
+                    to={`/vendors/${vendor.id}`}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white text-center rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    View Details
+                  </Link>
+                  {vendor.dd_required && !vendor.dd_completed && (
+                    <Link
+                      to={`/vendors/${vendor.id}?action=dd`}
+                      className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                    >
+                      Complete DD
+                    </Link>
+                  )}
+                  {vendor.status !== 'blacklisted' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleBlacklistVendor(vendor.id);
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                    >
+                      Blacklist
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
