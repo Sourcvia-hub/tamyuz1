@@ -2038,6 +2038,115 @@ async def approve_invoice(invoice_id: str, request: Request):
     
     return {"message": "Invoice approved"}
 
+# ==================== PURCHASE ORDER ENDPOINTS ====================
+@api_router.post("/purchase-orders")
+async def create_purchase_order(po: PurchaseOrder, request: Request):
+    """Create new purchase order with risk assessment"""
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN, UserRole.REQUESTER])
+    
+    # Generate PO number
+    year = datetime.now(timezone.utc).strftime('%y')
+    count = await db.purchase_orders.count_documents({}) + 1
+    po.po_number = f"PO-{year}-{count:04d}"
+    
+    # Calculate total amount
+    po.total_amount = sum(item.total for item in po.items)
+    
+    # Check if amount > 1,000,000 SAR
+    po.amount_over_million = po.total_amount > 1000000
+    
+    # Determine if contract is required (any yes answer or amount > 1M)
+    po.requires_contract = (
+        po.has_data_access or 
+        po.has_onsite_presence or 
+        po.has_implementation or 
+        po.duration_more_than_year or 
+        po.amount_over_million
+    )
+    
+    # If no contract required, automatically issue the PO
+    if not po.requires_contract:
+        po.status = POStatus.ISSUED
+    
+    po.created_by = user.id
+    po_dict = po.model_dump()
+    
+    await db.purchase_orders.insert_one(po_dict)
+    
+    return {
+        "message": "Purchase order created successfully",
+        "po_number": po.po_number,
+        "requires_contract": po.requires_contract,
+        "status": po.status
+    }
+
+@api_router.get("/purchase-orders")
+async def get_purchase_orders(request: Request):
+    """Get all purchase orders"""
+    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    
+    pos = await db.purchase_orders.find({}, {"_id": 0}).to_list(1000)
+    return pos
+
+@api_router.get("/purchase-orders/{po_id}")
+async def get_purchase_order(po_id: str, request: Request):
+    """Get purchase order by ID"""
+    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    
+    po = await db.purchase_orders.find_one({"id": po_id}, {"_id": 0})
+    if not po:
+        raise HTTPException(status_code=404, detail="Purchase order not found")
+    
+    return po
+
+@api_router.post("/purchase-orders/{po_id}/convert-to-contract")
+async def convert_po_to_contract(po_id: str, contract_data: dict, request: Request):
+    """Convert PO to contract"""
+    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    
+    po = await db.purchase_orders.find_one({"id": po_id})
+    if not po:
+        raise HTTPException(status_code=404, detail="Purchase order not found")
+    
+    # Create contract from PO data
+    contract = Contract(
+        tender_id=po.get('tender_id'),
+        vendor_id=po['vendor_id'],
+        title=contract_data.get('title', f"Contract for PO {po['po_number']}"),
+        sow=contract_data.get('sow', 'Contract created from Purchase Order'),
+        sla=contract_data.get('sla', 'Standard SLA'),
+        value=po['total_amount'],
+        start_date=contract_data.get('start_date'),
+        end_date=contract_data.get('end_date'),
+        created_by=user.id,
+        status=ContractStatus.DRAFT
+    )
+    
+    # Generate contract number
+    year = datetime.now(timezone.utc).strftime('%y')
+    count = await db.contracts.count_documents({}) + 1
+    contract.contract_number = f"CNT-{year}-{count:04d}"
+    
+    contract_dict = contract.model_dump()
+    await db.contracts.insert_one(contract_dict)
+    
+    # Update PO status
+    await db.purchase_orders.update_one(
+        {"id": po_id},
+        {"$set": {
+            "status": POStatus.CONVERTED_TO_CONTRACT.value,
+            "converted_to_contract": True,
+            "contract_id": contract.id,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "message": "Purchase order converted to contract successfully",
+        "contract_id": contract.id,
+        "contract_number": contract.contract_number
+    }
+
 # ==================== DASHBOARD ENDPOINTS ====================
 @api_router.get("/dashboard/stats")
 async def get_dashboard_summary_stats(request: Request):
