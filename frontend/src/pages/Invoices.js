@@ -167,7 +167,7 @@ const Invoices = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {invoices.map((invoice) => (
-                  <tr key={invoice.id}>
+                  <tr key={invoice.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{invoice.invoice_number}</div>
                       <div className="text-sm text-gray-500">{invoice.description}</div>
@@ -184,10 +184,16 @@ const Invoices = () => {
                       {new Date(invoice.submitted_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                      <Link
+                        to={`/invoices/${invoice.id}`}
+                        className="text-blue-600 hover:text-blue-900 font-medium"
+                      >
+                        View Details
+                      </Link>
                       {invoice.status === 'pending' && user?.role === 'procurement_officer' && (
                         <button
                           onClick={() => handleVerify(invoice.id)}
-                          className="text-blue-600 hover:text-blue-900 font-medium"
+                          className="text-green-600 hover:text-green-900 font-medium"
                         >
                           Verify
                         </button>
