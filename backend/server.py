@@ -1013,37 +1013,20 @@ async def create_vendor(vendor: Vendor, request: Request):
     else:
         vendor.risk_category = RiskCategory.LOW
     
-    # Check if Due Diligence data is provided
-    dd_fields_present = any([
-        vendor.dd_bc_strategy_exists is not None,
-        vendor.dd_bc_certified_standard is not None,
-        vendor.dd_bc_it_continuity_plan is not None,
-        vendor.dd_fraud_internal_last_year is not None,
-        vendor.dd_op_criminal_cases_last_3years is not None,
+    # Check if Due Diligence checklist items are provided (from vendor creation)
+    checklist_items_present = any([
+        vendor.dd_checklist_supporting_documents is not None,
+        vendor.dd_checklist_related_party_checked is not None,
+        vendor.dd_checklist_sanction_screening is not None,
     ])
     
-    if dd_fields_present:
-        # Mark DD as completed if data is provided
-        vendor.dd_completed = True
-        vendor.dd_completed_by = user.id
-        vendor.dd_completed_at = datetime.now(timezone.utc)
-        vendor.dd_approved_by = user.id
-        vendor.dd_approved_at = datetime.now(timezone.utc)
-        
-        # Recalculate risk score with DD adjustments
-        dd_adjustment = calculate_dd_risk_adjustment(vendor.model_dump())
-        vendor.risk_score = max(0, vendor.risk_score + dd_adjustment)
-        
-        # Update risk category based on new score
-        if vendor.risk_score >= 50:
-            vendor.risk_category = RiskCategory.HIGH
-        elif vendor.risk_score >= 25:
-            vendor.risk_category = RiskCategory.MEDIUM
-        else:
-            vendor.risk_category = RiskCategory.LOW
-    
-    # Auto-approve vendor
-    vendor.status = VendorStatus.APPROVED
+    # If checklist items are present, vendor requires DD completion later
+    if checklist_items_present:
+        vendor.status = VendorStatus.PENDING_DUE_DILIGENCE
+        vendor.dd_completed = False  # Not completed yet, just flagged for DD
+    else:
+        # No checklist items, vendor is approved directly
+        vendor.status = VendorStatus.APPROVED
     vendor.created_by = user.id
     
     # Generate vendor number
