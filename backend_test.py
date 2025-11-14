@@ -1136,6 +1136,7 @@ class ProcurementTester:
         test_results = {
             "vendor_auto_numbering": self.test_vendor_auto_numbering(),
             "vendor_dd_integration": self.test_vendor_creation_with_dd_integration(),
+            "contract_vendor_dd_status_checking": self.test_contract_vendor_dd_status_checking(),
             "due_diligence_workflow": self.test_due_diligence_workflow(),
             "tender_auto_numbering": self.test_tender_auto_numbering(),
             "approved_tenders_endpoint": self.test_approved_tenders_endpoint(),
