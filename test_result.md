@@ -419,7 +419,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Vendor-based Contract Filtering in Invoice Creation"
+    - "Vendor Field Editability in Invoice Creation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
