@@ -121,46 +121,6 @@ const Tenders = () => {
           )}
         </div>
 
-        {/* Dashboard Stats */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span>📊</span>
-            Tender Statistics
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-blue-700">{tenders.length}</p>
-                <p className="text-sm text-blue-600 font-medium mt-1">Total</p>
-              </div>
-            </div>
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-green-700">{tenders.filter(t => t.status === 'open').length}</p>
-                <p className="text-sm text-green-600 font-medium mt-1">Open</p>
-              </div>
-            </div>
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-gray-700">{tenders.filter(t => t.status === 'closed').length}</p>
-                <p className="text-sm text-gray-600 font-medium mt-1">Closed</p>
-              </div>
-            </div>
-            <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-purple-700">{tenders.filter(t => t.status === 'evaluated').length}</p>
-                <p className="text-sm text-purple-600 font-medium mt-1">Evaluated</p>
-              </div>
-            </div>
-            <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-orange-700">{tenders.filter(t => t.status === 'approved').length}</p>
-                <p className="text-sm text-orange-600 font-medium mt-1">Approved</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Search Bar */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <input
