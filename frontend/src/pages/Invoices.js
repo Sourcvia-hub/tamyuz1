@@ -15,6 +15,7 @@ const Invoices = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [contracts, setContracts] = useState([]);
   const [vendors, setVendors] = useState([]);
+  const [duplicateError, setDuplicateError] = useState('');
 
   const [formData, setFormData] = useState({
     invoice_number: '',
