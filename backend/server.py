@@ -2011,7 +2011,7 @@ async def get_expiring_contracts(request: Request, days: int = 30):
 # ==================== INVOICE ENDPOINTS ====================
 @api_router.post("/invoices")
 async def submit_invoice(invoice: Invoice, request: Request):
-    """Submit invoice - Auto-approved with generated number"""
+    """Submit invoice with duplicate validation"""
     await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
     
     # Verify contract exists
@@ -2019,9 +2019,23 @@ async def submit_invoice(invoice: Invoice, request: Request):
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
     
-    # Auto-approve and generate invoice number
+    # Check for duplicate invoice (same invoice_number and vendor_id)
+    if invoice.invoice_number:
+        existing_invoice = await db.invoices.find_one({
+            "invoice_number": invoice.invoice_number,
+            "vendor_id": invoice.vendor_id
+        })
+        if existing_invoice:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Duplicate invoice detected! Invoice number '{invoice.invoice_number}' already exists for this vendor."
+            )
+    else:
+        # Auto-generate invoice number if not provided
+        invoice.invoice_number = await generate_number("Invoice")
+    
+    # Auto-approve
     invoice.status = InvoiceStatus.APPROVED
-    invoice.invoice_number = await generate_number("Invoice")
     
     # vendor_id should be provided in the invoice object
     invoice_doc = invoice.model_dump()
