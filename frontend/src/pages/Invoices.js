@@ -63,6 +63,19 @@ const Invoices = () => {
     }
   };
 
+  const handleVendorSelect = (vendorId) => {
+    // Filter contracts by selected vendor
+    const vendorContracts = contracts.filter(c => c.vendor_id === vendorId);
+    setFilteredContracts(vendorContracts);
+    
+    // Update form data and clear contract if previously selected contract doesn't belong to this vendor
+    setFormData(prev => ({
+      ...prev,
+      vendor_id: vendorId,
+      contract_id: vendorContracts.find(c => c.id === prev.contract_id) ? prev.contract_id : ''
+    }));
+  };
+
   const handleContractSelect = (contractId) => {
     const selectedContract = contracts.find(c => c.id === contractId);
     if (selectedContract) {
@@ -71,6 +84,9 @@ const Invoices = () => {
         contract_id: contractId,
         vendor_id: selectedContract.vendor_id // Auto-populate vendor from contract
       });
+      // Update filtered contracts to show only contracts for this vendor
+      const vendorContracts = contracts.filter(c => c.vendor_id === selectedContract.vendor_id);
+      setFilteredContracts(vendorContracts);
     }
   };
 
