@@ -435,6 +435,18 @@ test_plan:
           agent: "testing"
           comment: "✅ TESTED: Purchase Orders section successfully added to Dashboard. VERIFIED: 1) Login successful with procurement@test.com/password, 2) Purchase Orders section appears in correct order (after Resources, before Quick Actions), 3) Section header shows '📝 Purchase Orders' with correct emoji, 4) All 4 stat cards present and functional: Total POs (7, blue card), Issued (1, green card), Converted (0, purple card), Total Value ($750,002, orange card with $ formatting), 5) All stat cards are clickable and navigate to /purchase-orders page, 6) Backend integration working - displays real data from API, 7) Color coding correct (blue, green, purple, orange), 8) Screenshots captured showing complete dashboard with PO section. All requirements from review request met successfully."
 
+  - task: "Dropdown Descriptive Names Implementation"
+    implemented: true
+    working: false
+    file: "frontend/src/pages/Contracts.js, frontend/src/pages/Invoices.js, frontend/src/pages/Resources.js, frontend/src/pages/PurchaseOrders.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "⚠️ TESTED: Dropdown descriptive names PARTIALLY implemented with inconsistencies. VERIFIED FORMATS: Contract Creation - Tender dropdown ✅ correct 'Tender-25-XXXX - Title', Vendor dropdown ⚠️ mixed (some with numbers, some without). Invoice Creation - Contract dropdown ⚠️ mixed formats (legacy 'CNT-001' and new 'Contract-25-XXXX'). Resource Creation - Contract dropdown ✅ correct 'Contract-25-XXXX - Title (status)'. Purchase Orders - Tender dropdown ✅ correct, Vendor dropdown ⚠️ mixed formats. CRITICAL ISSUES: 1) Inconsistent formatting across modules, 2) Legacy data mixed with auto-numbered data, 3) No search functionality in any dropdowns (HTML select elements not searchable). RECOMMENDATIONS: Standardize all dropdowns to show auto-numbers, update legacy data, implement searchable dropdown components for better UX."
+
 agent_communication:
     - agent: "main"
       message: |
