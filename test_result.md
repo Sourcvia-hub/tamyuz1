@@ -448,6 +448,18 @@ test_plan:
           agent: "testing"
           comment: "⚠️ TESTED: Dropdown descriptive names PARTIALLY implemented with inconsistencies. VERIFIED FORMATS: Contract Creation - Tender dropdown ✅ correct 'Tender-25-XXXX - Title', Vendor dropdown ⚠️ mixed (some with numbers, some without). Invoice Creation - Contract dropdown ⚠️ mixed formats (legacy 'CNT-001' and new 'Contract-25-XXXX'). Resource Creation - Contract dropdown ✅ correct 'Contract-25-XXXX - Title (status)'. Purchase Orders - Tender dropdown ✅ correct, Vendor dropdown ⚠️ mixed formats. CRITICAL ISSUES: 1) Inconsistent formatting across modules, 2) Legacy data mixed with auto-numbered data, 3) No search functionality in any dropdowns (HTML select elements not searchable). RECOMMENDATIONS: Standardize all dropdowns to show auto-numbers, update legacy data, implement searchable dropdown components for better UX."
 
+  - task: "Vendors Endpoint Data Verification"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Vendors endpoint verification completed successfully. VERIFIED: 1) Login successful with procurement@test.com/password, 2) GET /api/vendors?status=approved returns 200 status, 3) Retrieved 67 approved vendors with data, 4) Field presence: vendor_number (95.5% - 64/67 vendors), name_english (100%), commercial_name (100%), risk_category (100%), 5) Auto-numbering system working correctly with 64 vendors having Vendor-25-NNNN format, 6) First 3 vendors displayed: Vendor-25-0001 (Tech Solutions Ltd, medium risk), Vendor-25-0002 (Digital Innovations Co, medium risk), Vendor-25-0003 (A, high risk). FINDINGS: Most vendors have vendor_number field (95.5%), with only 3 legacy vendors missing this field. All other required fields (name_english, commercial_name, risk_category) are present in 100% of vendors. The vendors endpoint is returning all necessary fields for dropdown display as requested."
+
 agent_communication:
     - agent: "main"
       message: |
