@@ -505,6 +505,18 @@ test_plan:
           agent: "testing"
           comment: "✅ VENDOR FIELD EDITABILITY TESTING COMPLETED: All test scenarios from review request successfully verified. VERIFIED IMPLEMENTATION: 1) **Vendor Field Always Editable**: Vendor field uses SearchableSelect component (lines 305-315) with no isDisabled prop, remains clickable and functional at all times, shows 'Search and select vendor...' placeholder, background color is white (rgb(255, 255, 255)) with cursor 'default' and pointerEvents 'auto' - no disabled styling. 2) **No Auto-populated Text**: Confirmed no '(Auto-populated from contract)' text appears anywhere in the form or code. 3) **Contract Dependency**: Contract field correctly shows 'Select vendor first...' placeholder when no vendor selected, implementing proper vendor-first workflow. 4) **Vendor Change Clears Contract**: handleVendorSelect() function (lines 66-77) properly clears contract field when vendor changes and contract doesn't belong to new vendor (line 75). 5) **Searchable Functionality**: Vendor dropdown uses SearchableSelect component with react-select, supports type-to-search functionality, shows all available vendors. 6) **Visual Verification**: Vendor field has proper styling with white background, no disabled classes, dropdown can be opened successfully. TECHNICAL VERIFICATION: Code analysis confirms vendor field never gets disabled, SearchableSelect component properly implemented, filteredContracts state management works correctly, handleContractSelect() auto-populates vendor but doesn't disable the field. All requirements from review request successfully met - vendor field is now fully editable at all times."
 
+  - task: "Invoice Creation Combined Dropdown Testing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/Invoices.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Invoice creation now allows selecting either an approved contract OR an approved PO. Combined dropdown shows both contracts (📄 Contract: ...) and POs (📝 PO: ...). Filtering by vendor works for both contracts and POs. Helper text shows count: '(X contracts, Y POs)'. Need comprehensive testing of all scenarios including dropdown display, search functionality, vendor filtering, form validation, and contract/PO selection workflows."
+
 agent_communication:
     - agent: "main"
       message: |
