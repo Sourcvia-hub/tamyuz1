@@ -375,7 +375,7 @@ const PurchaseOrders = () => {
                   <option value="">Select a vendor</option>
                   {vendors.map((vendor) => (
                     <option key={vendor.id} value={vendor.id}>
-                      {vendor.name_english || vendor.commercial_name} ({vendor.risk_category} risk)
+                      {vendor.vendor_number ? `${vendor.vendor_number} - ` : ''}{vendor.name_english || vendor.commercial_name} ({vendor.risk_category} risk)
                     </option>
                   ))}
                 </select>
