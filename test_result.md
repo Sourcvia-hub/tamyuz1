@@ -419,7 +419,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Dropdown Descriptive Names Implementation"
+    - "Searchable Dropdown Functionality in Purchase Orders"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
