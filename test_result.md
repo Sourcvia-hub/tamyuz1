@@ -478,6 +478,21 @@ test_plan:
           agent: "testing"
           comment: "✅ COMPREHENSIVE TESTING COMPLETED: Searchable dropdown functionality successfully implemented across ALL 4 modules as requested. VERIFIED IMPLEMENTATION: 1) **Contracts Page** - Tender dropdown uses SearchableSelect component with proper format 'Tender-25-XXXX - Title', auto-populates vendor on selection, 2) **Invoices Page** - Contract dropdown uses SearchableSelect with format 'Contract-25-XXXX - Title', auto-populates vendor field when selected, 3) **Resources Page** - Contract dropdown uses SearchableSelect with format 'Contract-25-XXXX - Title (status)', auto-populates vendor on selection, 4) **Purchase Orders Page** - Both Tender and Vendor dropdowns use SearchableSelect, Tender shows 'Tender-25-XXXX - Title' format, Vendor shows 'Vendor-25-XXXX - Name (risk_category risk)' format. VERIFIED FEATURES: ✅ Type-to-search functionality works across all dropdowns, ✅ Filters results as you type with case-insensitive search, ✅ Clear button (X) works on all dropdowns, ✅ Blue focus ring on active dropdown (proper CSS focus states), ✅ 'No options found' displays when no matches, ✅ Dropdown styling matches existing design (8px border radius, 42px min height), ✅ Proper z-index handling and smooth animations, ✅ SearchableSelect component uses react-select with custom styling. All requirements from review request successfully met across all modules."
 
+  - task: "Invoice Creation with Searchable Vendor Dropdown and Duplicate Validation"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Invoices.js, backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added searchable dropdown for vendor selection in invoice creation and implemented duplicate validation: if invoice_number + vendor_id match an existing invoice, show error and prevent submission. Error message displays: 'Duplicate invoice detected! Invoice number 'XXX' already exists for this vendor.'"
+        - working: true
+          agent: "testing"
+          comment: "✅ COMPREHENSIVE TESTING COMPLETED: Invoice creation with searchable vendor dropdown and duplicate validation working perfectly. VERIFIED FEATURES: 1) **Searchable Vendor Dropdown** - Uses SearchableSelect component with react-select, displays correct format 'Vendor-25-XXXX - Name' (e.g., 'Vendor-25-0001 - Tech Solutions Ltd'), type-to-search functionality works (tested with 'Tech' filter showing 11 matching options), proper selection and form integration. 2) **Duplicate Invoice Validation** - Backend validation implemented correctly, when submitting duplicate invoice number 'aaa' with same vendor, shows proper error message '⚠️ Duplicate Invoice Error - Duplicate invoice detected! Invoice number 'aaa' already exists for this vendor. Please use a different invoice number.', modal remains open after error (correct behavior), form does NOT submit when duplicate detected. 3) **Different Invoice Numbers Work** - Unique invoice numbers create successfully, modal closes after successful submission. 4) **Error Clearing** - Error messages clear when modal is closed and reopened. 5) **Backend Integration** - Fixed backend duplicate validation logic to check invoice_number + vendor_id combination, returns HTTP 400 with proper error message for duplicates, allows user-provided invoice numbers while maintaining auto-generation fallback. All test scenarios from review request completed successfully."
+
 agent_communication:
     - agent: "main"
       message: |
