@@ -998,6 +998,54 @@ agent_communication:
           * Tenders: Active (42), Waiting Proposals (31), Waiting Evaluation (0), Approved (0), Total (44)
           * Contracts: Active (0), Outsourcing (13), Cloud (0), NOC (4), Expired (3), Total (54)
           * Invoices: All Invoices, Due Invoices sections present
+    - agent: "testing"
+      message: |
+        VENDOR FIELD EDITABILITY TESTING COMPLETED - All requirements from review request successfully verified:
+        
+        ✅ **TEST RESULTS SUMMARY:**
+        
+        **1. Vendor Field Always Editable:**
+        - ✅ Vendor field uses SearchableSelect component with no isDisabled prop
+        - ✅ Field remains clickable and functional at all times
+        - ✅ Shows 'Search and select vendor...' placeholder (not disabled)
+        - ✅ Background color: white (rgb(255, 255, 255)) - no gray disabled styling
+        - ✅ Cursor: 'default', pointerEvents: 'auto' - fully interactive
+        
+        **2. No Auto-populated Text:**
+        - ✅ Confirmed no '(Auto-populated from contract)' text appears anywhere
+        - ✅ Visual inspection and code review both confirm absence of this text
+        
+        **3. Contract Selection Behavior:**
+        - ✅ Contract field shows 'Select vendor first...' when no vendor selected
+        - ✅ Proper vendor-first workflow implemented
+        - ✅ Contract selection auto-populates vendor but does NOT disable vendor field
+        
+        **4. Vendor Change Clears Contract:**
+        - ✅ handleVendorSelect() function properly clears invalid contract selections
+        - ✅ filteredContracts state updates to show only new vendor's contracts
+        - ✅ Helper text shows correct contract count for selected vendor
+        
+        **5. Searchable Functionality:**
+        - ✅ Vendor dropdown uses SearchableSelect with react-select
+        - ✅ Type-to-search functionality available
+        - ✅ Shows all available vendors in dropdown
+        
+        **6. Visual Verification:**
+        - ✅ No disabled styling classes on vendor dropdown
+        - ✅ Dropdown can be opened successfully
+        - ✅ Proper focus states and interaction behavior
+        
+        **TECHNICAL IMPLEMENTATION VERIFIED:**
+        - Code analysis of /app/frontend/src/pages/Invoices.js confirms all requirements met
+        - SearchableSelect component properly implemented for both vendor and contract fields
+        - handleVendorSelect() and handleContractSelect() functions work correctly
+        - No isDisabled prop set on vendor SearchableSelect component
+        - Proper state management for filteredContracts and form data
+        
+        **APP URL TESTED:** https://sourcevia-mgmt.preview.emergentagent.com
+        **CREDENTIALS:** procurement@test.com / password ✅
+        
+        **CONCLUSION:** The vendor field is now fully editable at all times as requested. The fix successfully removed the previous blocking behavior where vendor field was disabled when contract was selected. All test scenarios from the review request have been verified and are working correctly.
           * Resources: Total, Active, Offshore, On Premises sections present
         - Quick Actions section visible for procurement_officer role
         - Clickable stats navigation working (tested Outsourcing filter → /contracts?filter=outsourcing)
