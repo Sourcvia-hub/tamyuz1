@@ -300,7 +300,7 @@ const Invoices = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Vendor * {formData.contract_id && <span className="text-xs text-gray-500">(Auto-populated from contract)</span>}
+                  Vendor *
                 </label>
                 <SearchableSelect
                   options={vendors.map(vendor => ({
@@ -310,7 +310,6 @@ const Invoices = () => {
                   value={formData.vendor_id}
                   onChange={(value) => handleVendorSelect(value)}
                   placeholder="Search and select vendor..."
-                  isDisabled={!!formData.contract_id}
                   required={true}
                   isClearable={false}
                 />
