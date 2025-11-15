@@ -358,19 +358,25 @@ const Invoices = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contract * {formData.vendor_id && !formData.contract_id && <span className="text-xs text-gray-500">({filteredContracts.length} contracts for selected vendor)</span>}
+                  Contract or PO * {formData.vendor_id && !formData.contract_id && !formData.po_id && <span className="text-xs text-gray-500">({filteredContracts.length} contracts, {filteredPOs.length} POs)</span>}
                 </label>
                 <SearchableSelect
-                  options={(formData.vendor_id ? filteredContracts : contracts).map(contract => ({
-                    value: contract.id,
-                    label: `${contract.contract_number} - ${contract.title}`
-                  }))}
-                  value={formData.contract_id}
-                  onChange={(value) => handleContractSelect(value)}
-                  placeholder={formData.vendor_id ? "Search and select contract..." : "Select vendor first..."}
+                  options={[
+                    ...(formData.vendor_id ? filteredContracts : contracts).map(contract => ({
+                      value: `contract-${contract.id}`,
+                      label: `📄 Contract: ${contract.contract_number} - ${contract.title}`
+                    })),
+                    ...(formData.vendor_id ? filteredPOs : purchaseOrders).map(po => ({
+                      value: `po-${po.id}`,
+                      label: `📝 PO: ${po.po_number} - ${po.vendor_name || 'Purchase Order'}`
+                    }))
+                  ]}
+                  value={formData.contract_id ? `contract-${formData.contract_id}` : formData.po_id ? `po-${formData.po_id}` : ''}
+                  onChange={(value) => handleContractOrPOSelect(value)}
+                  placeholder={formData.vendor_id ? "Search and select contract or PO..." : "Select vendor first..."}
                   required={true}
                   isClearable={false}
-                  isDisabled={!formData.vendor_id && !formData.contract_id}
+                  isDisabled={!formData.vendor_id && !formData.contract_id && !formData.po_id}
                 />
               </div>
               <div>
