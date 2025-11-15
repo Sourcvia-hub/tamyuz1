@@ -95,17 +95,40 @@ const Invoices = () => {
     }));
   };
 
-  const handleContractSelect = (contractId) => {
-    const selectedContract = contracts.find(c => c.id === contractId);
-    if (selectedContract) {
-      setFormData({
-        ...formData,
-        contract_id: contractId,
-        vendor_id: selectedContract.vendor_id // Auto-populate vendor from contract
-      });
-      // Update filtered contracts to show only contracts for this vendor
-      const vendorContracts = contracts.filter(c => c.vendor_id === selectedContract.vendor_id);
-      setFilteredContracts(vendorContracts);
+  const handleContractOrPOSelect = (value) => {
+    // Check if it's a contract or PO (format: "contract-{id}" or "po-{id}")
+    const [type, id] = value.split('-');
+    
+    if (type === 'contract') {
+      const selectedContract = contracts.find(c => c.id === id);
+      if (selectedContract) {
+        setFormData({
+          ...formData,
+          contract_id: id,
+          po_id: '',
+          vendor_id: selectedContract.vendor_id
+        });
+        // Update filtered lists
+        const vendorContracts = contracts.filter(c => c.vendor_id === selectedContract.vendor_id);
+        const vendorPOs = purchaseOrders.filter(po => po.vendor_id === selectedContract.vendor_id);
+        setFilteredContracts(vendorContracts);
+        setFilteredPOs(vendorPOs);
+      }
+    } else if (type === 'po') {
+      const selectedPO = purchaseOrders.find(po => po.id === id);
+      if (selectedPO) {
+        setFormData({
+          ...formData,
+          po_id: id,
+          contract_id: '',
+          vendor_id: selectedPO.vendor_id
+        });
+        // Update filtered lists
+        const vendorContracts = contracts.filter(c => c.vendor_id === selectedPO.vendor_id);
+        const vendorPOs = purchaseOrders.filter(po => po.vendor_id === selectedPO.vendor_id);
+        setFilteredContracts(vendorContracts);
+        setFilteredPOs(vendorPOs);
+      }
     }
   };
 
