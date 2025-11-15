@@ -379,7 +379,8 @@ const PurchaseOrders = () => {
               </div>
             ))}
           </div>
-        )}
+        );
+        })()}
       </div>
 
       {/* Create PO Modal */}
