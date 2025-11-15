@@ -3,6 +3,7 @@ import axios from 'axios';
 import Layout from '../components/Layout';
 import { useAuth } from '../App';
 import { Link } from 'react-router-dom';
+import SearchableSelect from '../components/SearchableSelect';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
