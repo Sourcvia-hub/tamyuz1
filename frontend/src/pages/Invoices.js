@@ -162,11 +162,14 @@ const Invoices = () => {
       setFormData({
         invoice_number: '',
         contract_id: '',
+        po_id: '',
         vendor_id: '',
         amount: '',
         description: '',
       });
       setDuplicateError('');
+      setFilteredContracts([]);
+      setFilteredPOs([]);
       fetchInvoices();
     } catch (error) {
       console.error('Error submitting invoice:', error);
