@@ -156,7 +156,10 @@ const Invoices = () => {
           </div>
           {user?.role === 'procurement_officer' && (
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={() => {
+                setShowCreateModal(true);
+                setDuplicateError(''); // Clear error when opening modal
+              }}
               data-testid="submit-invoice-btn"
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
