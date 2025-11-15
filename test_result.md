@@ -460,6 +460,18 @@ test_plan:
           agent: "testing"
           comment: "✅ TESTED: Vendors endpoint verification completed successfully. VERIFIED: 1) Login successful with procurement@test.com/password, 2) GET /api/vendors?status=approved returns 200 status, 3) Retrieved 67 approved vendors with data, 4) Field presence: vendor_number (95.5% - 64/67 vendors), name_english (100%), commercial_name (100%), risk_category (100%), 5) Auto-numbering system working correctly with 64 vendors having Vendor-25-NNNN format, 6) First 3 vendors displayed: Vendor-25-0001 (Tech Solutions Ltd, medium risk), Vendor-25-0002 (Digital Innovations Co, medium risk), Vendor-25-0003 (A, high risk). FINDINGS: Most vendors have vendor_number field (95.5%), with only 3 legacy vendors missing this field. All other required fields (name_english, commercial_name, risk_category) are present in 100% of vendors. The vendors endpoint is returning all necessary fields for dropdown display as requested."
 
+  - task: "Searchable Dropdown Functionality in Purchase Orders"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/PurchaseOrders.js, frontend/src/components/SearchableSelect.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented SearchableSelect component using react-select with type-to-search functionality. Replaced standard HTML select elements with searchable dropdowns for both Tender and Vendor selection in Purchase Orders page. Added proper styling, focus states, and search filtering capabilities."
+
 agent_communication:
     - agent: "main"
       message: |
