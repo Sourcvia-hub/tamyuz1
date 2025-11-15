@@ -250,20 +250,96 @@ const PurchaseOrders = () => {
           </button>
         </div>
 
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'all'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            All ({pos.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('issued')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'issued'
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Issued ({pos.filter(p => p.status === 'issued').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('converted')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'converted'
+                ? 'bg-purple-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Converted ({pos.filter(p => p.status === 'converted_to_contract').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('requires_contract')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'requires_contract'
+                ? 'bg-orange-600 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Requires Contract ({pos.filter(p => p.requires_contract && !p.converted_to_contract).length})
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <input
+            type="text"
+            placeholder="Search POs by number, vendor, or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
         {/* PO List */}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : pos.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <span className="text-6xl mb-4 block">📝</span>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No purchase orders found</h3>
-            <p className="text-gray-600">Create your first purchase order to get started.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {pos.map((po) => (
+        ) : (() => {
+          const filteredPOs = pos.filter(po => {
+            // Apply filter
+            if (activeFilter === 'issued' && po.status !== 'issued') return false;
+            if (activeFilter === 'converted' && po.status !== 'converted_to_contract') return false;
+            if (activeFilter === 'requires_contract' && (!po.requires_contract || po.converted_to_contract)) return false;
+            
+            // Apply search
+            if (searchQuery) {
+              const query = searchQuery.toLowerCase();
+              return (
+                po.po_number?.toLowerCase().includes(query) ||
+                po.vendor_name?.toLowerCase().includes(query) ||
+                po.items?.some(item => item.name?.toLowerCase().includes(query))
+              );
+            }
+            return true;
+          });
+
+          return filteredPOs.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <span className="text-6xl mb-4 block">📝</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No purchase orders found</h3>
+              <p className="text-gray-600">
+                {searchQuery ? 'Try adjusting your search criteria.' : 'Create your first purchase order to get started.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {filteredPOs.map((po) => (
               <div key={po.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
                 <div className="flex justify-between items-start mb-4">
                   <div>
