@@ -17,6 +17,8 @@ const PurchaseOrders = () => {
   const [vendors, setVendors] = useState([]);
   const [tenders, setTenders] = useState([]);
   const [selectedVendor, setSelectedVendor] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [formData, setFormData] = useState({
     tender_id: '',
