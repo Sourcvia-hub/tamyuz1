@@ -15,6 +15,8 @@ const Resources = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [contracts, setContracts] = useState([]);
   const [selectedContract, setSelectedContract] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [formData, setFormData] = useState({
     contract_id: '',
