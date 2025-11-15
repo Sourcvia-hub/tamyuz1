@@ -12,6 +12,7 @@ const Vendors = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [formData, setFormData] = useState({
     // Company Information
     vendor_type: 'local',
