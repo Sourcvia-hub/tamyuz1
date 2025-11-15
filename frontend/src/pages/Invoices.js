@@ -77,15 +77,21 @@ const Invoices = () => {
   };
 
   const handleVendorSelect = (vendorId) => {
-    // Filter contracts by selected vendor
+    // Filter contracts and POs by selected vendor
     const vendorContracts = contracts.filter(c => c.vendor_id === vendorId);
+    const vendorPOs = purchaseOrders.filter(po => po.vendor_id === vendorId);
     setFilteredContracts(vendorContracts);
+    setFilteredPOs(vendorPOs);
     
-    // Update form data and clear contract if previously selected contract doesn't belong to this vendor
+    // Clear contract/PO if they don't belong to this vendor
+    const contractStillValid = vendorContracts.find(c => c.id === formData.contract_id);
+    const poStillValid = vendorPOs.find(po => po.id === formData.po_id);
+    
     setFormData(prev => ({
       ...prev,
       vendor_id: vendorId,
-      contract_id: vendorContracts.find(c => c.id === prev.contract_id) ? prev.contract_id : ''
+      contract_id: contractStillValid ? prev.contract_id : '',
+      po_id: poStillValid ? prev.po_id : ''
     }));
   };
 
