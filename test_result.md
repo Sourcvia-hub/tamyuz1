@@ -419,7 +419,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Vendor Field Editability in Invoice Creation"
+    - "Invoice Creation Combined Dropdown Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
