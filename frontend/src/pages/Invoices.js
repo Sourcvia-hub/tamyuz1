@@ -176,6 +176,7 @@ const Invoices = () => {
               onClick={() => {
                 setShowCreateModal(true);
                 setDuplicateError(''); // Clear error when opening modal
+                setFilteredContracts([]); // Reset filtered contracts
               }}
               data-testid="submit-invoice-btn"
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
