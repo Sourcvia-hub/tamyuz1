@@ -16,6 +16,7 @@ const Invoices = () => {
   const [contracts, setContracts] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [duplicateError, setDuplicateError] = useState('');
+  const [filteredContracts, setFilteredContracts] = useState([]);
 
   const [formData, setFormData] = useState({
     invoice_number: '',
