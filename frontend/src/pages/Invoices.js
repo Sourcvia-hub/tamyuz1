@@ -14,13 +14,16 @@ const Invoices = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [contracts, setContracts] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [duplicateError, setDuplicateError] = useState('');
   const [filteredContracts, setFilteredContracts] = useState([]);
+  const [filteredPOs, setFilteredPOs] = useState([]);
 
   const [formData, setFormData] = useState({
     invoice_number: '',
     contract_id: '',
+    po_id: '',
     vendor_id: '',
     amount: '',
     description: '',
