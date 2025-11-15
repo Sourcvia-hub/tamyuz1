@@ -587,6 +587,65 @@ agent_communication:
 
     - agent: "testing"
       message: |
+        INVOICE CREATION COMBINED DROPDOWN TESTING COMPLETED - All requirements from review request successfully verified:
+        
+        ✅ **COMPREHENSIVE TEST RESULTS:**
+        
+        **TEST CONTEXT VERIFIED:**
+        - ✅ **APP URL:** https://sourcevia-mgmt.preview.emergentagent.com
+        - ✅ **CREDENTIALS:** procurement@test.com / password
+        - ✅ **NAVIGATION:** Successfully accessed /invoices page and Submit Invoice modal
+        
+        **1. Combined Dropdown Display:**
+        - ✅ **Dropdown Integration:** Contract or PO dropdown shows both contracts and POs in single dropdown
+        - ✅ **Contract Format:** Displays with 📄 icon: "📄 Contract: Contract-25-XXXX - Title"
+        - ✅ **PO Format:** Displays with 📝 icon: "📝 PO: PO-25-XXXX - Purchase Order"
+        - ✅ **Helper Text:** Shows count in format "(X contracts, Y POs)" (e.g., "(1 contracts, 2 POs)")
+        - ✅ **Visual Verification:** Screenshots confirm proper icon display and formatting
+        
+        **2. Search Functionality:**
+        - ✅ **Type-to-Search:** SearchableSelect component with react-select enables filtering
+        - ✅ **Contract Search:** Typing "Contract" filters to show only contract options
+        - ✅ **PO Search:** Typing "PO" filters to show only PO options
+        - ✅ **Number Search:** Can search by contract/PO numbers (e.g., "25" shows numbered items)
+        - ✅ **Clear Function:** Search can be cleared to show all options
+        
+        **3. Vendor Filtering:**
+        - ✅ **Vendor Selection First:** Selecting vendor filters dropdown to show only that vendor's contracts and POs
+        - ✅ **Dynamic Counts:** Helper text updates to show correct counts for selected vendor
+        - ✅ **Multiple Vendor Testing:** Tested vendors with different combinations:
+          * Vendor "test": (1 contracts, 0 POs)
+          * Vendor "Adwaa": (1 contracts, 2 POs)
+        - ✅ **Auto-population:** Contract/PO selection auto-populates vendor field
+        
+        **4. Contract Selection:**
+        - ✅ **Contract Selection:** Successfully selected contracts with proper format display
+        - ✅ **Vendor Auto-population:** Vendor field auto-populates when contract selected
+        - ✅ **Filtered Display:** After selection, dropdown shows only selected vendor's options
+        - ✅ **Form Integration:** Selected contract properly integrates with form state
+        
+        **5. PO Selection:**
+        - ✅ **PO Selection:** Successfully selected PO "📝 PO: PO-25-0008 - Purchase Order"
+        - ✅ **Vendor Auto-population:** Vendor field auto-populates when PO selected
+        - ✅ **PO Format Verification:** POs display with correct 📝 icon and format
+        - ✅ **Form Integration:** Selected PO properly integrates with form state
+        
+        **6. Form Validation:**
+        - ✅ **Required Field Validation:** Form prevents submission without contract or PO selection
+        - ✅ **Complete Form Testing:** All required fields (invoice number, vendor, contract/PO, amount, description) validated
+        - ✅ **Error Prevention:** Modal remains open when validation fails
+        
+        **TECHNICAL IMPLEMENTATION VERIFIED:**
+        - ✅ **SearchableSelect Component:** Uses react-select with proper styling and functionality
+        - ✅ **Combined Options Array:** Correctly merges contracts and POs with prefixes ('contract-{id}', 'po-{id}')
+        - ✅ **handleContractOrPOSelect():** Function correctly parses selection type and updates form state
+        - ✅ **Filtering Logic:** filteredContracts and filteredPOs state management works correctly
+        - ✅ **Auto-population Logic:** Bidirectional vendor selection/auto-population working perfectly
+        
+        **SUMMARY:** All test scenarios from the review request have been successfully verified. The combined dropdown functionality is working perfectly with proper icons, formatting, search capabilities, vendor filtering, and form validation. Both contracts and POs display correctly in the unified dropdown with appropriate visual indicators and helper text.
+
+    - agent: "testing"
+      message: |
         VENDOR-BASED CONTRACT FILTERING IN INVOICE CREATION TESTING COMPLETED:
         
         ✅ **COMPREHENSIVE TEST RESULTS - ALL REQUIREMENTS MET:**
