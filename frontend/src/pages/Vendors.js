@@ -198,6 +198,50 @@ const Vendors = () => {
           </button>
         </div>
 
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            All ({vendors.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('approved')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'approved' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Approved ({vendors.filter(v => v.status === 'approved').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('pending')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Pending ({vendors.filter(v => v.status === 'pending' || v.status === 'pending_due_diligence').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('high_risk')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'high_risk' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            High Risk ({vendors.filter(v => v.risk_category === 'high').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('blacklisted')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'blacklisted' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Blacklisted ({vendors.filter(v => v.status === 'blacklisted').length})
+          </button>
+        </div>
+
         {/* Search Bar */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <input
@@ -214,10 +258,30 @@ const Vendors = () => {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : vendors.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <span className="text-6xl mb-4 block">🏢</span>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No vendors found</h3>
+        ) : (() => {
+          const filteredVendors = vendors.filter(vendor => {
+            // Apply filter
+            if (activeFilter === 'approved' && vendor.status !== 'approved') return false;
+            if (activeFilter === 'pending' && vendor.status !== 'pending' && vendor.status !== 'pending_due_diligence') return false;
+            if (activeFilter === 'high_risk' && vendor.risk_category !== 'high') return false;
+            if (activeFilter === 'blacklisted' && vendor.status !== 'blacklisted') return false;
+            
+            // Apply search
+            if (searchQuery) {
+              const query = searchQuery.toLowerCase();
+              return (
+                vendor.vendor_number?.toLowerCase().includes(query) ||
+                vendor.name_english?.toLowerCase().includes(query) ||
+                vendor.commercial_name?.toLowerCase().includes(query)
+              );
+            }
+            return true;
+          });
+
+          return filteredVendors.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <span className="text-6xl mb-4 block">🏢</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No vendors found</h3>
             <p className="text-gray-600">No vendors match the current filter.</p>
           </div>
         ) : (
