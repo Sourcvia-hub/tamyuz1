@@ -376,8 +376,9 @@ const Vendors = () => {
                 </div>
               </div>
             ))}
-          </div>
-        )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Create Vendor Modal */}
