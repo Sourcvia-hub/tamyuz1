@@ -122,6 +122,50 @@ const Tenders = () => {
           )}
         </div>
 
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            All ({tenders.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('open')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'open' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Open ({tenders.filter(t => t.status === 'open').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('closed')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'closed' ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Closed ({tenders.filter(t => t.status === 'closed').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('evaluated')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'evaluated' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Evaluated ({tenders.filter(t => t.status === 'evaluated').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('approved')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'approved' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Approved ({tenders.filter(t => t.status === 'approved').length})
+          </button>
+        </div>
+
         {/* Search Bar */}
         <div className="bg-white rounded-xl shadow-md p-4">
           <input
@@ -138,19 +182,27 @@ const Tenders = () => {
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : tenders.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <span className="text-6xl mb-4 block">📋</span>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No tenders found</h3>
-            <p className="text-gray-600">
-              {user?.role === 'procurement_officer'
-                ? 'Create your first tender to get started.'
-                : 'No tenders are available at the moment.'}
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {tenders.map((tender) => (
+        ) : (() => {
+          const filteredTenders = tenders.filter(tender => {
+            // Apply filter
+            if (activeFilter !== 'all' && tender.status !== activeFilter) return false;
+            
+            // Search is already handled by backend API
+            return true;
+          });
+
+          return filteredTenders.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <span className="text-6xl mb-4 block">📋</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No tenders found</h3>
+              <p className="text-gray-600">
+                {searchQuery ? 'Try adjusting your search criteria.' : 
+                 user?.role === 'procurement_officer' ? 'Create your first tender to get started.' : 'No tenders are available at the moment.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {filteredTenders.map((tender) => (
               <div
                 key={tender.id}
                 className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
