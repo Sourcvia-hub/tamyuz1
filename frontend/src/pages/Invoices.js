@@ -234,19 +234,133 @@ const Invoices = () => {
           )}
         </div>
 
+        {/* Dashboard Stats */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span>📊</span>
+            Invoice Statistics
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-blue-700">{invoices.length}</p>
+                <p className="text-sm text-blue-600 font-medium mt-1">Total</p>
+              </div>
+            </div>
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-yellow-700">{invoices.filter(i => i.status === 'pending').length}</p>
+                <p className="text-sm text-yellow-600 font-medium mt-1">Pending</p>
+              </div>
+            </div>
+            <div className="bg-cyan-50 border-2 border-cyan-200 rounded-lg p-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-cyan-700">{invoices.filter(i => i.status === 'verified').length}</p>
+                <p className="text-sm text-cyan-600 font-medium mt-1">Verified</p>
+              </div>
+            </div>
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-green-700">{invoices.filter(i => i.status === 'approved').length}</p>
+                <p className="text-sm text-green-600 font-medium mt-1">Approved</p>
+              </div>
+            </div>
+            <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-purple-700">{invoices.filter(i => i.status === 'paid').length}</p>
+                <p className="text-sm text-purple-600 font-medium mt-1">Paid</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            All ({invoices.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('pending')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Pending ({invoices.filter(i => i.status === 'pending').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('verified')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'verified' ? 'bg-cyan-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Verified ({invoices.filter(i => i.status === 'verified').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('approved')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'approved' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Approved ({invoices.filter(i => i.status === 'approved').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('paid')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'paid' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Paid ({invoices.filter(i => i.status === 'paid').length})
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <input
+            type="text"
+            placeholder="Search by invoice number, vendor, or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
-        ) : invoices.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <span className="text-6xl mb-4 block">💰</span>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No invoices found</h3>
-            <p className="text-gray-600">No invoices have been submitted yet.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
+        ) : (() => {
+          const filteredInvoices = invoices.filter(invoice => {
+            // Apply filter
+            if (activeFilter !== 'all' && invoice.status !== activeFilter) return false;
+            
+            // Apply search
+            if (searchQuery) {
+              const query = searchQuery.toLowerCase();
+              return (
+                invoice.invoice_number?.toLowerCase().includes(query) ||
+                invoice.vendor_name?.toLowerCase().includes(query) ||
+                invoice.description?.toLowerCase().includes(query)
+              );
+            }
+            return true;
+          });
+
+          return filteredInvoices.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <span className="text-6xl mb-4 block">💰</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No invoices found</h3>
+              <p className="text-gray-600">
+                {searchQuery ? 'Try adjusting your search criteria.' : 'No invoices have been submitted yet.'}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
