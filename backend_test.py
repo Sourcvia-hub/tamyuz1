@@ -2178,12 +2178,10 @@ class ProcurementTester:
         print("SOURCEVIA PROCUREMENT MANAGEMENT SYSTEM - COMPREHENSIVE BACKEND TESTING")
         print("=" * 80)
         
-        # Login first
-        if not self.login("procurement"):
-            print("❌ Cannot proceed without authentication")
-            return False
-        
         test_results = {
+            # Login functionality test (as per review request - FIRST)
+            "comprehensive_login_functionality": self.test_login_functionality_comprehensive(),
+            
             # Core functionality tests (existing)
             "vendor_auto_numbering": self.test_vendor_auto_numbering(),
             "vendor_dd_integration": self.test_vendor_creation_with_dd_integration(),
