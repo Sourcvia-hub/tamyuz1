@@ -946,6 +946,58 @@ async def login(login_data: LoginRequest, response: Response):
     
     return {"user": user_dict}
 
+@api_router.post("/auth/auto-login")
+async def auto_login(response: Response):
+    """
+    Auto-login endpoint that creates a session for the default user without credentials.
+    This allows users to access the application without manual login.
+    """
+    # Use default procurement officer account
+    default_email = "procurement@test.com"
+    
+    # Find default user
+    user_doc = await db.users.find_one({"email": default_email})
+    if not user_doc:
+        raise HTTPException(status_code=500, detail="Default user not found")
+    
+    # Convert datetime strings
+    if isinstance(user_doc.get('created_at'), str):
+        user_doc['created_at'] = datetime.fromisoformat(user_doc['created_at'])
+    
+    user = User(**user_doc)
+    
+    # Create session
+    session_token = str(uuid.uuid4()) + str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    session = UserSession(
+        user_id=user.id,
+        session_token=session_token,
+        expires_at=expires_at
+    )
+    
+    session_doc = session.model_dump()
+    session_doc["expires_at"] = session_doc["expires_at"].isoformat()
+    session_doc["created_at"] = session_doc["created_at"].isoformat()
+    await db.user_sessions.insert_one(session_doc)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=False,
+        samesite="lax",
+        path="/",
+        max_age=7 * 24 * 60 * 60
+    )
+    
+    # Remove password from response
+    user_dict = user.model_dump()
+    user_dict.pop('password', None)
+    
+    return {"user": user_dict, "message": "Auto-login successful"}
+
 @api_router.get("/auth/me")
 async def get_me(request: Request):
     """Get current user"""
