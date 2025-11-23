@@ -1999,6 +1999,179 @@ class ProcurementTester:
             print(f"❌ Data integrity test error: {str(e)}")
             return False
 
+    def test_login_functionality_comprehensive(self):
+        """Comprehensive login functionality testing as per review request"""
+        print(f"\n=== COMPREHENSIVE LOGIN FUNCTIONALITY TEST ===")
+        
+        # Test 1: Login Endpoint with Valid Credentials
+        print(f"\n--- Test 1: Login with Valid Credentials ---")
+        login_data = {
+            "email": "procurement@test.com",
+            "password": "password"
+        }
+        
+        try:
+            # Clear any existing session first
+            self.session.cookies.clear()
+            
+            response = self.session.post(f"{BASE_URL}/auth/login", json=login_data)
+            print(f"Login Status Code: {response.status_code}")
+            print(f"Response Headers: {dict(response.headers)}")
+            
+            if response.status_code == 200:
+                print(f"✅ Login returned 200 OK")
+                
+                # Check response data
+                try:
+                    data = response.json()
+                    user_data = data.get('user', {})
+                    print(f"✅ Login response contains user data: {user_data.get('email')}")
+                    print(f"User role: {user_data.get('role')}")
+                except:
+                    print(f"❌ Login response is not valid JSON")
+                    return False
+                
+                # Check session cookie
+                session_cookie = None
+                if 'session_token' in self.session.cookies:
+                    session_cookie = self.session.cookies['session_token']
+                    print(f"✅ Session token cookie set: {session_cookie[:20]}...")
+                else:
+                    print(f"❌ No session_token cookie found")
+                    print(f"Available cookies: {list(self.session.cookies.keys())}")
+                    return False
+                
+                # Check CORS headers
+                cors_origin = response.headers.get('Access-Control-Allow-Origin')
+                cors_credentials = response.headers.get('Access-Control-Allow-Credentials')
+                print(f"CORS Origin: {cors_origin}")
+                print(f"CORS Credentials: {cors_credentials}")
+                
+                if cors_credentials == 'true':
+                    print(f"✅ CORS allows credentials")
+                else:
+                    print(f"⚠️ CORS credentials header: {cors_credentials}")
+                
+                # Test 2: Auth Check with Session
+                print(f"\n--- Test 2: Auth Check with Session Cookie ---")
+                me_response = self.session.get(f"{BASE_URL}/auth/me")
+                print(f"Auth Check Status Code: {me_response.status_code}")
+                print(f"Auth Check Headers: {dict(me_response.headers)}")
+                
+                if me_response.status_code == 200:
+                    print(f"✅ Auth check returned 200 OK with session cookie")
+                    try:
+                        me_data = me_response.json()
+                        print(f"✅ Auth check returned user data: {me_data.get('email')}")
+                    except:
+                        print(f"❌ Auth check response is not valid JSON")
+                        return False
+                elif me_response.status_code == 401:
+                    print(f"❌ Auth check returned 401 Unauthorized - session not working")
+                    return False
+                else:
+                    print(f"❌ Auth check returned unexpected status: {me_response.status_code}")
+                    print(f"Response: {me_response.text}")
+                    return False
+                
+                # Test 3: CORS Preflight
+                print(f"\n--- Test 3: CORS Preflight Test ---")
+                preflight_headers = {
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': 'Content-Type',
+                    'Origin': 'https://sourcevia-mgmt.preview.emergentagent.com'
+                }
+                
+                preflight_response = self.session.options(f"{BASE_URL}/auth/login", headers=preflight_headers)
+                print(f"Preflight Status Code: {preflight_response.status_code}")
+                print(f"Preflight Headers: {dict(preflight_response.headers)}")
+                
+                preflight_origin = preflight_response.headers.get('Access-Control-Allow-Origin')
+                preflight_credentials = preflight_response.headers.get('Access-Control-Allow-Credentials')
+                
+                if preflight_origin:
+                    print(f"✅ CORS preflight allows origin: {preflight_origin}")
+                else:
+                    print(f"⚠️ No Access-Control-Allow-Origin in preflight response")
+                
+                if preflight_credentials == 'true':
+                    print(f"✅ CORS preflight allows credentials")
+                else:
+                    print(f"⚠️ CORS preflight credentials: {preflight_credentials}")
+                
+                # Test 4: Invalid Credentials
+                print(f"\n--- Test 4: Login with Invalid Credentials ---")
+                invalid_login_data = {
+                    "email": "procurement@test.com",
+                    "password": "wrongpassword"
+                }
+                
+                # Use a new session to avoid cookie interference
+                invalid_session = requests.Session()
+                invalid_session.headers.update({
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                })
+                
+                invalid_response = invalid_session.post(f"{BASE_URL}/auth/login", json=invalid_login_data)
+                print(f"Invalid Login Status Code: {invalid_response.status_code}")
+                
+                if invalid_response.status_code == 401:
+                    print(f"✅ Invalid credentials correctly returned 401")
+                    try:
+                        error_data = invalid_response.json()
+                        error_message = error_data.get('detail', 'No error message')
+                        print(f"✅ Error message: {error_message}")
+                    except:
+                        print(f"⚠️ Error response is not JSON")
+                else:
+                    print(f"❌ Invalid credentials returned unexpected status: {invalid_response.status_code}")
+                    return False
+                
+                # Test 5: Session Persistence
+                print(f"\n--- Test 5: Session Persistence Test ---")
+                print(f"Making multiple /auth/me calls to test session persistence...")
+                
+                for i in range(3):
+                    persistence_response = self.session.get(f"{BASE_URL}/auth/me")
+                    print(f"Call {i+1} Status: {persistence_response.status_code}")
+                    
+                    if persistence_response.status_code != 200:
+                        print(f"❌ Session persistence failed on call {i+1}")
+                        return False
+                
+                print(f"✅ Session persistence working - all calls returned 200 OK")
+                
+                # Test 6: Cookie Details Analysis
+                print(f"\n--- Test 6: Session Cookie Analysis ---")
+                if 'session_token' in self.session.cookies:
+                    cookie = self.session.cookies['session_token']
+                    print(f"Cookie Value Length: {len(cookie)}")
+                    
+                    # Check cookie attributes by examining the raw cookie
+                    for cookie_obj in self.session.cookies:
+                        if cookie_obj.name == 'session_token':
+                            print(f"Cookie Domain: {cookie_obj.domain}")
+                            print(f"Cookie Path: {cookie_obj.path}")
+                            print(f"Cookie Secure: {cookie_obj.secure}")
+                            print(f"Cookie HttpOnly: {cookie_obj.has_nonstandard_attr('HttpOnly')}")
+                            print(f"Cookie SameSite: {cookie_obj.get_nonstandard_attr('SameSite', 'Not set')}")
+                            break
+                
+                print(f"\n✅ ALL LOGIN TESTS PASSED")
+                return True
+                
+            else:
+                print(f"❌ Login failed with status {response.status_code}")
+                print(f"Response: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Login functionality test error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     def run_all_tests(self):
         """Run all comprehensive backend tests"""
         print("=" * 80)
