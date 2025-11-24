@@ -173,6 +173,22 @@ const InvoiceDetail = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              
+              {/* File Attachments */}
+              <div className="mt-6">
+                <h4 className="text-md font-semibold text-gray-900 mb-3">Invoice File Attachment</h4>
+                <FileUpload
+                  entityId={id}
+                  module="invoices"
+                  label="Attach Invoice File (PDF, DOCX, Images)"
+                  accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                  multiple={true}
+                  onUploadComplete={(files) => {
+                    console.log('Files uploaded:', files);
+                  }}
+                />
+              </div>
+
               <button
                 type="submit"
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
