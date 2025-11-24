@@ -13,6 +13,9 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import aiohttp
 from enum import Enum
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from io import BytesIO
 from ai_helpers import (
     analyze_vendor_scoring,
     analyze_tender_proposal,
