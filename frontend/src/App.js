@@ -231,8 +231,8 @@ const AppRoutes = () => {
       );
     }
     
-    // Always redirect to dashboard (auto-login handles authentication)
-    return <Navigate to="/dashboard" replace />;
+    // Redirect to dashboard if logged in, otherwise to login
+    return user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />;
   };
 
   return (
