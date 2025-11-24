@@ -71,7 +71,12 @@ const TenderEvaluation = () => {
       fetchData(); // Refresh data
     } catch (error) {
       console.error('Error submitting evaluation:', error);
-      alert('Failed to submit evaluation: ' + (error.response?.data?.detail || error.message));
+      const errorMessage = error.response?.data?.detail 
+        ? (typeof error.response.data.detail === 'string' 
+          ? error.response.data.detail 
+          : JSON.stringify(error.response.data.detail))
+        : error.message;
+      alert('Failed to submit evaluation: ' + errorMessage);
     }
   };
 
