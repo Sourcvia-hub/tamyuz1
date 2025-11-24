@@ -271,9 +271,18 @@ const Dashboard = () => {
 
         {/* Invoices Section */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-3xl">💰</span>
-            <h2 className="text-2xl font-bold text-gray-900">Invoices</h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-3xl">💰</span>
+              <h2 className="text-2xl font-bold text-gray-900">Invoices</h2>
+            </div>
+            <button
+              onClick={() => handleExport('invoices')}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <span>📥</span>
+              <span className="font-medium">Export to Excel</span>
+            </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
             <StatCard
