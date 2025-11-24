@@ -339,6 +339,14 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/purchase-orders/:id"
+        element={
+          <ProtectedRoute>
+            <PurchaseOrderDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/resources"
         element={
           <ProtectedRoute>
