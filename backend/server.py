@@ -13,6 +13,13 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import aiohttp
 from enum import Enum
+from ai_helpers import (
+    analyze_vendor_scoring,
+    analyze_tender_proposal,
+    analyze_contract_classification,
+    analyze_po_items,
+    match_invoice_to_milestone
+)
 
 
 ROOT_DIR = Path(__file__).parent
