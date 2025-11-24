@@ -490,10 +490,13 @@ const PurchaseOrders = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Description 
+                      <span className="text-blue-600 ml-1">🤖 AI analyzes 10+ chars</span>
+                    </label>
                     <input
                       type="text"
-                      placeholder="Description"
+                      placeholder="e.g., Enterprise software license for cloud services"
                       value={currentItem.description}
                       onChange={(e) => setCurrentItem({ ...currentItem, description: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg"
