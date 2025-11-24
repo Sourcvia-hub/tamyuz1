@@ -446,6 +446,7 @@ const VendorDetail = () => {
               onSubmit={handleUpdateVendor}
               onCancel={() => setShowEditModal(false)}
               isEdit={true}
+              vendorId={id}
             />
           </div>
         </div>
