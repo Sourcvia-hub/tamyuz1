@@ -948,7 +948,7 @@ async def login(login_data: LoginRequest, response: Response):
         value=session_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",  # Changed to 'none' for cross-origin requests
         path="/",
         max_age=7 * 24 * 60 * 60
     )
@@ -1000,7 +1000,7 @@ async def auto_login(response: Response):
         value=session_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",  # Changed to 'none' for cross-origin requests
         path="/",
         max_age=7 * 24 * 60 * 60
     )
