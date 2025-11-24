@@ -2869,18 +2869,18 @@ async def export_vendors(request: Request):
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     
-    # Define comprehensive headers including due diligence
+    # Define comprehensive headers with all actual fields
     headers = [
-        "ID", "Name (English)", "Commercial Name", "Entity Type", "VAT Number", "CR Number", 
-        "CR Expiry Date", "CR Country/City", "Activity Description", "Number of Employees",
-        "Country", "City", "Street", "Building Number", "Postal Code",
-        "Contact Name", "Contact Phone", "Contact Email", "Website",
-        "Bank Name", "IBAN", "Bank Branch",
+        "ID", "Name (English)", "Commercial Name", "Entity Type", 
+        "VAT Number", "Unified Number", "CR Number", "CR Expiry Date", "CR Country/City",
+        "License Number", "License Expiry Date",
+        "Activity Description", "Number of Employees",
+        "Country", "City", "District", "Street", "Building No", 
+        "Representative Name", "Representative Email", "Representative Mobile", 
+        "Representative Designation", "Representative Nationality", "Representative ID Type", "Representative ID Number",
+        "Email", "Mobile", "Landline", "Fax",
+        "Bank Name", "IBAN", "Bank Branch", "Bank Country", "Bank Account Name", "SWIFT Code", "Currency",
         "Status", "Risk Category", "Risk Score",
-        "DD: Valid Registration", "DD: Financial Stability", "DD: Technical Capability",
-        "DD: Legal Compliance", "DD: Quality Management", "DD: Safety Records",
-        "DD: Insurance Coverage", "DD: References", "DD: Business Continuity",
-        "DD: Data Security",
         "Created At", "Updated At"
     ]
     
