@@ -2856,7 +2856,7 @@ async def ai_match_invoice_milestone(data: dict):
 
 @api_router.get("/export/vendors")
 async def export_vendors(request: Request):
-    """Export all vendors to Excel"""
+    """Export all vendors to Excel with complete due diligence data"""
     await require_auth(request)
     
     vendors = await db.vendors.find({}, {"_id": 0}).to_list(1000)
@@ -2869,9 +2869,20 @@ async def export_vendors(request: Request):
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     
-    # Define headers
-    headers = ["ID", "Name (English)", "Commercial Name", "Entity Type", "VAT Number", "CR Number", 
-               "Activity", "Employees", "Status", "Risk Category", "Risk Score", "Created At"]
+    # Define comprehensive headers including due diligence
+    headers = [
+        "ID", "Name (English)", "Commercial Name", "Entity Type", "VAT Number", "CR Number", 
+        "CR Expiry Date", "CR Country/City", "Activity Description", "Number of Employees",
+        "Country", "City", "Street", "Building Number", "Postal Code",
+        "Contact Name", "Contact Phone", "Contact Email", "Website",
+        "Bank Name", "IBAN", "Bank Branch",
+        "Status", "Risk Category", "Risk Score",
+        "DD: Valid Registration", "DD: Financial Stability", "DD: Technical Capability",
+        "DD: Legal Compliance", "DD: Quality Management", "DD: Safety Records",
+        "DD: Insurance Coverage", "DD: References", "DD: Business Continuity",
+        "DD: Data Security",
+        "Created At", "Updated At"
+    ]
     
     # Write headers
     for col, header in enumerate(headers, 1):
@@ -2888,12 +2899,41 @@ async def export_vendors(request: Request):
         ws.cell(row=row_idx, column=4, value=vendor.get("entity_type", ""))
         ws.cell(row=row_idx, column=5, value=vendor.get("vat_number", ""))
         ws.cell(row=row_idx, column=6, value=vendor.get("cr_number", ""))
-        ws.cell(row=row_idx, column=7, value=vendor.get("activity_description", ""))
-        ws.cell(row=row_idx, column=8, value=vendor.get("number_of_employees", ""))
-        ws.cell(row=row_idx, column=9, value=vendor.get("status", ""))
-        ws.cell(row=row_idx, column=10, value=vendor.get("risk_category", ""))
-        ws.cell(row=row_idx, column=11, value=vendor.get("risk_score", ""))
-        ws.cell(row=row_idx, column=12, value=str(vendor.get("created_at", "")))
+        ws.cell(row=row_idx, column=7, value=str(vendor.get("cr_expiry_date", "")))
+        ws.cell(row=row_idx, column=8, value=vendor.get("cr_country_city", ""))
+        ws.cell(row=row_idx, column=9, value=vendor.get("activity_description", ""))
+        ws.cell(row=row_idx, column=10, value=vendor.get("number_of_employees", ""))
+        ws.cell(row=row_idx, column=11, value=vendor.get("country", ""))
+        ws.cell(row=row_idx, column=12, value=vendor.get("city", ""))
+        ws.cell(row=row_idx, column=13, value=vendor.get("street", ""))
+        ws.cell(row=row_idx, column=14, value=vendor.get("building_number", ""))
+        ws.cell(row=row_idx, column=15, value=vendor.get("postal_code", ""))
+        ws.cell(row=row_idx, column=16, value=vendor.get("contact_name", ""))
+        ws.cell(row=row_idx, column=17, value=vendor.get("contact_phone", ""))
+        ws.cell(row=row_idx, column=18, value=vendor.get("contact_email", ""))
+        ws.cell(row=row_idx, column=19, value=vendor.get("website", ""))
+        ws.cell(row=row_idx, column=20, value=vendor.get("bank_name", ""))
+        ws.cell(row=row_idx, column=21, value=vendor.get("iban", ""))
+        ws.cell(row=row_idx, column=22, value=vendor.get("bank_branch", ""))
+        ws.cell(row=row_idx, column=23, value=vendor.get("status", ""))
+        ws.cell(row=row_idx, column=24, value=vendor.get("risk_category", ""))
+        ws.cell(row=row_idx, column=25, value=vendor.get("risk_score", ""))
+        
+        # Due Diligence fields
+        dd = vendor.get("due_diligence", {})
+        ws.cell(row=row_idx, column=26, value=str(dd.get("valid_registration", "")))
+        ws.cell(row=row_idx, column=27, value=str(dd.get("financial_stability", "")))
+        ws.cell(row=row_idx, column=28, value=str(dd.get("technical_capability", "")))
+        ws.cell(row=row_idx, column=29, value=str(dd.get("legal_compliance", "")))
+        ws.cell(row=row_idx, column=30, value=str(dd.get("quality_management", "")))
+        ws.cell(row=row_idx, column=31, value=str(dd.get("safety_records", "")))
+        ws.cell(row=row_idx, column=32, value=str(dd.get("insurance_coverage", "")))
+        ws.cell(row=row_idx, column=33, value=str(dd.get("references", "")))
+        ws.cell(row=row_idx, column=34, value=str(dd.get("business_continuity", "")))
+        ws.cell(row=row_idx, column=35, value=str(dd.get("data_security", "")))
+        
+        ws.cell(row=row_idx, column=36, value=str(vendor.get("created_at", "")))
+        ws.cell(row=row_idx, column=37, value=str(vendor.get("updated_at", "")))
     
     # Auto-size columns
     for col in ws.columns:
