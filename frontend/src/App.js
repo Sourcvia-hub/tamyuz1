@@ -199,6 +199,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // Import pages
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Vendors from './pages/Vendors';
 import VendorDetail from './pages/VendorDetail';
