@@ -1098,7 +1098,10 @@ async def get_dashboard_stats(request: Request):
     
     # Contract Statistics
     all_contracts = await db.contracts.count_documents({})
-    active_contracts = await db.contracts.count_documents({"status": ContractStatus.ACTIVE.value})
+    # Active contracts = approved + draft (not expired or pending)
+    active_contracts = await db.contracts.count_documents({
+        "status": {"$in": [ContractStatus.APPROVED.value, ContractStatus.DRAFT.value]}
+    })
     
     # Outsourcing, Cloud, and NOC contracts
     outsourcing_contracts = await db.contracts.count_documents({"outsourcing_classification": "outsourcing"})
