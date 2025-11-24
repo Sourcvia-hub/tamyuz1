@@ -529,7 +529,7 @@ test_plan:
     status_history:
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE LOGIN TESTING COMPLETED: All login functionality working perfectly after deployment. VERIFIED TESTS: 1) **Login Endpoint** - POST /api/auth/login returns 200 OK with valid credentials (procurement@test.com/password), proper user data returned with email and role, session_token cookie set correctly with 72-character UUID format. 2) **Session Cookie** - Cookie attributes properly configured (HttpOnly=true, SameSite=lax, Path=/, Max-Age=604800), domain set to sourcevia-mgmt.preview.emergentagent.com. 3) **Auth Check** - GET /api/auth/me returns 200 OK with session cookie, returns correct user data, session persistence verified across multiple calls. 4) **CORS Configuration** - CORS preflight (OPTIONS) works correctly, Access-Control-Allow-Origin: https://vendorprocure.preview.emergentagent.com, Access-Control-Allow-Credentials: true, proper CORS headers set. 5) **Invalid Credentials** - Returns 401 Unauthorized for wrong password with proper error message. 6) **Session Persistence** - Multiple /auth/me calls all return 200 OK, session remains valid across requests. **DEPLOYMENT VERIFICATION**: Login functionality is working correctly after deployment, session cookies are being set and accepted properly, CORS is configured correctly for the frontend domain, all authentication flows working as expected. No issues found - login system is fully functional."
+          comment: "✅ COMPREHENSIVE LOGIN TESTING COMPLETED: All login functionality working perfectly after deployment. VERIFIED TESTS: 1) **Login Endpoint** - POST /api/auth/login returns 200 OK with valid credentials (procurement@test.com/password), proper user data returned with email and role, session_token cookie set correctly with 72-character UUID format. 2) **Session Cookie** - Cookie attributes properly configured (HttpOnly=true, SameSite=lax, Path=/, Max-Age=604800), domain set to sourcevia-mgmt.preview.emergentagent.com. 3) **Auth Check** - GET /api/auth/me returns 200 OK with session cookie, returns correct user data, session persistence verified across multiple calls. 4) **CORS Configuration** - CORS preflight (OPTIONS) works correctly, Access-Control-Allow-Origin: https://attachmate-3.preview.emergentagent.com, Access-Control-Allow-Credentials: true, proper CORS headers set. 5) **Invalid Credentials** - Returns 401 Unauthorized for wrong password with proper error message. 6) **Session Persistence** - Multiple /auth/me calls all return 200 OK, session remains valid across requests. **DEPLOYMENT VERIFICATION**: Login functionality is working correctly after deployment, session cookies are being set and accepted properly, CORS is configured correctly for the frontend domain, all authentication flows working as expected. No issues found - login system is fully functional."
 
 agent_communication:
     - agent: "main"
@@ -604,7 +604,7 @@ agent_communication:
         - ✅ Clear visual feedback and loading indicators
         
         **APP DETAILS CONFIRMED:**
-        - ✅ URL: https://vendorprocure.preview.emergentagent.com
+        - ✅ URL: https://attachmate-3.preview.emergentagent.com
         - ✅ Auto-login: System automatically logs in (procurement@test.com)
         - ✅ Tech Stack: React frontend with AI-powered components using GPT-4o
         
@@ -655,7 +655,7 @@ agent_communication:
         
         🎉 **COMPREHENSIVE TEST RESULTS: ALL REQUIREMENTS MET**
         
-        **APP URL TESTED:** https://vendorprocure.preview.emergentagent.com
+        **APP URL TESTED:** https://attachmate-3.preview.emergentagent.com
         **CREDENTIALS:** procurement@test.com / password ✅
         **MODULES TESTED:** Contracts, Invoices, Resources, Purchase Orders ✅
         
@@ -668,7 +668,7 @@ agent_communication:
         ✅ **COMPREHENSIVE LOGIN TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://vendorprocure.preview.emergentagent.com/api
+        - ✅ **APP URL:** https://attachmate-3.preview.emergentagent.com/api
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **DEPLOYMENT:** Production environment testing completed
         
@@ -686,7 +686,7 @@ agent_communication:
         
         **3. CORS Preflight Test:**
         - ✅ **OPTIONS /api/auth/login:** Returns 200 OK with proper CORS headers
-        - ✅ **Access-Control-Allow-Origin:** https://vendorprocure.preview.emergentagent.com
+        - ✅ **Access-Control-Allow-Origin:** https://attachmate-3.preview.emergentagent.com
         - ✅ **Access-Control-Allow-Credentials:** true
         - ✅ **CORS Methods:** DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
         - ✅ **CORS Headers:** Content-Type allowed
@@ -716,8 +716,8 @@ agent_communication:
         - ✅ **Persistence:** Session persistence working across requests
         
         **TECHNICAL DETAILS:**
-        - **Backend URL:** https://vendorprocure.preview.emergentagent.com/api
-        - **Frontend Domain:** https://vendorprocure.preview.emergentagent.com
+        - **Backend URL:** https://attachmate-3.preview.emergentagent.com/api
+        - **Frontend Domain:** https://attachmate-3.preview.emergentagent.com
         - **Session Token Format:** UUID-based (72 characters)
         - **Cookie Security:** HttpOnly, SameSite=lax, 7-day expiry
         - **CORS Policy:** Specific origin with credentials allowed
@@ -731,7 +731,7 @@ agent_communication:
         ✅ **COMPREHENSIVE TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://vendorprocure.preview.emergentagent.com
+        - ✅ **APP URL:** https://attachmate-3.preview.emergentagent.com
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **NAVIGATION:** Successfully accessed /invoices page and Submit Invoice modal
         
@@ -790,7 +790,7 @@ agent_communication:
         ✅ **COMPREHENSIVE TEST RESULTS - ALL REQUIREMENTS MET:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://vendorprocure.preview.emergentagent.com
+        - ✅ **APP URL:** https://attachmate-3.preview.emergentagent.com
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **NAVIGATION:** Successfully accessed /invoices page and Submit Invoice modal
         
@@ -1078,7 +1078,7 @@ agent_communication:
       message: |
         DUE DILIGENCE WORKFLOW TESTING COMPLETED - Comprehensive testing of updated DD workflow as per review request:
         
-        ✅ DD WORKFLOW TEST RESULTS (API BASE URL: https://vendorprocure.preview.emergentagent.com/api):
+        ✅ DD WORKFLOW TEST RESULTS (API BASE URL: https://attachmate-3.preview.emergentagent.com/api):
         - Authentication: Successfully logged in with procurement@test.com/password credentials
         - STEP 1 - Vendor Creation with Checklist Items: ✅ PASSED
           * Created vendor "Workflow Test Vendor" with dd_checklist_supporting_documents=true, dd_checklist_related_party_checked=true, dd_checklist_sanction_screening=true
@@ -1188,7 +1188,7 @@ agent_communication:
         
         🎉 COMPREHENSIVE TEST RESULTS: 19/19 TESTS PASSED
         
-        API BASE URL TESTED: https://vendorprocure.preview.emergentagent.com/api
+        API BASE URL TESTED: https://attachmate-3.preview.emergentagent.com/api
         AUTHENTICATION: procurement@test.com / password ✅
         
         SUMMARY: All major modules of the Sourcevia Procurement Management System are working correctly. The system demonstrates robust functionality across authentication, vendor management, tender management, contract management, purchase orders, invoices, resources, due diligence workflows, and dashboard analytics. Auto-numbering, search functionality, data integrity, and complex business logic (DD workflows, contract status management) are all functioning as designed. No critical issues found.
@@ -1254,7 +1254,7 @@ agent_communication:
         - No isDisabled prop set on vendor SearchableSelect component
         - Proper state management for filteredContracts and form data
         
-        **APP URL TESTED:** https://vendorprocure.preview.emergentagent.com
+        **APP URL TESTED:** https://attachmate-3.preview.emergentagent.com
         **CREDENTIALS:** procurement@test.com / password ✅
         
         **CONCLUSION:** The vendor field is now fully editable at all times as requested. The fix successfully removed the previous blocking behavior where vendor field was disabled when contract was selected. All test scenarios from the review request have been verified and are working correctly.
@@ -1326,7 +1326,7 @@ agent_communication:
         
         🎉 COMPREHENSIVE FRONTEND TEST RESULTS: ALL MAJOR FEATURES WORKING
         
-        APP URL TESTED: https://vendorprocure.preview.emergentagent.com
+        APP URL TESTED: https://attachmate-3.preview.emergentagent.com
         CREDENTIALS: procurement@test.com / password ✅
         VIEWPORT: 1920x800 ✅
         
@@ -1442,7 +1442,7 @@ agent_communication:
       message: |
         VENDORS ENDPOINT VERIFICATION COMPLETED - Comprehensive testing of vendors endpoint data as per review request:
         
-        ✅ VENDORS ENDPOINT TEST RESULTS (API: https://vendorprocure.preview.emergentagent.com/api):
+        ✅ VENDORS ENDPOINT TEST RESULTS (API: https://attachmate-3.preview.emergentagent.com/api):
         
         **AUTHENTICATION & ACCESS:**
         - Login successful with procurement@test.com/password credentials ✅
@@ -2039,7 +2039,7 @@ if (!user) {
 
 **Test Results:**
 - ✅ Cleared cookies (fresh visit simulation)
-- ✅ Visited root URL: `https://vendorprocure.preview.emergentagent.com`
+- ✅ Visited root URL: `https://attachmate-3.preview.emergentagent.com`
 - ✅ **Redirected to:** `/dashboard` (immediate)
 - ✅ **No login page shown**
 - ✅ Dashboard fully loaded with all stats

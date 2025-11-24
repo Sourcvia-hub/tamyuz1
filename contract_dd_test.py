@@ -8,7 +8,7 @@ import json
 from datetime import datetime, timedelta, timezone
 
 # Configuration
-BASE_URL = "https://vendorprocure.preview.emergentagent.com/api"
+BASE_URL = "https://attachmate-3.preview.emergentagent.com/api"
 TEST_USER = {"email": "procurement@test.com", "password": "password"}
 
 class ContractDDTester:
