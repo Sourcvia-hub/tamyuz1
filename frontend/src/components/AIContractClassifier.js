@@ -31,13 +31,12 @@ const AIContractClassifier = ({ formData, setFormData }) => {
       setAiAnalysis(response.data);
       
       // Auto-fill classification checkboxes based on AI
-      setFormData(prev => ({
-        ...prev,
+      setFormData({
         outsourcing_classification: response.data.outsourcing_classification || 'none',
         is_noc_required: response.data.is_noc_required || false,
         involves_data_access: response.data.involves_data_access || false,
         involves_subcontracting: response.data.involves_subcontracting || false
-      }));
+      });
       
     } catch (err) {
       console.error('AI contract classification error:', err);
