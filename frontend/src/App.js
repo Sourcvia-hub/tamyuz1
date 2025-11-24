@@ -220,29 +220,26 @@ import ResourceDetail from './pages/ResourceDetail';
 const AppRoutes = () => {
   const { user, loading } = useAuth();
 
-  // Redirect authenticated users from login page to dashboard
-  const LoginWrapper = () => {
+  // Auto-redirect to dashboard (skip login page)
+  const RootRedirect = () => {
     if (loading) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Logging in...</p>
+            <p className="text-gray-600">Loading...</p>
           </div>
         </div>
       );
     }
     
-    if (user) {
-      return <Navigate to="/dashboard" replace />;
-    }
-    
-    return <LoginPage />;
+    // Always redirect to dashboard (auto-login handles authentication)
+    return <Navigate to="/dashboard" replace />;
   };
 
   return (
     <Routes>
-      <Route path="/" element={<LoginWrapper />} />
+      <Route path="/" element={<RootRedirect />} />
       <Route
         path="/dashboard"
         element={
