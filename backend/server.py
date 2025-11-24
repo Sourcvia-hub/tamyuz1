@@ -3075,6 +3075,8 @@ async def export_tenders(request: Request):
     await require_auth(request)
     
     tenders = await db.tenders.find({}, {"_id": 0}).to_list(1000)
+    # Fetch all proposals separately
+    all_proposals = await db.proposals.find({}, {"_id": 0}).to_list(5000)
     
     wb = Workbook()
     
