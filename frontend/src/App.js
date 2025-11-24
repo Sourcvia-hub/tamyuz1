@@ -222,6 +222,7 @@ import ContractDetail from './pages/ContractDetail';
 import Invoices from './pages/Invoices';
 import InvoiceDetail from './pages/InvoiceDetail';
 import PurchaseOrders from './pages/PurchaseOrders';
+import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
 import Resources from './pages/Resources';
 import ResourceDetail from './pages/ResourceDetail';
 
