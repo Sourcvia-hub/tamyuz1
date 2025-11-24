@@ -104,7 +104,7 @@ const Contracts = () => {
         case 'cloud':
           return contract.outsourcing_classification === 'cloud_computing';
         case 'noc':
-          return contract.is_noc === true || contract.is_noc_required === true;
+          return contract.is_noc === true;
         case 'expired':
           return contract.status === 'expired';
         default:
