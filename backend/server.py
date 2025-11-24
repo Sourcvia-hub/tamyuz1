@@ -2876,10 +2876,6 @@ async def shutdown_db_client():
     client.close()
 
 # ==================== EXPORT ENDPOINTS ====================
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment
-from io import BytesIO
-from fastapi.responses import StreamingResponse
 
 @api_router.get("/export/vendors")
 async def export_vendors(request: Request):
