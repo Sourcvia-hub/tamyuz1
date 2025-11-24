@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import { Link, useLocation } from 'react-router-dom';
 import OutsourcingQuestionnaire from '../components/OutsourcingQuestionnaire';
 import SearchableSelect from '../components/SearchableSelect';
+import AIContractClassifier from '../components/AIContractClassifier';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
