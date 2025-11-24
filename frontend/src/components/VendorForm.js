@@ -254,6 +254,22 @@ const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false,
         </div>
       )}
 
+      {/* File Attachments */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 sticky top-0 bg-white py-2">Supporting Documents</h3>
+        <FileUpload
+          entityId={vendorId}
+          module="vendors"
+          fileType="supporting_documents"
+          label="Attach Supporting Documents (PDF, DOCX, XLSX, Images)"
+          accept=".pdf,.doc,.docx,.xlsx,.xls,.png,.jpg,.jpeg"
+          multiple={true}
+          onUploadComplete={(files) => {
+            console.log('Files uploaded:', files);
+          }}
+        />
+      </div>
+
       {/* Form Actions */}
       <div className="flex space-x-4 pt-4 sticky bottom-0 bg-white border-t pb-2">
         <button type="button" onClick={onCancel}
