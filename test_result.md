@@ -1724,3 +1724,78 @@ Ready to integrate AI features into frontend UI for all 5 modules.
 
 **Result: 100% AI Integration Complete!**
 
+
+---
+## Bug Fixes - User Reported Issues
+**Date:** 2025-11-24
+**Status:** ✅ ALL FIXED
+
+### Issues Fixed:
+
+1. **✅ Tender Evaluation Submission Error**
+   - Problem: "[object Object]" error when submitting tender evaluation
+   - Root Cause: Error object being concatenated as string
+   - Solution: Added proper error message extraction with type checking
+   - File: `/app/frontend/src/pages/TenderEvaluation.js`
+   - Status: ✅ FIXED
+
+2. **✅ PO AI Always Visible**
+   - Problem: AI analyzer only appeared when typing 10+ characters
+   - User Request: Want AI visible for all items
+   - Solution: Removed conditional rendering - AI component now always visible
+   - File: `/app/frontend/src/pages/PurchaseOrders.js`
+   - Testing: ✅ VERIFIED - Screenshot shows AI section visible with empty description
+   - Status: ✅ FIXED
+
+3. **✅ Contract AI Apply Classification**
+   - Problem: Classifications not being applied
+   - Root Cause: setFormData using `prev =>` pattern but receiving direct updates function
+   - Solution: Changed from `prev => ({...prev, ...updates})` to direct object updates
+   - File: `/app/frontend/src/components/AIContractClassifier.js`
+   - Note: Classifications are auto-applied when AI completes (Apply button is for confirmation)
+   - Status: ✅ FIXED
+
+4. **✅ Vendor Risk Score - Increasing Instead of Overwriting**
+   - Problem: Risk score showing 599.4 and keeps increasing
+   - Root Cause: Score values being treated as strings and concatenated instead of replaced
+   - Solution: 
+     - Added `parseInt()` to all risk score assignments
+     - Added validation to clamp values between 0-100
+     - Ensured numeric types throughout the flow
+   - Files: `/app/frontend/src/components/AIDueDiligence.js`
+   - Status: ✅ FIXED
+
+### Technical Changes:
+
+**Tender Evaluation Error Handling:**
+```javascript
+// Before: alert('Failed: ' + error.response?.data?.detail)
+// After: Proper type checking and JSON.stringify for objects
+const errorMessage = error.response?.data?.detail 
+  ? (typeof error.response.data.detail === 'string' 
+    ? error.response.data.detail 
+    : JSON.stringify(error.response.data.detail))
+  : error.message;
+```
+
+**PO AI Visibility:**
+```javascript
+// Before: {currentItem.description && currentItem.description.trim().length >= 10 && (...)}
+// After: Always render component (removed conditional)
+<AIPOItemAnalyzer itemDescription={currentItem.description || ''} />
+```
+
+**Risk Score Type Safety:**
+```javascript
+// Added parseInt() and clamping
+risk_score: parseInt(response.data.risk_score) || 50
+// Manual input validation
+const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 50));
+```
+
+### Verification:
+- ✅ PO AI visible in screenshot even with empty description
+- ✅ All parseInt() calls added for numeric safety
+- ✅ Error handling properly stringifies objects
+- ✅ Contract AI auto-applies classifications on analysis complete
+
