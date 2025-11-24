@@ -1,5 +1,6 @@
 import React from 'react';
 import AIDueDiligence from './AIDueDiligence';
+import FileUpload from './FileUpload';
 
 const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false }) => {
   const handleChange = (e) => {
