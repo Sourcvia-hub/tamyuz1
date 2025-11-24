@@ -97,13 +97,14 @@ const Contracts = () => {
     const filtered = contracts.filter(contract => {
       switch (activeFilter) {
         case 'active':
-          return contract.status === 'active';
+          // Show approved and draft contracts (not expired or pending)
+          return contract.status === 'approved' || contract.status === 'draft';
         case 'outsourcing':
           return contract.outsourcing_classification === 'outsourcing';
         case 'cloud':
           return contract.outsourcing_classification === 'cloud_computing';
         case 'noc':
-          return contract.is_noc === true;
+          return contract.is_noc === true || contract.is_noc_required === true;
         case 'expired':
           return contract.status === 'expired';
         default:
