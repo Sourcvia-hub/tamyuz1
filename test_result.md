@@ -2070,3 +2070,146 @@ if (!user) {
 - Auto-login endpoint handles authentication automatically
 - User can still logout (will auto-login again on next visit)
 
+
+---
+## Excel Export Feature - Dashboard
+**Date:** 2025-11-24
+**Status:** ✅ IMPLEMENTED
+
+### Feature:
+- **User Request:** "Can I have export data option in the dashboard page for each model. This will allow me to extract the information in excel file including all fields"
+
+### Implementation:
+
+**1. Backend Export Endpoints (6 endpoints created):**
+- `/api/export/vendors` - Export all vendors with all fields
+- `/api/export/contracts` - Export all contracts with all fields
+- `/api/export/tenders` - Export all tenders with all fields
+- `/api/export/invoices` - Export all invoices with all fields
+- `/api/export/purchase-orders` - Export all POs with all fields
+- `/api/export/resources` - Export all resources with all fields
+
+**2. Excel Generation Features:**
+- Uses `openpyxl` library for Excel file generation
+- Professional formatting with blue headers
+- Bold white text on blue background for headers
+- Auto-sized columns for optimal readability
+- All fields included in export
+- Returns `.xlsx` files
+
+**3. Frontend Implementation:**
+- Green "📥 Export to Excel" button on each section
+- One-click download functionality
+- Automatic file download with proper naming
+- Error handling for failed exports
+
+### Excel File Details:
+
+**Vendors Export Fields:**
+- ID, Name (English), Commercial Name, Entity Type
+- VAT Number, CR Number, Activity Description
+- Number of Employees, Status, Risk Category, Risk Score
+- Created At timestamp
+
+**Contracts Export Fields:**
+- ID, Contract Number, Title, Vendor ID
+- Status, Value, Start Date, End Date
+- Classification, NOC Required
+- Created At timestamp
+
+**Tenders Export Fields:**
+- ID, Tender Number, Title, Status
+- Budget, Deadline, Requirements
+- Created At timestamp
+
+**Invoices Export Fields:**
+- ID, Invoice Number, Vendor ID
+- Contract ID, PO ID, Amount
+- Status, Description
+- Created At timestamp
+
+**Purchase Orders Export Fields:**
+- ID, PO Number, Vendor ID
+- Status, Total Value
+- Created At timestamp
+
+**Resources Export Fields:**
+- ID, Name, Vendor ID
+- Contract ID, Location, Status
+- Created At timestamp
+
+### UI/UX:
+
+**Export Button Design:**
+- Color: Green (#16a34a) - stands out as action button
+- Icon: 📥 (download icon)
+- Text: "Export to Excel"
+- Position: Top right of each section
+- Hover effect: Darker green (#15803d)
+
+**User Flow:**
+1. User visits dashboard
+2. Sees stats for each module (Vendors, Contracts, etc.)
+3. Clicks "Export to Excel" button
+4. Excel file automatically downloads
+5. File named: `{module}_export.xlsx`
+
+### Files Modified/Created:
+
+**Backend:**
+- `/app/backend/server.py` - Added 6 export endpoints
+- `/app/backend/requirements.txt` - Added `openpyxl` library
+
+**Frontend:**
+- `/app/frontend/src/pages/Dashboard.js`
+  - Added `handleExport()` function
+  - Added export buttons to all 6 sections
+  - Added axios blob download handling
+
+### Verification:
+
+**Screenshots:**
+- ✅ Export button visible on Vendors section
+- ✅ Export button visible on Tenders section
+- ✅ Export button visible on Contracts section (49 active)
+- ✅ Export button visible on Invoices section
+- ✅ Export button visible on Resources section
+- ✅ Export button visible on Purchase Orders section
+
+**Button Placement:**
+- All buttons consistently placed in top-right of section headers
+- Professional green color matches action button pattern
+- Clear icon and text for easy identification
+
+### Technical Details:
+
+**Excel Formatting:**
+```python
+# Header styling
+header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+header_font = Font(bold=True, color="FFFFFF")
+cell.alignment = Alignment(horizontal="center")
+
+# Auto-sizing columns
+max_length = max(len(str(cell.value)) for cell in column)
+column.width = min(max_length + 2, 50)  # Max 50 chars
+```
+
+**Download Handling:**
+```javascript
+// Frontend blob download
+responseType: 'blob'
+const url = window.URL.createObjectURL(new Blob([response.data]))
+link.setAttribute('download', `${module}_export.xlsx`)
+```
+
+### Benefits:
+
+✅ **Complete Data Export:** All fields included, nothing left out
+✅ **Professional Format:** Blue headers, auto-sized columns
+✅ **Easy Access:** One click from dashboard
+✅ **Bulk Export:** Get all records at once
+✅ **Excel Compatible:** .xlsx format works with Excel, Google Sheets, etc.
+✅ **Fast Download:** Streaming response for performance
+✅ **All Modules:** 6 modules, 6 export options
+
