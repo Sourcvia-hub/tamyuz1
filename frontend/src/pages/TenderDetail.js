@@ -3,6 +3,7 @@ import axios from 'axios';
 import Layout from '../components/Layout';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../App';
+import FileUpload from '../components/FileUpload';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
