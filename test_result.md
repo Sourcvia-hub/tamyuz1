@@ -2578,3 +2578,55 @@ Deployed app stuck on "Authenticating..." screen. Frontend could not reach backe
 - `/app/backend/server.py` (CORS middleware placement)
 - `/app/backend/.env` (CORS_ORIGINS configuration)
 
+
+---
+
+## Deployment Build Errors Fixed - Nov 24, 2025
+
+### Build Error:
+Production deployment failing with:
+```
+Failed to compile.
+Error: Parse Error: <p
+error Command failed with exit code 1.
+```
+
+### Root Cause:
+1. **Unclosed HTML tag**: `/app/frontend/public/index.html` had an unclosed `<p>` tag (lines 94-106) in the Emergent badge
+2. **Hardcoded API Key**: `EMERGENT_LLM_KEY` was hardcoded in `backend/ai_helpers.py` instead of using environment variable
+3. **Missing environment variable**: EMERGENT_LLM_KEY not in backend/.env
+
+### Fixes Applied:
+
+**1. Fixed Unclosed HTML Tag:**
+- File: `/app/frontend/public/index.html`
+- Added closing content and proper tag closure for the `<p>` element in Emergent badge
+- Added text: "Made for Sunna Altamyuz"
+
+**2. Removed Hardcoded API Key:**
+- File: `/app/backend/ai_helpers.py`
+- Changed from: `EMERGENT_LLM_KEY = "sk-emergent-e9d7eEd061b2fCeDbB"`
+- Changed to: `EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')`
+- Added `import os` statement
+
+**3. Updated Environment File:**
+- File: `/app/backend/.env`
+- Added: `EMERGENT_LLM_KEY="sk-emergent-e9d7eEd061b2fCeDbB"`
+
+### Verification:
+✅ Frontend build successful: `yarn build` completed without errors
+✅ Build output: 162.92 kB JS, 13.16 kB CSS (gzipped)
+✅ No parse errors
+✅ API key now loaded from environment variable
+✅ Ready for production deployment
+
+### Files Modified:
+- `/app/frontend/public/index.html` - Fixed unclosed <p> tag
+- `/app/backend/ai_helpers.py` - Removed hardcoded API key, use environment variable
+- `/app/backend/.env` - Added EMERGENT_LLM_KEY
+
+### Deployment Notes:
+- Emergent deployment will auto-update MONGO_URL and DB_NAME for Atlas MongoDB
+- CORS_ORIGINS will be auto-configured for production domain
+- Frontend REACT_APP_BACKEND_URL will be auto-set to production URL
+
