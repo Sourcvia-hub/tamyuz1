@@ -3720,9 +3720,7 @@ async def download_file(module: str, entity_id: str, filename: str, request: Req
     )
 
 # ==================== APP SETUP ====================
-# Include the router in the main app (must be after all endpoints are defined)
-app.include_router(api_router)
-
+# Configure CORS middleware (must be before including router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -3730,6 +3728,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include the router in the main app (must be after all endpoints are defined)
+app.include_router(api_router)
 
 # Configure logging
 logging.basicConfig(
