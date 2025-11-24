@@ -498,6 +498,12 @@ const Invoices = () => {
                 />
               )}
 
+              {/* File Attachments */}
+              <div className="mt-6 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">📎 Invoice File Attachment</p>
+                <p className="text-xs text-gray-500">Save the invoice first to enable file uploads</p>
+              </div>
+
               <div className="flex space-x-4 pt-4">
                 <button
                   type="button"
