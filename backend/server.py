@@ -3474,7 +3474,7 @@ UPLOAD_DIR = Path("/app/backend/uploads")
 async def upload_vendor_files(
     vendor_id: str,
     request: Request,
-    files: list[UploadFile] = File(...),
+    files: List[UploadFile] = File(...),
     file_type: str = "supporting_documents"  # supporting_documents, due_diligence
 ):
     """Upload files for vendor (supporting documents, due diligence)"""
