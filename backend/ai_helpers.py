@@ -146,7 +146,11 @@ Description: {contract_description}
 Determine:
 1. Is this an outsourcing contract? (vendor provides services/labor)
 2. Is this a cloud computing contract? (SaaS, IaaS, PaaS, cloud services)
-3. Does it require NOC (No Objection Certificate)? (international vendor or specific compliance)
+3. Does it require NOC (No Objection Certificate)?
+   IMPORTANT RULES:
+   - Cloud computing contracts (SaaS, IaaS, PaaS, AWS, Azure, Google Cloud) ALWAYS require NOC
+   - International vendor contracts ALWAYS require NOC
+   - Contracts involving cross-border data transfer ALWAYS require NOC
 4. Does it involve data access/processing?
 5. Does it involve third-party subcontracting?
 
