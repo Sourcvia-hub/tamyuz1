@@ -3549,7 +3549,7 @@ async def upload_tender_files(
 async def upload_proposal_files(
     proposal_id: str,
     request: Request,
-    files: list[UploadFile] = File(...)
+    files: List[UploadFile] = File(...)
 ):
     """Upload supporting documents for proposal"""
     await require_auth(request)
@@ -3584,7 +3584,7 @@ async def upload_proposal_files(
 async def upload_po_files(
     po_id: str,
     request: Request,
-    files: list[UploadFile] = File(...),
+    files: List[UploadFile] = File(...),
     file_type: str = "quotation"  # quotation, supporting_documents
 ):
     """Upload quotations and supporting documents for PO"""
@@ -3621,7 +3621,7 @@ async def upload_po_files(
 async def upload_invoice_files(
     invoice_id: str,
     request: Request,
-    files: list[UploadFile] = File(...)
+    files: List[UploadFile] = File(...)
 ):
     """Upload invoice files"""
     await require_auth(request)
@@ -3656,7 +3656,7 @@ async def upload_invoice_files(
 async def upload_resource_files(
     resource_id: str,
     request: Request,
-    files: list[UploadFile] = File(...)
+    files: List[UploadFile] = File(...)
 ):
     """Upload supporting documents for resource"""
     await require_auth(request)
@@ -3692,7 +3692,7 @@ async def upload_resource_files(
 async def upload_contract_files(
     contract_id: str,
     request: Request,
-    files: list[UploadFile] = File(...)
+    files: List[UploadFile] = File(...)
 ):
     """Upload contract documents"""
     await require_auth(request)
