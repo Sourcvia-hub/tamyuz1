@@ -4,6 +4,7 @@ AI Helper Functions using OpenAI GPT-4o via Emergent Universal Key
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 import json
 import uuid
+import re
 
 # Emergent Universal Key
 EMERGENT_LLM_KEY = "sk-emergent-e9d7eEd061b2fCeDbB"
