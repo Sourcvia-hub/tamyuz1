@@ -2772,6 +2772,79 @@ async def mark_notification_read(notification_id: str, request: Request):
     
     return {"message": "Notification marked as read"}
 
+# ==================== AI ENDPOINTS ====================
+@api_router.post("/ai/analyze-vendor")
+async def ai_analyze_vendor(vendor_data: dict):
+    """AI analyzes vendor data and suggests risk scores"""
+    try:
+        result = await analyze_vendor_scoring(vendor_data)
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "risk_category": "medium",
+            "risk_score": 50,
+            "reasoning": "AI analysis unavailable"
+        }
+
+@api_router.post("/ai/analyze-tender-proposal")
+async def ai_analyze_tender(tender_data: dict, proposal_data: dict):
+    """AI analyzes tender proposal and suggests scores"""
+    try:
+        result = await analyze_tender_proposal(tender_data, proposal_data)
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "overall_score": 70,
+            "recommendation": "Manual Review Required"
+        }
+
+@api_router.post("/ai/classify-contract")
+async def ai_classify_contract(data: dict):
+    """AI classifies contract type (outsourcing, cloud, NOC)"""
+    try:
+        description = data.get('description', '')
+        title = data.get('title', '')
+        result = await analyze_contract_classification(description, title)
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "outsourcing_classification": "none",
+            "is_noc_required": False,
+            "reasoning": "AI analysis unavailable"
+        }
+
+@api_router.post("/ai/analyze-po-item")
+async def ai_analyze_po_item(data: dict):
+    """AI analyzes PO item and suggests checkboxes"""
+    try:
+        description = data.get('description', '')
+        result = await analyze_po_items(description)
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "requires_contract": False,
+            "reasoning": "AI analysis unavailable"
+        }
+
+@api_router.post("/ai/match-invoice-milestone")
+async def ai_match_invoice_milestone(data: dict):
+    """AI matches invoice to contract milestones"""
+    try:
+        description = data.get('description', '')
+        milestones = data.get('milestones', [])
+        result = await match_invoice_to_milestone(description, milestones)
+        return result
+    except Exception as e:
+        return {
+            "error": str(e),
+            "matched_milestone_name": None,
+            "reasoning": "AI analysis unavailable"
+        }
+
 # ==================== BASIC ENDPOINTS ====================
 @api_router.get("/")
 async def root():
