@@ -1,5 +1,5 @@
 import React from 'react';
-import VendorChecklist from './VendorChecklist';
+import AIDueDiligence from './AIDueDiligence';
 
 const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false }) => {
   const handleChange = (e) => {
