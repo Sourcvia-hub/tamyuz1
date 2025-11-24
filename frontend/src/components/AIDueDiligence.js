@@ -236,7 +236,10 @@ const AIDueDiligence = ({ formData, setFormData }) => {
               min="0"
               max="100"
               value={formData.risk_score || 50}
-              onChange={(e) => setFormData(prev => ({ ...prev, risk_score: parseInt(e.target.value) || 50 }))}
+              onChange={(e) => {
+                const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 50));
+                setFormData(prev => ({ ...prev, risk_score: value }));
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
