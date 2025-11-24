@@ -3011,35 +3011,132 @@ async def export_contracts(request: Request):
 
 @api_router.get("/export/tenders")
 async def export_tenders(request: Request):
-    """Export all tenders to Excel"""
+    """Export all tenders with proposals and evaluations to Excel"""
     await require_auth(request)
     
     tenders = await db.tenders.find({}, {"_id": 0}).to_list(1000)
     
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Tenders"
+    
+    # Sheet 1: Tenders
+    ws_tenders = wb.active
+    ws_tenders.title = "Tenders"
     
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     
-    headers = ["ID", "Tender Number", "Title", "Status", "Budget", "Deadline", "Requirements", "Created At"]
+    tender_headers = ["ID", "Tender Number", "Title", "Description", "Status", "Budget", 
+                      "Deadline", "Requirements", "Published Date", "Closing Date", 
+                      "Created At", "Updated At"]
     
-    for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col, value=header)
+    for col, header in enumerate(tender_headers, 1):
+        cell = ws_tenders.cell(row=1, column=col, value=header)
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center")
     
     for row_idx, tender in enumerate(tenders, 2):
-        ws.cell(row=row_idx, column=1, value=tender.get("id", ""))
-        ws.cell(row=row_idx, column=2, value=tender.get("tender_number", ""))
-        ws.cell(row=row_idx, column=3, value=tender.get("title", ""))
-        ws.cell(row=row_idx, column=4, value=tender.get("status", ""))
-        ws.cell(row=row_idx, column=5, value=tender.get("budget", 0))
-        ws.cell(row=row_idx, column=6, value=str(tender.get("deadline", "")))
-        ws.cell(row=row_idx, column=7, value=tender.get("requirements", ""))
-        ws.cell(row=row_idx, column=8, value=str(tender.get("created_at", "")))
+        ws_tenders.cell(row=row_idx, column=1, value=tender.get("id", ""))
+        ws_tenders.cell(row=row_idx, column=2, value=tender.get("tender_number", ""))
+        ws_tenders.cell(row=row_idx, column=3, value=tender.get("title", ""))
+        ws_tenders.cell(row=row_idx, column=4, value=tender.get("description", ""))
+        ws_tenders.cell(row=row_idx, column=5, value=tender.get("status", ""))
+        ws_tenders.cell(row=row_idx, column=6, value=tender.get("budget", 0))
+        ws_tenders.cell(row=row_idx, column=7, value=str(tender.get("deadline", "")))
+        ws_tenders.cell(row=row_idx, column=8, value=tender.get("requirements", ""))
+        ws_tenders.cell(row=row_idx, column=9, value=str(tender.get("published_date", "")))
+        ws_tenders.cell(row=row_idx, column=10, value=str(tender.get("closing_date", "")))
+        ws_tenders.cell(row=row_idx, column=11, value=str(tender.get("created_at", "")))
+        ws_tenders.cell(row=row_idx, column=12, value=str(tender.get("updated_at", "")))
+    
+    # Auto-size columns
+    for col in ws_tenders.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws_tenders.column_dimensions[column].width = min(max_length + 2, 50)
+    
+    # Sheet 2: Proposals
+    ws_proposals = wb.create_sheet("Proposals")
+    proposal_headers = ["Proposal ID", "Tender ID", "Tender Number", "Vendor ID", "Vendor Name",
+                        "Proposed Price", "Technical Approach", "Delivery Time", "Status",
+                        "Submitted At", "Updated At"]
+    
+    for col, header in enumerate(proposal_headers, 1):
+        cell = ws_proposals.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center")
+    
+    proposal_row = 2
+    for tender in tenders:
+        proposals = tender.get("proposals", [])
+        for proposal in proposals:
+            ws_proposals.cell(row=proposal_row, column=1, value=proposal.get("proposal_id", ""))
+            ws_proposals.cell(row=proposal_row, column=2, value=tender.get("id", ""))
+            ws_proposals.cell(row=proposal_row, column=3, value=tender.get("tender_number", ""))
+            ws_proposals.cell(row=proposal_row, column=4, value=proposal.get("vendor_id", ""))
+            ws_proposals.cell(row=proposal_row, column=5, value=proposal.get("vendor_name", ""))
+            ws_proposals.cell(row=proposal_row, column=6, value=proposal.get("proposed_price", 0))
+            ws_proposals.cell(row=proposal_row, column=7, value=proposal.get("technical_approach", ""))
+            ws_proposals.cell(row=proposal_row, column=8, value=proposal.get("delivery_time", ""))
+            ws_proposals.cell(row=proposal_row, column=9, value=proposal.get("status", ""))
+            ws_proposals.cell(row=proposal_row, column=10, value=str(proposal.get("submitted_at", "")))
+            ws_proposals.cell(row=proposal_row, column=11, value=str(proposal.get("updated_at", "")))
+            proposal_row += 1
+    
+    # Auto-size
+    for col in ws_proposals.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws_proposals.column_dimensions[column].width = min(max_length + 2, 50)
+    
+    # Sheet 3: Evaluations
+    ws_evaluations = wb.create_sheet("Evaluations")
+    eval_headers = ["Evaluation ID", "Tender ID", "Proposal ID", "Vendor Name",
+                    "Reliability Score", "Delivery Score", "Technical Score", 
+                    "Cost Score", "Meets Requirements", "Total Score",
+                    "Evaluated By", "Evaluated At"]
+    
+    for col, header in enumerate(eval_headers, 1):
+        cell = ws_evaluations.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center")
+    
+    eval_row = 2
+    for tender in tenders:
+        proposals = tender.get("proposals", [])
+        for proposal in proposals:
+            evaluation = proposal.get("evaluation", {})
+            if evaluation:
+                ws_evaluations.cell(row=eval_row, column=1, value=evaluation.get("id", ""))
+                ws_evaluations.cell(row=eval_row, column=2, value=tender.get("id", ""))
+                ws_evaluations.cell(row=eval_row, column=3, value=proposal.get("proposal_id", ""))
+                ws_evaluations.cell(row=eval_row, column=4, value=proposal.get("vendor_name", ""))
+                ws_evaluations.cell(row=eval_row, column=5, value=evaluation.get("vendor_reliability_stability", ""))
+                ws_evaluations.cell(row=eval_row, column=6, value=evaluation.get("delivery_warranty_backup", ""))
+                ws_evaluations.cell(row=eval_row, column=7, value=evaluation.get("technical_experience", ""))
+                ws_evaluations.cell(row=eval_row, column=8, value=evaluation.get("cost_score", ""))
+                ws_evaluations.cell(row=eval_row, column=9, value=evaluation.get("meets_requirements", ""))
+                ws_evaluations.cell(row=eval_row, column=10, value=evaluation.get("total_score", ""))
+                ws_evaluations.cell(row=eval_row, column=11, value=evaluation.get("evaluated_by", ""))
+                ws_evaluations.cell(row=eval_row, column=12, value=str(evaluation.get("evaluated_at", "")))
+                eval_row += 1
+    
+    # Auto-size
+    for col in ws_evaluations.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws_evaluations.column_dimensions[column].width = min(max_length + 2, 50)
     
     for col in ws.columns:
         max_length = 0
