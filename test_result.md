@@ -1415,3 +1415,65 @@ agent_communication:
         🎉 VENDORS ENDPOINT VERIFICATION: SUCCESSFUL
         
         SUMMARY: The vendors endpoint is working correctly and returning all necessary fields for dropdown display. The GET /api/vendors?status=approved endpoint successfully returns 67 approved vendors with 95.5% having vendor_number fields and 100% having name_english, commercial_name, and risk_category fields. The auto-numbering system (Vendor-25-NNNN) is functioning properly for new vendors. Only 3 legacy vendors lack vendor_number fields, which is acceptable for dropdown functionality. All requirements from the review request have been verified successfully.
+---
+## Testing Session - Invoice Dropdown Bug Fix & AI Backend Verification
+**Date:** 2025-11-24
+**Agent:** E1 Fork Agent
+**Tested by:** Agent (Screenshot tool + curl testing)
+
+### Issue 1: Invoice Form Contract/PO Dropdown Not Selectable ✅ FIXED
+
+**Problem:** 
+After selecting a vendor, the Contract/PO dropdown appeared but options could not be selected.
+
+**Root Cause:**
+The `handleContractOrPOSelect` function used `value.split('-')` to extract the ID from values like "contract-123" or "po-456". However, if the ID itself contained hyphens (e.g., "contract-abc-def-123"), the split would only capture the first two parts, causing the ID extraction to fail.
+
+**Fix Applied:**
+Changed from `split('-')` to `substring()` method:
+- For contracts: `value.substring(9)` removes "contract-" prefix
+- For POs: `value.substring(3)` removes "po-" prefix
+
+**Testing Results:**
+✅ Vendor selection works correctly
+✅ Contract/PO dropdown becomes enabled after vendor selection  
+✅ Dropdown shows filtered contracts/POs based on selected vendor
+✅ Options can now be selected successfully
+✅ Selected value displays correctly in the dropdown
+✅ Form submission works with selected contract/PO
+
+**File Modified:** `/app/frontend/src/pages/Invoices.js` (lines 100-135)
+
+### Issue 2: AI Endpoints Returning Fallback Data ✅ FIXED
+
+**Problem:**
+AI helper endpoints were called successfully but JSON parsing failed, causing fallback data to be returned instead of real AI analysis.
+
+**Root Cause:**
+The LLM (GPT-4o) was returning JSON wrapped in markdown code blocks (```json ... ```), but the code was attempting direct `json.loads()` which failed, triggering the fallback.
+
+**Fix Applied:**
+1. Added `extract_json_from_response()` helper function that:
+   - Extracts JSON from markdown code blocks using regex
+   - Falls back to direct JSON extraction if no markdown
+   - Handles parsing errors gracefully
+2. Updated all 5 AI helper functions to use this extraction method
+
+**Testing Results:**
+✅ `/api/ai/analyze-vendor` - Returns complete risk assessment with reasoning, red flags, and recommendations
+✅ `/api/ai/analyze-po-item` - Returns item classification with requirements and risk level
+✅ `/api/ai/classify-contract` - Returns contract classification with confidence score
+✅ All responses contain proper structured data (not fallback)
+✅ JSON parsing works correctly for all endpoints
+
+**Files Modified:** 
+- `/app/backend/ai_helpers.py` - Added JSON extraction helper and updated all functions
+
+**Sample AI Response Quality:**
+- Vendor Risk: 55/100 (medium) with detailed geopolitical analysis
+- PO Item: Correctly identified cloud service as high-risk IT service requiring contract and specs
+- Contract: 95% confidence classification as cloud computing with data access
+
+**Next Steps:**
+Ready to integrate AI features into frontend UI for all 5 modules.
+
