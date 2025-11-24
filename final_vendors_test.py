@@ -9,7 +9,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://sourcevia-mgmt.preview.emergentagent.com/api"
+BASE_URL = "https://vendorprocure.preview.emergentagent.com/api"
 TEST_CREDENTIALS = {"email": "procurement@test.com", "password": "password"}
 
 class FinalVendorsTest:
@@ -151,7 +151,7 @@ class FinalVendorsTest:
     def run_test(self):
         """Run the complete test as requested"""
         print("VENDORS ENDPOINT VERIFICATION TEST")
-        print("API BASE URL: https://sourcevia-mgmt.preview.emergentagent.com/api")
+        print("API BASE URL: https://vendorprocure.preview.emergentagent.com/api")
         print("=" * 70)
         
         # Step 1: Login with procurement@test.com / password

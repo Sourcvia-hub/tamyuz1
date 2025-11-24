@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import sys
 
 # Configuration
-BASE_URL = "https://sourcevia-mgmt.preview.emergentagent.com/api"
+BASE_URL = "https://vendorprocure.preview.emergentagent.com/api"
 TEST_USERS = {
     "procurement": {"email": "procurement@test.com", "password": "password"},
     "manager": {"email": "manager@test.com", "password": "password"}
@@ -2079,7 +2079,7 @@ class ProcurementTester:
                 preflight_headers = {
                     'Access-Control-Request-Method': 'POST',
                     'Access-Control-Request-Headers': 'Content-Type',
-                    'Origin': 'https://sourcevia-mgmt.preview.emergentagent.com'
+                    'Origin': 'https://vendorprocure.preview.emergentagent.com'
                 }
                 
                 preflight_response = self.session.options(f"{BASE_URL}/auth/login", headers=preflight_headers)

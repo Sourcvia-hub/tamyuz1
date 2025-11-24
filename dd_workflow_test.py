@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import sys
 
 # Configuration
-BASE_URL = "https://sourcevia-mgmt.preview.emergentagent.com/api"
+BASE_URL = "https://vendorprocure.preview.emergentagent.com/api"
 TEST_USER = {"email": "procurement@test.com", "password": "password"}
 
 class DDWorkflowTester:
