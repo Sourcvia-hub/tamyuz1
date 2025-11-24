@@ -641,6 +641,12 @@ const Resources = () => {
                 )}
               </div>
 
+              {/* File Attachments */}
+              <div className="mt-6 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">📎 Supporting Documents</p>
+                <p className="text-xs text-gray-500">Save the resource first to enable file uploads</p>
+              </div>
+
               <button
                 type="submit"
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
