@@ -3284,33 +3284,90 @@ async def export_invoices(request: Request):
 
 @api_router.get("/export/purchase-orders")
 async def export_purchase_orders(request: Request):
-    """Export all purchase orders to Excel"""
+    """Export all purchase orders with line items to Excel"""
     await require_auth(request)
     
     pos = await db.purchase_orders.find({}, {"_id": 0}).to_list(1000)
     
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Purchase Orders"
+    
+    # Sheet 1: Purchase Orders
+    ws_pos = wb.active
+    ws_pos.title = "Purchase Orders"
     
     header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     
-    headers = ["ID", "PO Number", "Vendor ID", "Status", "Total Value", "Created At"]
+    po_headers = ["ID", "PO Number", "Vendor ID", "Tender ID", "Status", 
+                  "Total Value", "Delivery Location", "Delivery Date",
+                  "Payment Terms", "Notes", "Created By", "Approved By",
+                  "Created At", "Updated At"]
     
-    for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col, value=header)
+    for col, header in enumerate(po_headers, 1):
+        cell = ws_pos.cell(row=1, column=col, value=header)
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center")
     
     for row_idx, po in enumerate(pos, 2):
-        ws.cell(row=row_idx, column=1, value=po.get("id", ""))
-        ws.cell(row=row_idx, column=2, value=po.get("po_number", ""))
-        ws.cell(row=row_idx, column=3, value=po.get("vendor_id", ""))
-        ws.cell(row=row_idx, column=4, value=po.get("status", ""))
-        ws.cell(row=row_idx, column=5, value=po.get("total_value", 0))
-        ws.cell(row=row_idx, column=6, value=str(po.get("created_at", "")))
+        ws_pos.cell(row=row_idx, column=1, value=po.get("id", ""))
+        ws_pos.cell(row=row_idx, column=2, value=po.get("po_number", ""))
+        ws_pos.cell(row=row_idx, column=3, value=po.get("vendor_id", ""))
+        ws_pos.cell(row=row_idx, column=4, value=po.get("tender_id", ""))
+        ws_pos.cell(row=row_idx, column=5, value=po.get("status", ""))
+        ws_pos.cell(row=row_idx, column=6, value=po.get("total_value", 0))
+        ws_pos.cell(row=row_idx, column=7, value=po.get("delivery_location", ""))
+        ws_pos.cell(row=row_idx, column=8, value=str(po.get("delivery_date", "")))
+        ws_pos.cell(row=row_idx, column=9, value=po.get("payment_terms", ""))
+        ws_pos.cell(row=row_idx, column=10, value=po.get("notes", ""))
+        ws_pos.cell(row=row_idx, column=11, value=po.get("created_by", ""))
+        ws_pos.cell(row=row_idx, column=12, value=po.get("approved_by", ""))
+        ws_pos.cell(row=row_idx, column=13, value=str(po.get("created_at", "")))
+        ws_pos.cell(row=row_idx, column=14, value=str(po.get("updated_at", "")))
+    
+    # Auto-size
+    for col in ws_pos.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws_pos.column_dimensions[column].width = min(max_length + 2, 50)
+    
+    # Sheet 2: PO Items
+    ws_items = wb.create_sheet("PO Items")
+    item_headers = ["PO ID", "PO Number", "Item Name", "Description", 
+                    "Quantity", "Unit Price", "Total", "Unit", "Category"]
+    
+    for col, header in enumerate(item_headers, 1):
+        cell = ws_items.cell(row=1, column=col, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center")
+    
+    item_row = 2
+    for po in pos:
+        items = po.get("items", [])
+        for item in items:
+            ws_items.cell(row=item_row, column=1, value=po.get("id", ""))
+            ws_items.cell(row=item_row, column=2, value=po.get("po_number", ""))
+            ws_items.cell(row=item_row, column=3, value=item.get("name", ""))
+            ws_items.cell(row=item_row, column=4, value=item.get("description", ""))
+            ws_items.cell(row=item_row, column=5, value=item.get("quantity", 0))
+            ws_items.cell(row=item_row, column=6, value=item.get("price", 0))
+            ws_items.cell(row=item_row, column=7, value=item.get("total", 0))
+            ws_items.cell(row=item_row, column=8, value=item.get("unit", ""))
+            ws_items.cell(row=item_row, column=9, value=item.get("category", ""))
+            item_row += 1
+    
+    # Auto-size
+    for col in ws_items.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            if cell.value:
+                max_length = max(max_length, len(str(cell.value)))
+        ws_items.column_dimensions[column].width = min(max_length + 2, 50)
     
     for col in ws.columns:
         max_length = 0
