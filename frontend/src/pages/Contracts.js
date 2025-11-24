@@ -512,6 +512,12 @@ const Contracts = () => {
                 />
               </div>
 
+              {/* AI Contract Classifier */}
+              <AIContractClassifier 
+                formData={{ title: formData.title, scope: formData.sow }}
+                setFormData={(updates) => setFormData({ ...formData, ...updates })}
+              />
+
               {/* Milestones Section */}
               <div>
                 <div className="flex justify-between items-center mb-3">
