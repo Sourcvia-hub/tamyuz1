@@ -316,13 +316,19 @@ const TenderEvaluation = () => {
                   timeline: selectedProposal.delivery_time || 'See proposal details'
                 }}
                 onScoresGenerated={(scores) => {
-                  // Auto-fill form with AI scores (convert 0-100 to 1-5 scale)
+                  // Convert 0-100 scale to 1-5 scale
+                  // Formula: (score * 4 / 100) + 1, ensuring min=1, max=5
+                  const convertScore = (score) => {
+                    const converted = (score * 4 / 100) + 1;
+                    return Math.max(1, Math.min(5, Math.round(converted * 2) / 2)); // Round to nearest 0.5
+                  };
+                  
                   setEvaluationForm({
-                    vendor_reliability_stability: Math.round((scores.technical_score / 20) * 10) / 10,
-                    delivery_warranty_backup: Math.round((scores.financial_score / 20) * 10) / 10,
-                    technical_experience: Math.round((scores.overall_score / 20) * 10) / 10,
+                    vendor_reliability_stability: convertScore(scores.technical_score),
+                    delivery_warranty_backup: convertScore(scores.financial_score),
+                    technical_experience: convertScore(scores.overall_score),
                     cost_score: evaluationForm.cost_score,
-                    meets_requirements: Math.round((scores.overall_score / 20) * 10) / 10,
+                    meets_requirements: convertScore(scores.overall_score),
                   });
                 }}
               />
