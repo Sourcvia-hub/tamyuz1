@@ -5,9 +5,10 @@ from emergentintegrations.llm.chat import LlmChat, UserMessage
 import json
 import uuid
 import re
+import os
 
-# Emergent Universal Key
-EMERGENT_LLM_KEY = "sk-emergent-e9d7eEd061b2fCeDbB"
+# Emergent Universal Key - Load from environment
+EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
 
 def extract_json_from_response(response: str) -> dict:
     """
