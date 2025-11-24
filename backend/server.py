@@ -2852,32 +2852,6 @@ async def ai_match_invoice_milestone(data: dict):
         }
 
 # ==================== BASIC ENDPOINTS ====================
-@api_router.get("/")
-async def root():
-    return {"message": "Sourcevia Procurement Management System API"}
-
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
-
 # ==================== EXPORT ENDPOINTS ====================
 
 @api_router.get("/export/vendors")
@@ -3193,4 +3167,30 @@ async def export_resources(request: Request):
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": "attachment; filename=resources_export.xlsx"}
     )
+
+@api_router.get("/")
+async def root():
+    return {"message": "Sourcevia Procurement Management System API"}
+
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
 
