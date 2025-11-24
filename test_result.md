@@ -2489,3 +2489,61 @@ Integrate the FileUpload component across all modules (Vendors, Tenders, Contrac
 
 All modules now have fully functional file attachment capabilities!
 
+
+---
+
+## Purchase Order Detail Page - Nov 24, 2025
+
+### Objective:
+Add a comprehensive detail view page for Purchase Orders to view and edit PO information.
+
+### Implementation:
+
+**New File Created:**
+- `/app/frontend/src/pages/PurchaseOrderDetail.js` - Complete PO detail page
+
+**Modified Files:**
+1. `/app/frontend/src/App.js` - Added route for `/purchase-orders/:id`
+2. `/app/frontend/src/pages/PurchaseOrders.js` - Added "View Details" button to PO cards
+
+### Features Implemented:
+
+**View Mode:**
+- PO header with number, status badge, creation date
+- Vendor information with clickable link to vendor detail
+- Related tender link (if applicable)
+- Delivery time display
+- Total amount prominently displayed
+- Complete items list with table showing:
+  - Item name, quantity, unit price, subtotal
+  - Calculated total
+- Classification details section showing:
+  - Data access flag
+  - Onsite presence flag
+  - Implementation flag
+  - Duration > 1 year flag
+- Contract requirement warning (if applicable)
+
+**Edit Mode:**
+- Editable delivery time field
+- Items management:
+  - Add new items with "+ Add Item" button
+  - Edit existing items (name, quantity, unit price)
+  - Remove items
+  - Real-time subtotal and total calculations
+- File upload section with FileUpload component
+- Save changes functionality
+
+**Navigation:**
+- "Back to List" button
+- "Edit PO" / "Cancel Edit" toggle button
+- Links to related entities (vendor, tender, contract)
+
+### Testing Results:
+✅ All functionality tested and working via Frontend Testing Agent
+✅ Navigation from list to detail page working
+✅ All PO information displaying correctly
+✅ Edit mode functional with item management
+✅ File upload section visible in edit mode
+✅ Responsive design confirmed
+
