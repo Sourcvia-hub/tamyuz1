@@ -57,6 +57,21 @@ const TenderEvaluation = () => {
 
   const submitEvaluation = async (e) => {
     e.preventDefault();
+    
+    // Validate all scores are between 1 and 5
+    const scores = [
+      evaluationForm.vendor_reliability_stability,
+      evaluationForm.delivery_warranty_backup,
+      evaluationForm.technical_experience,
+      evaluationForm.cost_score,
+      evaluationForm.meets_requirements
+    ];
+    
+    if (scores.some(score => score < 1 || score > 5)) {
+      alert('All scores must be between 1 and 5. Please check your ratings.');
+      return;
+    }
+    
     try {
       await axios.post(
         `${API}/tenders/${id}/proposals/${selectedProposal.proposal_id}/evaluate`,
