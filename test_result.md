@@ -1850,3 +1850,71 @@ Score 100 → 5.0 ✓ (maximum)
 - ✅ No more validation errors on submission
 - ✅ Pre-submission validation prevents invalid data
 
+
+---
+## Contract Filter Fix - Active Contracts Not Showing
+**Date:** 2025-11-24
+**Status:** ✅ FIXED
+
+### Issue:
+- **Problem:** "Active" filter showed 0 contracts, but database has 62 contracts (37 approved, 12 draft)
+- **User Report:** "Why no active contracts in the contract page"
+
+### Root Cause Analysis:
+1. **Status Mismatch:** Filter looking for `status === 'active'` but database uses:
+   - `approved` (37 contracts)
+   - `draft` (12 contracts)
+   - `expired` (6 contracts)
+   - `pending_due_diligence` (7 contracts)
+
+2. **Field Name Inconsistency:** AI component using `is_noc_required` but backend model expects `is_noc`
+
+### Solution:
+1. **Updated Active Filter Logic:**
+   ```javascript
+   // Before: contract.status === 'active' (matched nothing)
+   // After: contract.status === 'approved' || contract.status === 'draft'
+   ```
+
+2. **Fixed Filter Button Count:**
+   ```javascript
+   // Before: Active ({contracts.filter(c => c.status === 'active').length})
+   // After: Active ({contracts.filter(c => c.status === 'approved' || c.status === 'draft').length})
+   ```
+
+3. **Fixed AI Contract Classifier Field Mapping:**
+   ```javascript
+   // Map AI response to correct backend field
+   is_noc: response.data.is_noc_required  // Backend uses 'is_noc' not 'is_noc_required'
+   ```
+
+### Verification:
+- ✅ **Screenshot 1 (All):** Shows 62 contracts
+- ✅ **Screenshot 2 (Active Filter):** Shows contracts with approved/draft status
+- ✅ **Screenshot 3 (Cloud Filter):** Shows 1 cloud contract
+- ✅ Filter counts now display correctly
+- ✅ Contracts are visible and filterable
+
+### Database Status Breakdown:
+```
+Total: 62 contracts
+- approved: 37 (49 with draft = "Active")
+- draft: 12
+- expired: 6
+- pending_due_diligence: 7
+```
+
+### Files Modified:
+- `/app/frontend/src/pages/Contracts.js`
+  - Updated active filter logic to match approved/draft statuses
+  - Fixed button count calculation
+  - Fixed NOC filter field name
+- `/app/frontend/src/components/AIContractClassifier.js`
+  - Mapped is_noc_required → is_noc for backend compatibility
+
+### Result:
+✅ Active filter now correctly shows 49 contracts (37 approved + 12 draft)
+✅ All filter buttons display accurate counts
+✅ AI contract classification correctly maps to backend fields
+✅ NOC filter uses correct field name
+
