@@ -3198,14 +3198,6 @@ async def export_tenders(request: Request):
                 max_length = max(max_length, len(str(cell.value)))
         ws_evaluations.column_dimensions[column].width = min(max_length + 2, 50)
     
-    for col in ws.columns:
-        max_length = 0
-        column = col[0].column_letter
-        for cell in col:
-            if cell.value:
-                max_length = max(max_length, len(str(cell.value)))
-        ws.column_dimensions[column].width = min(max_length + 2, 50)
-    
     output = BytesIO()
     wb.save(output)
     output.seek(0)
