@@ -399,6 +399,21 @@ const ResourceDetail = () => {
                 )}
               </div>
 
+              {/* File Attachments */}
+              <div className="mt-6">
+                <h4 className="text-md font-semibold text-gray-900 mb-3">Supporting Documents</h4>
+                <FileUpload
+                  entityId={id}
+                  module="resources"
+                  label="Attach Supporting Documents (PDF, DOCX, Images)"
+                  accept=".pdf,.doc,.docx,.xlsx,.xls,.png,.jpg,.jpeg"
+                  multiple={true}
+                  onUploadComplete={(files) => {
+                    console.log('Files uploaded:', files);
+                  }}
+                />
+              </div>
+
               <button
                 type="submit"
                 className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
