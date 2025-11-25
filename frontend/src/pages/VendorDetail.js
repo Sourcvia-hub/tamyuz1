@@ -481,6 +481,46 @@ const VendorDetail = () => {
           </div>
         )}
 
+        {/* Tenders Where Vendor Ranked #1 */}
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-xl font-bold text-gray-900">Tenders Ranked #1 ({rankedFirstTenders.length})</h3>
+            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">TOP RANKED</span>
+          </div>
+          {rankedFirstTenders.length > 0 ? (
+            <div className="space-y-3">
+              {rankedFirstTenders.map((tender) => (
+                <div key={tender.id} className="p-4 border-2 border-green-200 bg-green-50 rounded-lg hover:border-green-300 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-medium text-gray-900">{tender.title}</h4>
+                        <span className="px-2 py-1 bg-green-600 text-white rounded text-xs font-bold">RANK #1</span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{tender.description}</p>
+                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                        <span>Budget: ${tender.budget?.toLocaleString()}</span>
+                        <span>Deadline: {new Date(tender.deadline).toLocaleDateString()}</span>
+                        {tender.evaluation_score && (
+                          <span className="text-green-600 font-medium">Score: {tender.evaluation_score}/100</span>
+                        )}
+                      </div>
+                    </div>
+                    <Link
+                      to={`/tenders/${tender.id}`}
+                      className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">This vendor has not been ranked #1 in any tender evaluations yet</p>
+          )}
+        </div>
+
         {/* Related Tenders */}
         <div className="bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-900 mb-4">Related Tenders ({relatedTenders.length})</h3>
@@ -497,12 +537,12 @@ const VendorDetail = () => {
                         <span>Deadline: {new Date(tender.deadline).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <a
-                      href={`/tenders/${tender.id}`}
+                    <Link
+                      to={`/tenders/${tender.id}`}
                       className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
                     >
                       View
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}
