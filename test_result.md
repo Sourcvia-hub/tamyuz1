@@ -2936,3 +2936,76 @@ Updated the HTML to properly close the tag and add content:
 ✅ Build successful locally
 ✅ Ready for production deployment
 
+
+---
+
+## Facilities Asset Management & OSR Module - Backend Implementation - Nov 25, 2025
+
+### Phase 1: Backend Data Models & APIs - COMPLETE
+
+**New Enums Added:**
+- AssetStatus: active, under_maintenance, out_of_service, replaced, decommissioned
+- AssetCondition: good, fair, poor
+- OSRType: asset_related, general_request
+- OSRCategory: maintenance, cleaning, relocation, safety, other
+- OSRStatus: open, assigned, in_progress, completed, cancelled
+- OSRPriority: low, normal, high
+
+**New Pydantic Models:**
+1. Building - Master data for buildings
+2. Floor - Master data for floors (linked to buildings)
+3. AssetCategory - Configurable asset categories
+4. Asset - Complete asset registration with all fields
+5. OSR - Operating Service Request with workflow
+
+**API Endpoints Created:**
+
+Buildings:
+- GET /api/buildings
+- POST /api/buildings
+- PUT /api/buildings/{id}
+- DELETE /api/buildings/{id}
+
+Floors:
+- GET /api/floors?building_id={id}
+- POST /api/floors
+- PUT /api/floors/{id}
+- DELETE /api/floors/{id}
+
+Asset Categories:
+- GET /api/asset-categories
+- POST /api/asset-categories
+- PUT /api/asset-categories/{id}
+- DELETE /api/asset-categories/{id}
+
+Assets:
+- GET /api/assets
+- GET /api/assets/{id}
+- POST /api/assets (auto-generates asset_number, calculates warranty_status)
+- PUT /api/assets/{id} (recalculates warranty_status)
+- DELETE /api/assets/{id}
+
+OSR:
+- GET /api/osr
+- GET /api/osr/{id}
+- POST /api/osr (auto-generates osr_number, auto-fetches asset details, auto-suggests AMC vendor)
+- PUT /api/osr/{id} (auto-updates asset last_maintenance_date on completion)
+- DELETE /api/osr/{id}
+
+Utilities:
+- POST /api/facilities/seed-data (seeds initial categories, sample buildings, floors)
+
+**Business Logic Implemented:**
+1. Auto-number generation for assets (ASSET-YYYY-####)
+2. Auto-number generation for OSRs (OSR-YYYY-####)
+3. Auto-calculation of warranty status (in_warranty/out_of_warranty)
+4. Auto-fetch asset details when creating asset-related OSR
+5. Auto-suggest AMC vendor for maintenance requests
+6. Auto-update asset last_maintenance_date when maintenance OSR completed
+7. User tracking (created_by, created_by_name)
+
+**Files Modified:**
+- /app/backend/server.py - Added ~300 lines of code
+
+**Status:** ✅ Backend Complete - Ready for Frontend
+
