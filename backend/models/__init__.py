@@ -1,7 +1,7 @@
 """
 Models package - Pydantic models for the application
 """
-from .user import User, UserSession, UserRole
+from .user import User, UserSession, UserRole, LoginRequest, RegisterRequest
 from .vendor import Vendor, VendorType, VendorStatus, RiskCategory
 from .tender import Tender, TenderStatus, EvaluationCriteria, Proposal, ProposalStatus, ProposalEvaluationRequest
 from .contract import Contract, ContractStatus
@@ -10,7 +10,7 @@ from .purchase_order import PurchaseOrder, POItem, POStatus
 from .resource import Resource, ResourceStatus, WorkType, Relative
 from .asset import Asset, AssetStatus, AssetCondition, Building, Floor, AssetCategory
 from .osr import OSR, OSRType, OSRCategory, OSRStatus, OSRPriority
-from .shared import Notification, AuditLog, LoginRequest, RegisterRequest
+from .shared import Notification, AuditLog
 
 __all__ = [
     # User
