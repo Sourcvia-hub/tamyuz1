@@ -44,7 +44,7 @@ const TenderEvaluation = () => {
           const vendor = vendors.find(v => v.id === proposal.vendor_id);
           return {
             ...proposal,
-            vendor_name: vendor ? vendor.name : proposal.vendor_id
+            vendor_name: vendor ? (vendor.name_english || vendor.commercial_name || vendor.name) : proposal.vendor_id
           };
         })
       };
