@@ -13,6 +13,7 @@ const ResourceDetail = () => {
   const [resource, setResource] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [contract, setContract] = useState(null);
   const [editFormData, setEditFormData] = useState({
     name: '',
     nationality: '',
