@@ -26,16 +26,28 @@ const PurchaseOrderDetail = () => {
   const fetchPO = async () => {
     try {
       const response = await axios.get(`${API}/purchase-orders/${id}`, { withCredentials: true });
-      setPO(response.data);
+      let poData = response.data;
+      
+      // Fetch vendor name if vendor_id exists
+      if (poData.vendor_id && !poData.vendor_name) {
+        try {
+          const vendorRes = await axios.get(`${API}/vendors/${poData.vendor_id}`, { withCredentials: true });
+          poData = { ...poData, vendor_name: vendorRes.data.name };
+        } catch (err) {
+          console.log('Could not fetch vendor name');
+        }
+      }
+      
+      setPO(poData);
       setEditFormData({
-        delivery_time: response.data.delivery_time || '',
-        items: response.data.items || []
+        delivery_time: poData.delivery_time || '',
+        items: poData.items || []
       });
       
       // Fetch related tender if applicable
-      if (response.data.tender_id) {
+      if (poData.tender_id) {
         try {
-          const tenderRes = await axios.get(`${API}/tenders/${response.data.tender_id}`, { withCredentials: true });
+          const tenderRes = await axios.get(`${API}/tenders/${poData.tender_id}`, { withCredentials: true });
           setTender(tenderRes.data);
         } catch (err) {
           console.log('Could not fetch tender info');
