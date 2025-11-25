@@ -21,6 +21,7 @@ const VendorDetail = () => {
   const [editFormData, setEditFormData] = useState(null);
   const [showDueDiligenceModal, setShowDueDiligenceModal] = useState(false);
   const [relatedTenders, setRelatedTenders] = useState([]);
+  const [rankedFirstTenders, setRankedFirstTenders] = useState([]);
   const [relatedContracts, setRelatedContracts] = useState([]);
   const [relatedPOs, setRelatedPOs] = useState([]);
 
