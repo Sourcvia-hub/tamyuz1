@@ -3182,6 +3182,38 @@ async def delete_asset_category(category_id: str, request: Request):
     await db.asset_categories.delete_one({"id": category_id})
     return {"message": "Asset category deleted successfully"}
 
+# OSR Categories
+@api_router.get("/osr-categories")
+async def get_osr_categories(request: Request):
+    """Get all OSR categories"""
+    await require_auth(request)
+    categories = await db.osr_categories.find({}, {"_id": 0}).to_list(1000)
+    return categories
+
+@api_router.post("/osr-categories")
+async def create_osr_category(request: Request, category_data: dict):
+    """Create OSR category"""
+    await require_auth(request)
+    category_data["id"] = str(uuid.uuid4())
+    category_data["created_at"] = datetime.now(timezone.utc)
+    await db.osr_categories.insert_one(category_data)
+    return {"message": "OSR category created successfully", "category": category_data}
+
+@api_router.put("/osr-categories/{category_id}")
+async def update_osr_category(category_id: str, request: Request, category_data: dict):
+    """Update OSR category"""
+    await require_auth(request)
+    category_data["updated_at"] = datetime.now(timezone.utc)
+    await db.osr_categories.update_one({"id": category_id}, {"$set": category_data})
+    return {"message": "OSR category updated successfully"}
+
+@api_router.delete("/osr-categories/{category_id}")
+async def delete_osr_category(category_id: str, request: Request):
+    """Delete OSR category"""
+    await require_auth(request)
+    await db.osr_categories.delete_one({"id": category_id})
+    return {"message": "OSR category deleted successfully"}
+
 # Assets
 @api_router.get("/assets")
 async def get_assets(request: Request):
