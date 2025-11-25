@@ -403,6 +403,73 @@ const PurchaseOrderDetail = () => {
                 )}
               </div>
             )}
+
+            {/* Financial Summary */}
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Financial Summary</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Total Amount</p>
+                  <p className="text-2xl font-bold text-blue-600">${po.total_amount?.toLocaleString()}</p>
+                </div>
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Total Items</p>
+                  <p className="text-2xl font-bold text-gray-900">{po.items?.length || 0}</p>
+                </div>
+                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Average Item Value</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    ${po.items?.length > 0 ? (po.total_amount / po.items.length).toLocaleString(undefined, {maximumFractionDigits: 2}) : '0'}
+                  </p>
+                </div>
+              </div>
+              {po.requires_contract && (
+                <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-orange-800">
+                    <strong>⚠️ Contract Required:</strong> This PO requires a formal contract due to its value or classification.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Related Tender */}
+            {tender && (
+              <div className="bg-white rounded-xl shadow-lg p-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Related Tender</h3>
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900 text-lg">{tender.title}</h4>
+                      <p className="text-gray-600 mt-1">{tender.description}</p>
+                    </div>
+                    <Link
+                      to={`/tenders/${tender.id}`}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      View Tender
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Budget</p>
+                      <p className="font-medium text-gray-900">${tender.budget?.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Deadline</p>
+                      <p className="font-medium text-gray-900">{new Date(tender.deadline).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Status</p>
+                      <p className="font-medium text-gray-900">{tender.status}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Proposals</p>
+                      <p className="font-medium text-gray-900">{tender.proposals_count || 0}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
