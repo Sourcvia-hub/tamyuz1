@@ -19,6 +19,7 @@ const AssetForm = () => {
   const [categories, setCategories] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [contracts, setContracts] = useState([]);
+  const [purchaseOrders, setPurchaseOrders] = useState([]);
 
   const [formData, setFormData] = useState({
     name: '',
