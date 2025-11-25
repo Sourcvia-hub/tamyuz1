@@ -3991,7 +3991,40 @@ async def delete_asset_category(category_id: str, request: Request):
 async def get_assets(request: Request):
     """Get all assets"""
     await require_auth(request)
-    assets = await db.assets.find({"_id": 0}).to_list(10000)
+    assets = await db.assets.find({}, {"_id": 0}).to_list(10000)
+    
+    # Enrich assets with denormalized data
+    for asset in assets:
+        # Get category name
+        if asset.get("category_id"):
+            category = await db.asset_categories.find_one({"id": asset["category_id"]}, {"_id": 0})
+            if category:
+                asset["category_name"] = category.get("name")
+        
+        # Get building name
+        if asset.get("building_id"):
+            building = await db.buildings.find_one({"id": asset["building_id"]}, {"_id": 0})
+            if building:
+                asset["building_name"] = building.get("name")
+        
+        # Get floor name
+        if asset.get("floor_id"):
+            floor = await db.floors.find_one({"id": asset["floor_id"]}, {"_id": 0})
+            if floor:
+                asset["floor_name"] = floor.get("name")
+        
+        # Get vendor name
+        if asset.get("vendor_id"):
+            vendor = await db.vendors.find_one({"id": asset["vendor_id"]}, {"_id": 0})
+            if vendor:
+                asset["vendor_name"] = vendor.get("name_english")
+        
+        # Get contract number
+        if asset.get("contract_id"):
+            contract = await db.contracts.find_one({"id": asset["contract_id"]}, {"_id": 0})
+            if contract:
+                asset["contract_number"] = contract.get("contract_number")
+    
     return assets
 
 @api_router.get("/assets/{asset_id}")
