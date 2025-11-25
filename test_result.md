@@ -2871,3 +2871,28 @@ if (poData.vendor_id && !poData.vendor_name) {
 - `/app/frontend/src/pages/TenderEvaluation.js` - Added vendor name mapping
 - `/app/frontend/src/pages/PurchaseOrderDetail.js` - Added vendor name fetching
 
+
+---
+
+## Vendor Name Display - FIXED (using name_english field) - Nov 25, 2025
+
+### Issue Identified:
+- Vendor schema uses `name_english` field, not `name` field
+- Code was looking for `vendor.name` which doesn't exist
+- This caused vendor IDs to display instead of names
+
+### Fix Applied:
+Updated all vendor name references to use the correct field hierarchy:
+```javascript
+vendor.name_english || vendor.commercial_name || vendor.name || vendor_id
+```
+
+### Files Fixed:
+1. `/app/frontend/src/pages/TenderEvaluation.js` - Line 47
+2. `/app/frontend/src/pages/PurchaseOrderDetail.js` - Line 35
+
+### Verification:
+✅ Tested on localhost - vendor names display correctly
+✅ PO Detail shows "Digital Innovations Co" instead of UUID
+✅ Fallback chain ensures name always displays
+
