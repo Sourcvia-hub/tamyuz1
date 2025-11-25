@@ -22,6 +22,7 @@ const Layout = ({ children }) => {
     { name: 'Resources', path: '/resources', icon: '👤', roles: ['all'] },
     { name: 'Invoices', path: '/invoices', icon: '💰', roles: ['all'] },
     { name: 'Assets', path: '/assets', icon: '🏗️', roles: ['all'] },
+    { name: 'Service Requests', path: '/osr', icon: '🔧', roles: ['all'] },
   ];
 
   const filteredNavigation = navigation.filter(
