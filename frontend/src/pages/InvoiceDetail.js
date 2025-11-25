@@ -229,6 +229,89 @@ const InvoiceDetail = () => {
             </form>
           </div>
         )}
+
+        {/* Related Vendor */}
+        {!isEditing && vendor && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Vendor Information</h3>
+            <div className="p-4 border border-gray-200 rounded-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium text-gray-900 text-lg">{vendor.name}</h4>
+                  <p className="text-gray-600 mt-1">{vendor.email}</p>
+                  <div className="flex gap-4 mt-2 text-sm">
+                    <span className="text-gray-500">Category: {vendor.category}</span>
+                    {vendor.risk_score !== undefined && (
+                      <span className={`font-medium ${
+                        vendor.risk_score >= 70 ? 'text-red-600' :
+                        vendor.risk_score >= 40 ? 'text-yellow-600' :
+                        'text-green-600'
+                      }`}>
+                        Risk Score: {vendor.risk_score}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <Link
+                  to={`/vendors/${vendor.id}`}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  View Vendor
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Related Contract */}
+        {!isEditing && contract && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Related Contract</h3>
+            <div className="p-4 border border-gray-200 rounded-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium text-gray-900 text-lg">Contract #{contract.contract_number}</h4>
+                  <p className="text-gray-600 mt-1">{contract.title}</p>
+                  <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                    <span>Value: ${contract.value?.toLocaleString()}</span>
+                    <span>Status: {contract.status}</span>
+                  </div>
+                </div>
+                <Link
+                  to={`/contracts/${contract.id}`}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  View Contract
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Related Purchase Order */}
+        {!isEditing && po && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Related Purchase Order</h3>
+            <div className="p-4 border border-gray-200 rounded-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium text-gray-900 text-lg">PO #{po.po_number}</h4>
+                  <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                    <span>Amount: ${po.total_amount?.toLocaleString()}</span>
+                    <span>Status: {po.status}</span>
+                    <span>Items: {po.items?.length || 0}</span>
+                  </div>
+                </div>
+                <Link
+                  to={`/purchase-orders/${po.id}`}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  View PO
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
