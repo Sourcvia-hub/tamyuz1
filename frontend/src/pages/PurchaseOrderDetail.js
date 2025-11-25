@@ -32,7 +32,10 @@ const PurchaseOrderDetail = () => {
       if (poData.vendor_id && !poData.vendor_name) {
         try {
           const vendorRes = await axios.get(`${API}/vendors/${poData.vendor_id}`, { withCredentials: true });
-          poData = { ...poData, vendor_name: vendorRes.data.name };
+          poData = { 
+            ...poData, 
+            vendor_name: vendorRes.data.name_english || vendorRes.data.commercial_name || vendorRes.data.name || poData.vendor_id
+          };
         } catch (err) {
           console.log('Could not fetch vendor name');
         }
