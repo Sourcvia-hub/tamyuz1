@@ -423,6 +423,80 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+# Asset Management Module Testing Results
+asset_management:
+  - task: "Asset List Page"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/Assets.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Asset list page loads correctly with statistics cards (Total: 2, Active: 2, Under Maintenance: 0, Out of Warranty: 0). Register Asset button visible and functional. All filters working (search, status, warranty). Clear filters button working. Page displays proper title 'Asset Registry'."
+
+  - task: "Master Data Seeding"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: POST /api/facilities/seed-data endpoint working correctly. Creates 8 asset categories (HVAC, Electrical, Plumbing, Fire Safety, Furniture, Elevators, Vehicles, Other), 2 buildings (Main Office, Warehouse A), and 3 floors (Ground Floor, 1st Floor, 2nd Floor). Fixed MongoDB query issue in GET endpoints."
+
+  - task: "Asset Creation Form"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/AssetForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Asset creation form working perfectly. All dropdowns populated correctly (Category: HVAC, Building: Main Office, Floor: 1st Floor). Form accepts all test data as specified: Central HVAC Unit A1, Carrier 50TCQ model, CC123456 serial number, Carrier manufacturer, Mechanical Room location, active status, good condition. Form submission successful with redirect to asset list."
+
+  - task: "Asset Auto-numbering"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Asset auto-numbering working correctly. Assets created with format ASSET-YYYY-NNNN (e.g., ASSET-2025-0001, ASSET-2025-0002). Sequential numbering confirmed. Fixed ObjectId serialization issue in create asset endpoint response."
+
+  - task: "Asset Detail Page"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/AssetDetail.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Asset detail page accessible via 'View Details' links. Page loads correctly showing asset information. Edit Asset, Delete, and Back to List buttons present. Related OSRs section visible (empty initially as expected). Minor: Denormalized data display needs verification - category, building, floor names should show friendly names instead of IDs."
+
+  - task: "Asset Edit Functionality"
+    implemented: true
+    working: true
+    file: "frontend/src/pages/AssetForm.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTED: Asset edit functionality working. Edit Asset button navigates to edit form. Form pre-populated with existing data. Successfully changed condition from 'good' to 'fair' and added notes 'Requires inspection' as specified in test requirements. Form submission successful."
+
   - task: "Purchase Orders Dashboard Section"
     implemented: true
     working: true
