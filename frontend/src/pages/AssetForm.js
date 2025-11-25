@@ -71,17 +71,19 @@ const AssetForm = () => {
 
   const fetchMasterData = async () => {
     try {
-      const [buildingsRes, categoriesRes, vendorsRes, contractsRes] = await Promise.all([
+      const [buildingsRes, categoriesRes, vendorsRes, contractsRes, posRes] = await Promise.all([
         axios.get(`${API}/buildings`, { withCredentials: true }),
         axios.get(`${API}/asset-categories`, { withCredentials: true }),
         axios.get(`${API}/vendors`, { withCredentials: true }),
-        axios.get(`${API}/contracts`, { withCredentials: true })
+        axios.get(`${API}/contracts`, { withCredentials: true }),
+        axios.get(`${API}/purchase-orders`, { withCredentials: true })
       ]);
       
       setBuildings(buildingsRes.data);
       setCategories(categoriesRes.data);
       setVendors(vendorsRes.data);
       setContracts(contractsRes.data);
+      setPurchaseOrders(posRes.data);
     } catch (error) {
       console.error('Error fetching master data:', error);
     }
