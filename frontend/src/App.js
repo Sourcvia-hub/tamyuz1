@@ -362,6 +362,22 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/assets/new"
+        element={
+          <ProtectedRoute>
+            <AssetForm />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assets/:id/edit"
+        element={
+          <ProtectedRoute>
+            <AssetForm />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };
