@@ -224,3 +224,23 @@ def calculate_dd_risk_adjustment(vendor_data: dict) -> float:
     
     return risk_score
 
+
+# ==================== REQUEST/RESPONSE MODELS ====================
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    role: Optional[UserRole] = UserRole.PROCUREMENT_OFFICER
+
+class ProposalEvaluationRequest(BaseModel):
+    """Request model for evaluating proposals"""
+    vendor_reliability_stability: float
+    delivery_warranty_backup: float
+    technical_experience: float
+    cost_score: float
+    meets_requirements: float
+
