@@ -45,6 +45,16 @@ const ResourceDetail = () => {
     try {
       const response = await axios.get(`${API}/resources/${id}`, { withCredentials: true });
       setResource(response.data);
+      
+      // Fetch related contract
+      if (response.data.contract_id) {
+        try {
+          const contractRes = await axios.get(`${API}/contracts/${response.data.contract_id}`, { withCredentials: true });
+          setContract(contractRes.data);
+        } catch (err) {
+          console.log('Could not fetch contract info');
+        }
+      }
       setEditFormData({
         name: response.data.name || '',
         nationality: response.data.nationality || '',
