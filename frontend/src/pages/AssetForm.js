@@ -58,6 +58,16 @@ const AssetForm = () => {
     }
   }, [formData.building_id]);
 
+  // Clear contract selection if vendor changes
+  useEffect(() => {
+    if (formData.vendor_id && formData.contract_id) {
+      const selectedContract = contracts.find(c => c.id === formData.contract_id);
+      if (selectedContract && selectedContract.vendor_id !== formData.vendor_id) {
+        setFormData(prev => ({ ...prev, contract_id: '' }));
+      }
+    }
+  }, [formData.vendor_id]);
+
   const fetchMasterData = async () => {
     try {
       const [buildingsRes, categoriesRes, vendorsRes, contractsRes] = await Promise.all([
