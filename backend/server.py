@@ -4133,6 +4133,49 @@ async def delete_osr(osr_id: str, request: Request):
     await db.osr.delete_one({"id": osr_id})
     return {"message": "OSR deleted successfully"}
 
+# Seed Master Data
+@api_router.post("/facilities/seed-data")
+async def seed_facilities_data(request: Request):
+    """Seed initial master data for facilities management"""
+    await require_auth(request)
+    
+    # Seed Asset Categories
+    categories = [
+        {"id": str(uuid.uuid4()), "name": "HVAC", "description": "Heating, Ventilation, and Air Conditioning", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Electrical", "description": "Electrical Systems and Equipment", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Plumbing", "description": "Plumbing Systems", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Fire Safety", "description": "Fire Safety Equipment", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Furniture", "description": "Office and Facility Furniture", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Elevators", "description": "Elevators and Lifts", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Vehicles", "description": "Company Vehicles", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Other", "description": "Other Assets", "is_active": True, "created_at": datetime.now(timezone.utc)},
+    ]
+    
+    existing_categories = await db.asset_categories.count_documents({})
+    if existing_categories == 0:
+        await db.asset_categories.insert_many(categories)
+    
+    # Seed Sample Buildings
+    buildings = [
+        {"id": str(uuid.uuid4()), "name": "Main Office", "code": "MO", "address": "123 Main St", "is_active": True, "created_at": datetime.now(timezone.utc)},
+        {"id": str(uuid.uuid4()), "name": "Warehouse A", "code": "WH-A", "address": "456 Industrial Rd", "is_active": True, "created_at": datetime.now(timezone.utc)},
+    ]
+    
+    existing_buildings = await db.buildings.count_documents({})
+    if existing_buildings == 0:
+        await db.buildings.insert_many(buildings)
+        
+        # Seed Sample Floors for Main Office
+        building_id = buildings[0]["id"]
+        floors = [
+            {"id": str(uuid.uuid4()), "building_id": building_id, "name": "Ground Floor", "number": 0, "is_active": True, "created_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "building_id": building_id, "name": "1st Floor", "number": 1, "is_active": True, "created_at": datetime.now(timezone.utc)},
+            {"id": str(uuid.uuid4()), "building_id": building_id, "name": "2nd Floor", "number": 2, "is_active": True, "created_at": datetime.now(timezone.utc)},
+        ]
+        await db.floors.insert_many(floors)
+    
+    return {"message": "Seed data created successfully"}
+
 # ==================== APP SETUP ====================
 # Configure CORS middleware (must be before including router)
 app.add_middleware(
