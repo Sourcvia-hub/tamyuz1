@@ -20,8 +20,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def get_current_user(request: Request, User, db):
+async def get_current_user(request: Request):
     """Get current user from session token"""
+    # Import here to avoid circular dependency
+    from models import User
+    from utils.database import db
+    
     # Try to get token from cookie first
     session_token = request.cookies.get("session_token")
     
@@ -55,17 +59,17 @@ async def get_current_user(request: Request, User, db):
     return User(**user_doc)
 
 
-async def require_auth(request: Request, User, db):
+async def require_auth(request: Request):
     """Require authentication"""
-    user = await get_current_user(request, User, db)
+    user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return user
 
 
-async def require_role(request: Request, allowed_roles: List, User, UserRole, db):
+async def require_role(request: Request, allowed_roles: List):
     """Require specific role"""
-    user = await require_auth(request, User, db)
+    user = await require_auth(request)
     if user.role not in allowed_roles:
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
