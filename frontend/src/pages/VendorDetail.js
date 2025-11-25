@@ -54,10 +54,31 @@ const VendorDetail = () => {
 
   const fetchRelatedData = async () => {
     try {
-      // Fetch related tenders
+      // Fetch all tenders and proposals
       const tendersRes = await axios.get(`${API}/tenders`, { withCredentials: true });
       const vendorTenders = tendersRes.data.filter(t => t.vendor_id === id);
       setRelatedTenders(vendorTenders);
+
+      // Fetch proposals to find tenders where vendor is ranked #1
+      const proposalsRes = await axios.get(`${API}/proposals`, { withCredentials: true });
+      const vendorProposals = proposalsRes.data.filter(p => p.vendor_id === id);
+      
+      // Find tenders where this vendor's proposal is ranked #1
+      const rankedFirst = [];
+      for (const proposal of vendorProposals) {
+        if (proposal.rank === 1) {
+          // Fetch the tender details
+          const tender = tendersRes.data.find(t => t.id === proposal.tender_id);
+          if (tender) {
+            rankedFirst.push({
+              ...tender,
+              proposal: proposal,
+              evaluation_score: proposal.evaluation_score
+            });
+          }
+        }
+      }
+      setRankedFirstTenders(rankedFirst);
 
       // Fetch related contracts
       const contractsRes = await axios.get(`${API}/contracts`, { withCredentials: true });
