@@ -2821,3 +2821,53 @@ Added a new section to Vendor Detail page showing tenders where the vendor was r
 ### Files Modified:
 - `/app/frontend/src/pages/VendorDetail.js`
 
+
+---
+
+## Vendor Display Fixes - Nov 24, 2025
+
+### Changes Made:
+
+**1. Removed "Related Tenders" Section from Vendor Detail:**
+- Removed the "Related Tenders" section that showed tenders by vendor_id
+- Kept only "Tenders Ranked #1" section for better focus
+- Users now see only winning tenders for the vendor
+
+**2. Fixed Vendor Name in Tender Evaluation Page:**
+- Issue: Showing vendor_id instead of vendor name (e.g., "10aabaa9-7bcb-47ce-93da-3f9eec0bf26a")
+- Fix: Added vendor name resolution in fetchData()
+- Now fetches all vendors and maps names to proposals
+- Displays actual vendor name (e.g., "ABC Corporation")
+
+**3. Fixed Vendor Name in PO Detail Page:**
+- Issue: Showing vendor_id instead of vendor name
+- Fix: Added vendor lookup in fetchPO()
+- Fetches vendor details if vendor_name not present
+- Displays vendor name with link to vendor details
+
+### Technical Implementation:
+
+**Evaluation Page:**
+```javascript
+// Fetch vendors and map to proposals
+const vendors = vendorsRes.data;
+proposals.map(proposal => ({
+  ...proposal,
+  vendor_name: vendors.find(v => v.id === proposal.vendor_id)?.name
+}));
+```
+
+**PO Detail Page:**
+```javascript
+// Fetch vendor name if missing
+if (poData.vendor_id && !poData.vendor_name) {
+  const vendorRes = await axios.get(`/api/vendors/${poData.vendor_id}`);
+  poData.vendor_name = vendorRes.data.name;
+}
+```
+
+### Files Modified:
+- `/app/frontend/src/pages/VendorDetail.js` - Removed related tenders section
+- `/app/frontend/src/pages/TenderEvaluation.js` - Added vendor name mapping
+- `/app/frontend/src/pages/PurchaseOrderDetail.js` - Added vendor name fetching
+
