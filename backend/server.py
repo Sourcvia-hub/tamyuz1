@@ -3892,7 +3892,7 @@ async def download_file(module: str, entity_id: str, filename: str, request: Req
 async def get_buildings(request: Request):
     """Get all buildings"""
     await require_auth(request)
-    buildings = await db.buildings.find({"_id": 0}).to_list(1000)
+    buildings = await db.buildings.find({}, {"_id": 0}).to_list(1000)
     return buildings
 
 @api_router.post("/buildings")
