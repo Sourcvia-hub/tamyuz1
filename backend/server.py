@@ -244,6 +244,8 @@ class ProposalEvaluationRequest(BaseModel):
     cost_score: float
     meets_requirements: float
 
+# ==================== AUTH ENDPOINTS ====================
+@api_router.post("/auth/register")
 async def register(register_data: RegisterRequest):
     """Register a new user (admin only endpoint for creating users)"""
     # Check if user already exists
