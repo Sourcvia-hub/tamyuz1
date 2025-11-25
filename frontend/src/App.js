@@ -214,6 +214,7 @@ import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseOrderDetail from './pages/PurchaseOrderDetail';
 import Resources from './pages/Resources';
 import ResourceDetail from './pages/ResourceDetail';
+import Assets from './pages/Assets';
 
 // ==================== MAIN APP ====================
 const AppRoutes = () => {
