@@ -402,14 +402,29 @@ const AssetForm = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">PO Number</label>
-                <input
-                  type="text"
+                <select
                   name="po_number"
                   value={formData.po_number}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Optional"
-                />
+                  disabled={!formData.vendor_id}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                >
+                  <option value="">
+                    {formData.vendor_id ? 'No PO linked' : 'Select vendor first'}
+                  </option>
+                  {purchaseOrders
+                    .filter(po => po.vendor_id === formData.vendor_id)
+                    .map(po => (
+                      <option key={po.id} value={po.po_number}>
+                        {po.po_number} - ${po.total_amount?.toLocaleString()}
+                      </option>
+                    ))}
+                </select>
+                {formData.vendor_id && purchaseOrders.filter(po => po.vendor_id === formData.vendor_id).length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No purchase orders found for selected vendor
+                  </p>
+                )}
               </div>
 
               <div>
