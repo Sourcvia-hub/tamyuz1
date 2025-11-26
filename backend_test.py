@@ -744,6 +744,282 @@ class RBACTester:
         except Exception as e:
             return {'success': False, 'status_code': 500, 'error': str(e)}
 
+    def run_comprehensive_rbac_tests(self):
+        """Run comprehensive RBAC tests for all 8 modules"""
+        print(f"\n" + "="*100)
+        print(f"COMPREHENSIVE RBAC TESTING - ALL SECURED MODULES")
+        print(f"="*100)
+        
+        # Login as admin first to ensure we can create test data
+        if not self.login_rbac_user('admin'):
+            print("❌ Failed to login as admin - cannot proceed with testing")
+            return False
+        
+        # Test all modules
+        modules_to_test = [
+            ('Vendors', self.test_rbac_vendors_module),
+            ('Tenders', self.test_rbac_tenders_module),
+            ('Contracts', self.test_rbac_contracts_module),
+            ('Invoices', self.test_rbac_invoices_module),
+            ('Purchase Orders', self.test_rbac_purchase_orders_module),
+            ('Resources', self.test_rbac_resources_module),
+            ('Assets', self.test_rbac_assets_module),
+            ('OSR/Service Requests', self.test_rbac_osrs_module)
+        ]
+        
+        results = {}
+        for module_name, test_method in modules_to_test:
+            print(f"\n🔍 Starting {module_name} Module Testing...")
+            try:
+                results[module_name] = test_method()
+                print(f"✅ {module_name} Module Testing Completed")
+            except Exception as e:
+                print(f"❌ {module_name} Module Testing Failed: {str(e)}")
+                results[module_name] = False
+        
+        # Print comprehensive summary
+        self.print_rbac_test_summary()
+        
+        return results
+
+    def test_rbac_tenders_module(self):
+        """Test RBAC for Tenders Module (/api/tenders)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: TENDERS MODULE")
+        print(f"="*80)
+        
+        test_scenarios = [
+            # CREATE (POST /api/tenders) - Should work for user, procurement_officer, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/tenders',
+                'should_pass': ['user', 'procurement_officer', 'admin'],
+                'should_fail': ['direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "title": "RBAC Test Tender",
+                    "description": "Test tender for RBAC validation",
+                    "project_name": "RBAC Testing Project",
+                    "requirements": "Testing RBAC permissions for tender creation",
+                    "budget": 100000.0,
+                    "deadline": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+                    "invited_vendors": []
+                }
+            },
+            # LIST (GET /api/tenders) - Should work for all roles
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/tenders',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None
+            },
+            # DETAIL (GET /api/tenders/{id}) - Should work for all roles
+            {
+                'operation': 'DETAIL',
+                'method': 'GET',
+                'endpoint': '/tenders/{tender_id}',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None,
+                'requires_tender': True
+            }
+        ]
+        
+        return self._execute_module_tests('tenders', test_scenarios, self._execute_tender_operation)
+
+    def test_rbac_contracts_module(self):
+        """Test RBAC for Contracts Module (/api/contracts)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: CONTRACTS MODULE")
+        print(f"="*80)
+        
+        test_scenarios = [
+            # CREATE (POST /api/contracts) - Should work for user, procurement_officer, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/contracts',
+                'should_pass': ['user', 'procurement_officer', 'admin'],
+                'should_fail': ['direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "title": "RBAC Test Contract",
+                    "sow": "Statement of work for RBAC testing",
+                    "sla": "Service level agreement for testing",
+                    "value": 75000.0,
+                    "start_date": datetime.now(timezone.utc).isoformat(),
+                    "end_date": (datetime.now(timezone.utc) + timedelta(days=180)).isoformat(),
+                    "milestones": []
+                },
+                'requires_tender_vendor': True
+            },
+            # LIST (GET /api/contracts) - Should work for all roles
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/contracts',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None
+            },
+            # DETAIL (GET /api/contracts/{id}) - Should work for all roles
+            {
+                'operation': 'DETAIL',
+                'method': 'GET',
+                'endpoint': '/contracts/{contract_id}',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None,
+                'requires_contract': True
+            },
+            # APPROVE (PUT /api/contracts/{id}/approve) - Should work for procurement_manager, admin
+            {
+                'operation': 'APPROVE',
+                'method': 'PUT',
+                'endpoint': '/contracts/{contract_id}/approve',
+                'should_pass': ['procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'procurement_officer', 'senior_manager'],
+                'data': None,
+                'requires_contract': True
+            }
+        ]
+        
+        return self._execute_module_tests('contracts', test_scenarios, self._execute_contract_operation)
+
+    def test_rbac_invoices_module(self):
+        """Test RBAC for Invoices Module (/api/invoices)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: INVOICES MODULE")
+        print(f"="*80)
+        
+        test_scenarios = [
+            # CREATE (POST /api/invoices) - Should work for procurement_officer, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/invoices',
+                'should_pass': ['procurement_officer', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "amount": 25000.0,
+                    "description": "RBAC Test Invoice",
+                    "milestone_reference": "Testing milestone"
+                },
+                'requires_contract_vendor': True
+            },
+            # LIST (GET /api/invoices) - Should work for all roles
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/invoices',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None
+            },
+            # VERIFY (PUT /api/invoices/{id}/verify) - Should work for user, procurement_officer (has VERIFIER)
+            {
+                'operation': 'VERIFY',
+                'method': 'PUT',
+                'endpoint': '/invoices/{invoice_id}/verify',
+                'should_pass': ['user', 'procurement_officer', 'admin'],
+                'should_fail': ['direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': None,
+                'requires_invoice': True
+            },
+            # APPROVE (PUT /api/invoices/{id}/approve) - Should work for procurement_manager, admin
+            {
+                'operation': 'APPROVE',
+                'method': 'PUT',
+                'endpoint': '/invoices/{invoice_id}/approve',
+                'should_pass': ['procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'procurement_officer', 'senior_manager'],
+                'data': None,
+                'requires_invoice': True
+            }
+        ]
+        
+        return self._execute_module_tests('invoices', test_scenarios, self._execute_invoice_operation)
+
+    def test_rbac_purchase_orders_module(self):
+        """Test RBAC for Purchase Orders Module (/api/purchase-orders)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: PURCHASE ORDERS MODULE")
+        print(f"="*80)
+        
+        test_scenarios = [
+            # CREATE (POST /api/purchase-orders) - Should work for user, procurement_officer, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/purchase-orders',
+                'should_pass': ['user', 'procurement_officer', 'admin'],
+                'should_fail': ['direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "delivery_time": "30 days",
+                    "items": [
+                        {
+                            "name": "RBAC Test Item",
+                            "description": "Test item for RBAC validation",
+                            "quantity": 5,
+                            "unit_price": 1000.0
+                        }
+                    ]
+                },
+                'requires_tender_vendor': True
+            },
+            # LIST (GET /api/purchase-orders) - Should work for all roles
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/purchase-orders',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None
+            }
+        ]
+        
+        return self._execute_module_tests('purchase_orders', test_scenarios, self._execute_purchase_order_operation)
+
+    def test_rbac_resources_module(self):
+        """Test RBAC for Resources Module (/api/resources)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: RESOURCES MODULE")
+        print(f"="*80)
+        
+        test_scenarios = [
+            # CREATE (POST /api/resources) - Should work for user, procurement_officer, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/resources',
+                'should_pass': ['user', 'procurement_officer', 'admin'],
+                'should_fail': ['direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "name": "RBAC Test Resource",
+                    "designation": "Test Developer",
+                    "work_type": "on_premises",
+                    "start_date": datetime.now(timezone.utc).isoformat(),
+                    "end_date": (datetime.now(timezone.utc) + timedelta(days=90)).isoformat(),
+                    "monthly_cost": 8000.0,
+                    "skills": ["Python", "Testing"],
+                    "experience_years": 3
+                },
+                'requires_contract_vendor': True
+            },
+            # LIST (GET /api/resources) - Should work for all roles
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/resources',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None
+            }
+        ]
+        
+        return self._execute_module_tests('resources', test_scenarios, self._execute_resource_operation)
+
     def print_rbac_test_summary(self):
         """Print comprehensive RBAC test summary"""
         print(f"\n" + "="*80)
