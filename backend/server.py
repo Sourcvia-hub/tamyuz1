@@ -3260,8 +3260,10 @@ async def get_asset_categories(request: Request):
 
 @api_router.post("/asset-categories")
 async def create_asset_category(request: Request, category: AssetCategory):
-    """Create a new asset category"""
-    await require_auth(request)
+    """Create a new asset category - RBAC: requires controller permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "assets", Permission.CONTROLLER)
     category_dict = category.model_dump()
     await db.asset_categories.insert_one(category_dict)
     return {"message": "Asset category created successfully", "category": category_dict}
