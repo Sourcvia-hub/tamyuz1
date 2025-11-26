@@ -883,8 +883,10 @@ async def get_vendor_audit_log(vendor_id: str, request: Request):
 
 @api_router.put("/vendors/{vendor_id}/due-diligence")
 async def update_vendor_due_diligence(vendor_id: str, dd_data: dict, request: Request):
-    """Update vendor due diligence questionnaire - Auto-approves and recalculates risk"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    """Update vendor due diligence questionnaire - RBAC: requires requester permission on vendor_dd"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    user = await require_permission(request, "vendor_dd", Permission.REQUESTER)
     
     vendor = await db.vendors.find_one({"id": vendor_id})
     if not vendor:
