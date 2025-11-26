@@ -2052,8 +2052,10 @@ async def get_resources(request: Request, status: Optional[str] = None):
 
 @api_router.get("/resources/{resource_id}")
 async def get_resource(resource_id: str, request: Request):
-    """Get resource by ID"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    """Get resource by ID - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "resources", Permission.VIEWER)
     
     resource = await db.resources.find_one({"id": resource_id}, {"_id": 0})
     if not resource:
