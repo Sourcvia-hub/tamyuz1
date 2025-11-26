@@ -1788,8 +1788,9 @@ async def update_invoice(invoice_id: str, invoice_data: dict, request: Request):
 
 @api_router.put("/invoices/{invoice_id}/verify")
 async def verify_invoice(invoice_id: str, request: Request):
-    """Verify invoice (Procurement Officer)"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER])
+    """Verify invoice - RBAC: requires verify permission"""
+    from utils.auth import require_verify_permission
+    user = await require_verify_permission(request, "invoices")
     
     result = await db.invoices.update_one(
         {"id": invoice_id},
