@@ -60,9 +60,13 @@ const Layout = ({ children }) => {
           <div className="flex items-center justify-between h-16 px-4 border-b">
             <div className="flex items-center space-x-2">
               <img 
-                src="/logo.png" 
+                src={`${process.env.PUBLIC_URL}/logo.png`}
                 alt="Sourcevia Logo" 
                 className="h-10 w-auto"
+                onError={(e) => {
+                  console.error('Logo failed to load');
+                  e.target.style.display = 'none';
+                }}
               />
             </div>
           </div>
