@@ -170,7 +170,7 @@ const TenderDetail = () => {
             ← Back to Tenders
           </button>
           <div className="flex gap-3">
-            {user?.role === 'procurement_officer' && tender?.status === 'published' && (
+            {canCreate(user?.role, Module.TENDER_PROPOSALS) && tender?.status === 'published' && (
               <>
                 <button
                   onClick={() => setShowProposalModal(true)}
@@ -186,7 +186,7 @@ const TenderDetail = () => {
                 </button>
               </>
             )}
-            {user?.role === 'procurement_officer' && (
+            {canEdit(user?.role, Module.TENDERS) && (
               <button
                 onClick={handleEdit}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
