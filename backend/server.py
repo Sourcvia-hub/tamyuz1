@@ -1948,8 +1948,9 @@ async def convert_po_to_contract(po_id: str, contract_data: dict, request: Reque
 # ==================== RESOURCE ENDPOINTS ====================
 @api_router.post("/resources")
 async def create_resource(resource: Resource, request: Request):
-    """Create new resource based on approved contract and vendor"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN, UserRole.REQUESTER])
+    """Create new resource - RBAC: requires create permission"""
+    from utils.auth import require_create_permission
+    user = await require_create_permission(request, "resources")
     
     # Verify contract exists and is approved
     contract = await db.contracts.find_one({"id": resource.contract_id})
