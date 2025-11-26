@@ -1176,8 +1176,9 @@ async def update_tender(tender_id: str, tender: Tender, request: Request):
 
 @api_router.put("/tenders/{tender_id}/publish")
 async def publish_tender(tender_id: str, request: Request):
-    """Publish tender"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER])
+    """Publish tender - RBAC: requires verify permission"""
+    from utils.auth import require_verify_permission
+    await require_verify_permission(request, "tenders")
     
     result = await db.tenders.update_one(
         {"id": tender_id},
