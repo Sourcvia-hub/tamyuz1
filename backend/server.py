@@ -3464,8 +3464,9 @@ async def create_osr(request: Request, osr: OSR):
 
 @api_router.put("/osrs/{osr_id}")
 async def update_osr(osr_id: str, request: Request, update_data: dict):
-    """Update OSR"""
-    await require_auth(request)
+    """Update OSR - RBAC: requires edit permission"""
+    from utils.auth import require_edit_permission
+    await require_edit_permission(request, "service_requests")
     
     update_data["updated_at"] = datetime.now(timezone.utc)
     
