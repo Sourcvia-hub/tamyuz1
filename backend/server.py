@@ -3410,8 +3410,10 @@ async def delete_asset(asset_id: str, request: Request):
 # OSR (Operating Service Requests)
 @api_router.get("/osrs")
 async def get_osrs(request: Request):
-    """Get all OSRs"""
-    await require_auth(request)
+    """Get all OSRs - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "service_requests", Permission.VIEWER)
     osrs = await db.osr.find({"_id": 0}).to_list(10000)
     return osrs
 
