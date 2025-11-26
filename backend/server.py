@@ -1894,12 +1894,18 @@ async def create_purchase_order(po: PurchaseOrder, request: Request):
 
 @api_router.get("/purchase-orders")
 async def get_purchase_orders(request: Request):
-    """Get all purchase orders - RBAC: requires viewer permission"""
+    """Get all purchase orders - RBAC: requires viewer permission with data filtering"""
     from utils.auth import require_permission
-    from utils.permissions import Permission
-    await require_permission(request, "purchase_orders", Permission.VIEWER)
+    from utils.permissions import Permission, should_filter_by_user
+    user = await require_permission(request, "purchase_orders", Permission.VIEWER)
+    user_role_str = user.role.value.lower()
     
-    pos = await db.purchase_orders.find({}, {"_id": 0}).to_list(1000)
+    query = {}
+    # Apply row-level security: regular users see only their own POs
+    if should_filter_by_user(user_role_str, "purchase_orders"):
+        query["created_by"] = user.id
+    
+    pos = await db.purchase_orders.find(query, {"_id": 0}).to_list(1000)
     return pos
 
 @api_router.get("/purchase-orders/{po_id}")
