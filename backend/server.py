@@ -1064,14 +1064,20 @@ async def get_tenders(request: Request, status: Optional[TenderStatus] = None, s
     """Get all tenders - RBAC: requires viewer permission with data filtering"""
     from utils.auth import require_permission
     from utils.permissions import Permission, should_filter_by_user
+    import logging
+    
     user = await require_permission(request, "tenders", Permission.VIEWER)
     user_role_str = user.role.value.lower()
     
     query = {}
     
     # Apply row-level security: regular users see only their own tenders
-    if should_filter_by_user(user_role_str, "tenders"):
+    filter_check = should_filter_by_user(user_role_str, "tenders")
+    logging.info(f"Tender query filter: role={user_role_str}, should_filter={filter_check}, user_id={user.id}")
+    
+    if filter_check:
         query["created_by"] = user.id
+        logging.info(f"Applied filter: query={query}")
     
     if status:
         query["status"] = status.value
