@@ -861,8 +861,10 @@ async def update_vendor(vendor_id: str, vendor_update: Vendor, request: Request)
 
 @api_router.get("/vendors/{vendor_id}/audit-log")
 async def get_vendor_audit_log(vendor_id: str, request: Request):
-    """Get audit log for a vendor"""
-    await require_auth(request)
+    """Get audit log for a vendor - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "vendors", Permission.VIEWER)
     
     logs = await db.audit_logs.find({"entity_type": "vendor", "entity_id": vendor_id}).sort("timestamp", -1).to_list(100)
     
