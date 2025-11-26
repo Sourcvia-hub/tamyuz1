@@ -54,8 +54,53 @@ class RBACTester:
             'osrs': {}
         }
         
+    def login_rbac_user(self, user_key):
+        """Login with RBAC test user"""
+        print(f"\n=== LOGIN TEST ({user_key.upper()}) ===")
+        
+        if user_key not in RBAC_TEST_USERS:
+            print(f"❌ Unknown user key: {user_key}")
+            return False
+            
+        user_creds = RBAC_TEST_USERS[user_key]
+        login_data = {
+            "email": user_creds["email"],
+            "password": user_creds["password"]
+        }
+        
+        try:
+            response = self.session.post(f"{BASE_URL}/auth/login", json=login_data)
+            print(f"Login Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                user_info = data.get('user', {})
+                self.current_user = {
+                    'email': user_info.get('email'),
+                    'role': user_info.get('role'),
+                    'name': user_info.get('name')
+                }
+                
+                print(f"✅ Login successful for {user_creds['email']}")
+                print(f"User role: {user_info.get('role', 'Unknown')}")
+                print(f"User name: {user_info.get('name', 'Unknown')}")
+                
+                # Extract session token from cookies
+                if 'session_token' in self.session.cookies:
+                    self.auth_token = self.session.cookies['session_token']
+                    print(f"Session token obtained from cookies")
+                
+                return True
+            else:
+                print(f"❌ Login failed: {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Login error: {str(e)}")
+            return False
+
     def login(self, user_type="procurement"):
-        """Login with test user"""
+        """Legacy login method for backward compatibility"""
         print(f"\n=== LOGIN TEST ({user_type}) ===")
         
         user_creds = TEST_USERS[user_type]
