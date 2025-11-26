@@ -2007,8 +2007,10 @@ async def create_resource(resource: Resource, request: Request):
 
 @api_router.get("/resources")
 async def get_resources(request: Request, status: Optional[str] = None):
-    """Get all resources"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    """Get all resources - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "resources", Permission.VIEWER)
     
     query = {}
     if status:
