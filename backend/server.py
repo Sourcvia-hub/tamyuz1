@@ -707,8 +707,10 @@ async def create_vendor(vendor: Vendor, request: Request):
 
 @api_router.get("/vendors")
 async def get_vendors(request: Request, status: Optional[VendorStatus] = None, search: Optional[str] = None):
-    """Get all vendors with optional search by vendor_number or name"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    """Get all vendors with optional search by vendor_number or name - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "vendors", Permission.VIEWER)
     
     query = {}
     if status:
