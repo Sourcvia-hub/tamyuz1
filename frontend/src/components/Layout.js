@@ -15,16 +15,21 @@ const Layout = ({ children }) => {
   };
 
   const navigation = [
-    { name: 'Dashboard', path: '/dashboard', icon: '📊', roles: ['all'] },
-    { name: 'Vendors', path: '/vendors', icon: '🏢', roles: ['all'] },
-    { name: 'Tenders', path: '/tenders', icon: '📋', roles: ['all'] },
-    { name: 'Contracts', path: '/contracts', icon: '📄', roles: ['all'] },
-    { name: 'Purchase Orders', path: '/purchase-orders', icon: '📝', roles: ['all'] },
-    { name: 'Resources', path: '/resources', icon: '👤', roles: ['all'] },
-    { name: 'Invoices', path: '/invoices', icon: '💰', roles: ['all'] },
-    { name: 'Assets', path: '/assets', icon: '🏗️', roles: ['all'] },
-    { name: 'Service Requests', path: '/osr', icon: '🔧', roles: ['all'] },
+    { name: 'Dashboard', path: '/dashboard', icon: '📊', module: Module.DASHBOARD },
+    { name: 'Vendors', path: '/vendors', icon: '🏢', module: Module.VENDORS },
+    { name: 'Tenders', path: '/tenders', icon: '📋', module: Module.TENDERS },
+    { name: 'Contracts', path: '/contracts', icon: '📄', module: Module.CONTRACTS },
+    { name: 'Purchase Orders', path: '/purchase-orders', icon: '📝', module: Module.PURCHASE_ORDERS },
+    { name: 'Resources', path: '/resources', icon: '👤', module: Module.RESOURCES },
+    { name: 'Invoices', path: '/invoices', icon: '💰', module: Module.INVOICES },
+    { name: 'Assets', path: '/assets', icon: '🏗️', module: Module.ASSETS },
+    { name: 'Service Requests', path: '/osr', icon: '🔧', module: Module.SERVICE_REQUESTS },
   ];
+
+  // Filter navigation based on user permissions
+  const filteredNavigation = navigation.filter(item => 
+    canAccessModule(user?.role, item.module)
+  );
 
   const filteredNavigation = navigation.filter(
     item => item.roles.includes('all') || item.roles.includes(user?.role)
