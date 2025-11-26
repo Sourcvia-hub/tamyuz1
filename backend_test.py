@@ -3263,39 +3263,38 @@ class RBACTester:
             return False
 
 if __name__ == "__main__":
-    import sys
+    tester = RBACTester()
     
-    # Check if RBAC testing is requested
-    if len(sys.argv) > 1 and sys.argv[1] == "rbac":
-        print("🔐 Running RBAC Testing Suite...")
-        tester = RBACTester()
-        success = tester.run_rbac_tests()
-        sys.exit(0 if success else 1)
-    else:
-        print("📋 Running Full Backend Testing Suite...")
-        print("💡 Use 'python backend_test.py rbac' for RBAC-only testing")
+    print(f"\n" + "="*100)
+    print(f"COMPREHENSIVE RBAC TESTING - ALL SECURED MODULES")
+    print(f"Testing 8 modules with 6 user roles as per review request")
+    print(f"="*100)
+    
+    # Run comprehensive RBAC tests
+    try:
+        results = tester.run_comprehensive_rbac_tests()
         
-        # Run RBAC tests first
-        print("\n" + "="*80)
-        print("PHASE 1: RBAC TESTING")
-        print("="*80)
-        rbac_tester = RBACTester()
-        rbac_success = rbac_tester.run_rbac_tests()
+        # Print final summary
+        print(f"\n" + "="*100)
+        print(f"FINAL RBAC TESTING RESULTS")
+        print(f"="*100)
         
-        # Run comprehensive tests
-        print("\n" + "="*80)
-        print("PHASE 2: COMPREHENSIVE TESTING")
-        print("="*80)
-        tester = RBACTester()
-        comprehensive_success = tester.run_all_tests()
+        passed_modules = sum(1 for result in results.values() if result)
+        total_modules = len(results)
         
-        # Overall result
-        overall_success = rbac_success and comprehensive_success
-        print(f"\n" + "="*80)
-        print("FINAL RESULTS")
-        print("="*80)
-        print(f"RBAC Testing: {'✅ PASSED' if rbac_success else '❌ FAILED'}")
-        print(f"Comprehensive Testing: {'✅ PASSED' if comprehensive_success else '❌ FAILED'}")
-        print(f"Overall: {'🎉 ALL TESTS PASSED' if overall_success else '⚠️ SOME TESTS FAILED'}")
+        for module_name, result in results.items():
+            status = "✅ PASS" if result else "❌ FAIL"
+            print(f"{status} {module_name} Module")
         
-        sys.exit(0 if overall_success else 1)
+        print(f"\nModule Summary: {passed_modules}/{total_modules} modules passed ({(passed_modules/total_modules*100):.1f}%)")
+        
+        if passed_modules == total_modules:
+            print("🎉 All RBAC modules passed!")
+            sys.exit(0)
+        else:
+            print("⚠️ Some RBAC modules failed - check the detailed output above")
+            sys.exit(1)
+            
+    except Exception as e:
+        print(f"❌ RBAC Testing failed with error: {str(e)}")
+        sys.exit(1)
