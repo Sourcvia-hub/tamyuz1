@@ -1115,8 +1115,10 @@ async def get_tender(tender_id: str, request: Request):
 
 @api_router.get("/tenders/approved/list")
 async def get_approved_tenders(request: Request):
-    """Get list of approved tenders for contract creation"""
-    await require_auth(request)
+    """Get list of approved tenders for contract creation - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "tenders", Permission.VIEWER)
     
     tenders = await db.tenders.find({"status": TenderStatus.PUBLISHED.value}).to_list(1000)
     
