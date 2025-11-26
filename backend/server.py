@@ -1142,8 +1142,9 @@ async def get_approved_tenders(request: Request):
 
 @api_router.put("/tenders/{tender_id}")
 async def update_tender(tender_id: str, tender: Tender, request: Request):
-    """Update tender"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER])
+    """Update tender - RBAC: requires edit permission"""
+    from utils.auth import require_edit_permission
+    user = await require_edit_permission(request, "tenders")
     
     # Check if tender exists
     existing_tender = await db.tenders.find_one({"id": tender_id})
