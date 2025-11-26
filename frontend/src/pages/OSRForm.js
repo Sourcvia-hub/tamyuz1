@@ -57,11 +57,29 @@ const OSRForm = () => {
 
   const fetchMasterData = async () => {
     try {
-      const [masterRes, assetsRes, vendorsRes] = await Promise.all([
-        axios.get(`${API}/facilities/master-data`, { withCredentials: true }),
-        axios.get(`${API}/assets`, { withCredentials: true }),
-        axios.get(`${API}/vendors`, { withCredentials: true })
-      ]);
+      // Fetch data separately to handle individual errors
+      let masterRes, assetsRes, vendorsRes;
+      
+      try {
+        masterRes = await axios.get(`${API}/facilities/master-data`, { withCredentials: true });
+      } catch (err) {
+        console.error('Error fetching facilities master data:', err);
+        masterRes = { data: { buildings: [], floors: [], osr_categories: [], asset_categories: [] } };
+      }
+      
+      try {
+        assetsRes = await axios.get(`${API}/assets`, { withCredentials: true });
+      } catch (err) {
+        console.error('Error fetching assets:', err);
+        assetsRes = { data: [] };
+      }
+      
+      try {
+        vendorsRes = await axios.get(`${API}/vendors`, { withCredentials: true });
+      } catch (err) {
+        console.error('Error fetching vendors:', err);
+        vendorsRes = { data: [] };
+      }
       
       setMasterData({
         buildings: masterRes.data.buildings || [],
@@ -71,8 +89,7 @@ const OSRForm = () => {
         vendors: vendorsRes.data || []
       });
     } catch (error) {
-      console.error('Error fetching master data:', error);
-      alert('Error loading form data');
+      console.error('Error loading form data:', error);
     }
   };
 
