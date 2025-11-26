@@ -3279,8 +3279,10 @@ async def update_asset_category(category_id: str, request: Request, category: As
 
 @api_router.delete("/asset-categories/{category_id}")
 async def delete_asset_category(category_id: str, request: Request):
-    """Delete asset category"""
-    await require_auth(request)
+    """Delete asset category - RBAC: requires controller permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "assets", Permission.CONTROLLER)
     await db.asset_categories.delete_one({"id": category_id})
     return {"message": "Asset category deleted successfully"}
 
