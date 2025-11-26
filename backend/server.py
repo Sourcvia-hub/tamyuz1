@@ -1701,8 +1701,10 @@ async def submit_invoice(invoice: Invoice, request: Request):
 
 @api_router.get("/invoices")
 async def get_invoices(request: Request, status: Optional[InvoiceStatus] = None, search: Optional[str] = None):
-    """Get all invoices with optional search by invoice_number"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
+    """Get all invoices - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "invoices", Permission.VIEWER)
     
     query = {}
     if status:
