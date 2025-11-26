@@ -3276,8 +3276,10 @@ async def delete_osr_category(category_id: str, request: Request):
 # Assets
 @api_router.get("/assets")
 async def get_assets(request: Request):
-    """Get all assets"""
-    await require_auth(request)
+    """Get all assets - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "assets", Permission.VIEWER)
     assets = await db.assets.find({}, {"_id": 0}).to_list(10000)
     
     # Enrich assets with denormalized data
