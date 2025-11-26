@@ -1642,8 +1642,9 @@ async def get_expiring_contracts(request: Request, days: int = 30):
 # ==================== INVOICE ENDPOINTS ====================
 @api_router.post("/invoices")
 async def submit_invoice(invoice: Invoice, request: Request):
-    """Submit invoice with duplicate validation"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    """Submit invoice with duplicate validation - RBAC: requires create permission"""
+    from utils.auth import require_create_permission
+    await require_create_permission(request, "invoices")
     
     # Verify contract exists
     contract = await db.contracts.find_one({"id": invoice.contract_id})
