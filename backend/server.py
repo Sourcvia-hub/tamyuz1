@@ -1053,8 +1053,10 @@ async def create_tender(tender: Tender, request: Request):
 
 @api_router.get("/tenders")
 async def get_tenders(request: Request, status: Optional[TenderStatus] = None, search: Optional[str] = None):
-    """Get all tenders with optional search by tender_number or title"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROJECT_MANAGER, UserRole.SYSTEM_ADMIN])
+    """Get all tenders - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    user = await require_permission(request, "tenders", Permission.VIEWER)
     
     query = {}
     if status:
