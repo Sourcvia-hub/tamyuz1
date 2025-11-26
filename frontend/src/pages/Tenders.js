@@ -112,7 +112,7 @@ const Tenders = () => {
             <h1 className="text-3xl font-bold text-gray-900">Tender Management</h1>
             <p className="text-gray-600 mt-1">Create and manage tenders and proposals</p>
           </div>
-          {user?.role === 'procurement_officer' && (
+          {canCreate(user?.role, Module.TENDERS) && (
             <button
               onClick={() => setShowCreateModal(true)}
               data-testid="create-tender-btn"
