@@ -3356,8 +3356,9 @@ async def get_asset(asset_id: str, request: Request):
 
 @api_router.post("/assets")
 async def create_asset(request: Request, asset: Asset):
-    """Create a new asset"""
-    await require_auth(request)
+    """Create a new asset - RBAC: requires create permission"""
+    from utils.auth import require_create_permission
+    await require_create_permission(request, "assets")
     
     # Generate asset number
     count = await db.assets.count_documents({})
