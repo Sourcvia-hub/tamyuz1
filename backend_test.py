@@ -50,11 +50,20 @@ class RBACTester:
             'tenders': [],
             'contracts': [],
             'invoices': [],
+            'purchase_orders': [],
+            'resources': [],
             'assets': [],
-            'osrs': []
+            'osrs': [],
+            'buildings': [],
+            'floors': []
         }
         self.test_results = {
             'vendors': {},
+            'tenders': {},
+            'contracts': {},
+            'invoices': {},
+            'purchase_orders': {},
+            'resources': {},
             'assets': {},
             'osrs': {}
         }
