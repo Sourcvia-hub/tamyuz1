@@ -429,8 +429,16 @@ async def update_user_role(user_id: str, role: UserRole, request: Request):
 
 @api_router.get("/dashboard")
 async def get_dashboard_stats(request: Request):
-    """Get dashboard statistics for all modules"""
-    await require_auth(request)
+    """Get dashboard statistics - filtered by user role"""
+    from utils.auth import require_auth
+    from utils.permissions import should_filter_by_user, should_filter_by_domain
+    
+    user = await require_auth(request)
+    user_role_str = user.role.value.lower()
+    
+    # Determine if data should be filtered
+    filter_by_user = should_filter_by_user(user_role_str, "dashboard")
+    filter_by_domain = should_filter_by_domain(user_role_str, "dashboard")
     
     # Vendor Statistics
     all_vendors = await db.vendors.count_documents({})
