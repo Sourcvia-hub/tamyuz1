@@ -132,6 +132,647 @@ class RBACTester:
             print(f"❌ Login error: {str(e)}")
             return False
     
+    def test_rbac_vendors_module(self):
+        """Test RBAC for Vendors Module (/api/vendors)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: VENDORS MODULE")
+        print(f"="*80)
+        
+        # Test scenarios based on permissions matrix
+        test_scenarios = [
+            # CREATE (POST /api/vendors) - Should work for procurement_officer, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/vendors',
+                'should_pass': ['procurement_officer', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "name_english": "RBAC Test Vendor",
+                    "commercial_name": "RBAC Test Co",
+                    "vendor_type": "local",
+                    "entity_type": "LLC",
+                    "vat_number": "300999999999001",
+                    "cr_number": "9999999001",
+                    "cr_expiry_date": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
+                    "cr_country_city": "Riyadh, Saudi Arabia",
+                    "activity_description": "RBAC Testing Services",
+                    "number_of_employees": 10,
+                    "street": "Test Street",
+                    "building_no": "999",
+                    "city": "Riyadh",
+                    "district": "Test District",
+                    "country": "Saudi Arabia",
+                    "mobile": "+966501999999",
+                    "email": "rbac@test.com",
+                    "representative_name": "RBAC Tester",
+                    "representative_designation": "Test Manager",
+                    "representative_id_type": "National ID",
+                    "representative_id_number": "9999999999",
+                    "representative_nationality": "Saudi",
+                    "representative_mobile": "+966501999999",
+                    "representative_email": "rbac@test.com",
+                    "bank_account_name": "RBAC Test Vendor",
+                    "bank_name": "Test Bank",
+                    "bank_branch": "Test Branch",
+                    "bank_country": "Saudi Arabia",
+                    "iban": "SA0399999999999999999999",
+                    "currency": "SAR",
+                    "swift_code": "TESTSAR"
+                }
+            },
+            # LIST (GET /api/vendors) - Should work for all roles except user (user has VIEWER but may access)
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/vendors',
+                'should_pass': ['direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],  # User might have access based on permission matrix
+                'test_user_separately': ['user'],  # Test user separately to check behavior
+                'data': None
+            },
+            # UPDATE (PUT /api/vendors/{id}) - Should work for procurement_officer, admin
+            {
+                'operation': 'UPDATE',
+                'method': 'PUT',
+                'endpoint': '/vendors/{vendor_id}',
+                'should_pass': ['procurement_officer', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager', 'procurement_manager'],
+                'data': {
+                    "name_english": "Updated RBAC Test Vendor",
+                    "commercial_name": "Updated RBAC Test Co"
+                },
+                'requires_vendor': True
+            },
+            # BLACKLIST (POST /api/vendors/{id}/blacklist) - Should work only for admin (requires CONTROLLER)
+            {
+                'operation': 'BLACKLIST',
+                'method': 'POST',
+                'endpoint': '/vendors/{vendor_id}/blacklist',
+                'should_pass': ['admin'],
+                'should_fail': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager'],
+                'data': None,
+                'requires_vendor': True
+            }
+        ]
+        
+        # Execute test scenarios
+        for scenario in test_scenarios:
+            print(f"\n--- Testing {scenario['operation']} Operation ---")
+            
+            # Test users that should pass
+            for user_key in scenario['should_pass']:
+                print(f"\n🔹 Testing {user_key} (should PASS)")
+                if self.login_rbac_user(user_key):
+                    result = self._execute_vendor_operation(scenario)
+                    if result['success']:
+                        print(f"✅ {user_key}: {scenario['operation']} operation PASSED as expected")
+                        self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "PASS"
+                    else:
+                        print(f"❌ {user_key}: {scenario['operation']} operation FAILED unexpectedly - {result['error']}")
+                        self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = f"FAIL - {result['error']}"
+                else:
+                    print(f"❌ {user_key}: Login failed")
+                    self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+            
+            # Test users that should fail
+            for user_key in scenario['should_fail']:
+                print(f"\n🔹 Testing {user_key} (should FAIL)")
+                if self.login_rbac_user(user_key):
+                    result = self._execute_vendor_operation(scenario)
+                    if not result['success'] and result['status_code'] == 403:
+                        print(f"✅ {user_key}: {scenario['operation']} operation correctly DENIED (403)")
+                        self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "PASS - Correctly denied"
+                    else:
+                        print(f"❌ {user_key}: {scenario['operation']} operation should have been DENIED but got status {result['status_code']}")
+                        self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = f"FAIL - Should be denied but got {result['status_code']}"
+                else:
+                    print(f"❌ {user_key}: Login failed")
+                    self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+            
+            # Test users separately (like user role for LIST operation)
+            if 'test_user_separately' in scenario:
+                for user_key in scenario['test_user_separately']:
+                    print(f"\n🔹 Testing {user_key} (checking behavior)")
+                    if self.login_rbac_user(user_key):
+                        result = self._execute_vendor_operation(scenario)
+                        if result['success']:
+                            print(f"ℹ️ {user_key}: {scenario['operation']} operation ALLOWED")
+                            self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "PASS - Allowed"
+                        elif result['status_code'] == 403:
+                            print(f"ℹ️ {user_key}: {scenario['operation']} operation DENIED (403)")
+                            self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "PASS - Correctly denied"
+                        else:
+                            print(f"⚠️ {user_key}: {scenario['operation']} operation got unexpected status {result['status_code']}")
+                            self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = f"UNEXPECTED - Status {result['status_code']}"
+                    else:
+                        print(f"❌ {user_key}: Login failed")
+                        self.test_results['vendors'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+        
+        return True
+
+    def _execute_vendor_operation(self, scenario):
+        """Execute a vendor operation and return result"""
+        try:
+            endpoint = scenario['endpoint']
+            
+            # Handle operations that require a vendor ID
+            if scenario.get('requires_vendor') and '{vendor_id}' in endpoint:
+                # Create a vendor first or use existing one
+                if not self.created_entities['vendors']:
+                    # Login as admin to create a vendor for testing
+                    current_user = self.current_user
+                    if self.login_rbac_user('admin'):
+                        create_result = self._execute_vendor_operation({
+                            'method': 'POST',
+                            'endpoint': '/vendors',
+                            'data': {
+                                "name_english": "Test Vendor for RBAC",
+                                "commercial_name": "Test Vendor Co",
+                                "vendor_type": "local",
+                                "entity_type": "LLC",
+                                "vat_number": "300888888888001",
+                                "cr_number": "8888888001",
+                                "cr_expiry_date": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat(),
+                                "cr_country_city": "Riyadh, Saudi Arabia",
+                                "activity_description": "Testing Services",
+                                "number_of_employees": 5,
+                                "street": "Test Street",
+                                "building_no": "888",
+                                "city": "Riyadh",
+                                "district": "Test District",
+                                "country": "Saudi Arabia",
+                                "mobile": "+966501888888",
+                                "email": "testvendor@test.com",
+                                "representative_name": "Test Rep",
+                                "representative_designation": "Manager",
+                                "representative_id_type": "National ID",
+                                "representative_id_number": "8888888888",
+                                "representative_nationality": "Saudi",
+                                "representative_mobile": "+966501888888",
+                                "representative_email": "testrep@test.com",
+                                "bank_account_name": "Test Vendor",
+                                "bank_name": "Test Bank",
+                                "bank_branch": "Test Branch",
+                                "bank_country": "Saudi Arabia",
+                                "iban": "SA0388888888888888888888",
+                                "currency": "SAR",
+                                "swift_code": "TESTSAR"
+                            }
+                        })
+                        if create_result['success']:
+                            vendor_data = create_result['response'].json()
+                            self.created_entities['vendors'].append(vendor_data['id'])
+                    
+                    # Switch back to original user
+                    if current_user:
+                        # Find user key by email
+                        for key, user_info in RBAC_TEST_USERS.items():
+                            if user_info['email'] == current_user['email']:
+                                self.login_rbac_user(key)
+                                break
+                
+                if self.created_entities['vendors']:
+                    vendor_id = self.created_entities['vendors'][0]
+                    endpoint = endpoint.replace('{vendor_id}', vendor_id)
+                else:
+                    return {'success': False, 'status_code': 500, 'error': 'No vendor available for testing'}
+            
+            # Execute the operation
+            url = f"{BASE_URL}{endpoint}"
+            
+            if scenario['method'] == 'GET':
+                response = self.session.get(url)
+            elif scenario['method'] == 'POST':
+                response = self.session.post(url, json=scenario['data'])
+            elif scenario['method'] == 'PUT':
+                # For PUT operations, we need to merge with existing data
+                if scenario.get('requires_vendor'):
+                    # Get existing vendor data first
+                    get_response = self.session.get(url)
+                    if get_response.status_code == 200:
+                        existing_data = get_response.json()
+                        # Merge update data with existing data
+                        update_data = {**existing_data, **scenario['data']}
+                        response = self.session.put(url, json=update_data)
+                    else:
+                        response = self.session.put(url, json=scenario['data'])
+                else:
+                    response = self.session.put(url, json=scenario['data'])
+            else:
+                return {'success': False, 'status_code': 500, 'error': f'Unsupported method: {scenario["method"]}'}
+            
+            # Store created vendor ID for future operations
+            if scenario['method'] == 'POST' and endpoint.endswith('/vendors') and response.status_code in [200, 201]:
+                try:
+                    vendor_data = response.json()
+                    if 'id' in vendor_data:
+                        self.created_entities['vendors'].append(vendor_data['id'])
+                except:
+                    pass
+            
+            return {
+                'success': response.status_code in [200, 201],
+                'status_code': response.status_code,
+                'response': response,
+                'error': response.text if response.status_code not in [200, 201] else None
+            }
+            
+        except Exception as e:
+            return {'success': False, 'status_code': 500, 'error': str(e)}
+
+    def test_rbac_assets_module(self):
+        """Test RBAC for Assets Module (/api/assets)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: ASSETS MODULE")
+        print(f"="*80)
+        
+        # Test scenarios based on permissions matrix
+        test_scenarios = [
+            # CREATE (POST /api/assets) - Should work for procurement_officer, procurement_manager, admin
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/assets',
+                'should_pass': ['procurement_officer', 'procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager'],
+                'data': {
+                    "name": "RBAC Test Asset",
+                    "category_id": "test-category-id",
+                    "building_id": "test-building-id",
+                    "floor_id": "test-floor-id",
+                    "room_location": "Test Room",
+                    "model": "Test Model",
+                    "serial_number": "RBAC-TEST-001",
+                    "manufacturer": "Test Manufacturer",
+                    "status": "active",
+                    "condition": "good",
+                    "purchase_date": datetime.now(timezone.utc).isoformat(),
+                    "warranty_start_date": datetime.now(timezone.utc).isoformat(),
+                    "warranty_end_date": (datetime.now(timezone.utc) + timedelta(days=365)).isoformat()
+                }
+            },
+            # LIST (GET /api/assets) - Should work for procurement_officer, procurement_manager, admin
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/assets',
+                'should_pass': ['procurement_officer', 'procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager'],
+                'data': None
+            },
+            # UPDATE (PUT /api/assets/{id}) - Should work for procurement_officer, procurement_manager, admin
+            {
+                'operation': 'UPDATE',
+                'method': 'PUT',
+                'endpoint': '/assets/{asset_id}',
+                'should_pass': ['procurement_officer', 'procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager'],
+                'data': {
+                    "name": "Updated RBAC Test Asset",
+                    "condition": "fair"
+                },
+                'requires_asset': True
+            },
+            # DELETE (DELETE /api/assets/{id}) - Should work for procurement_manager, admin (require APPROVER/CONTROLLER)
+            {
+                'operation': 'DELETE',
+                'method': 'DELETE',
+                'endpoint': '/assets/{asset_id}',
+                'should_pass': ['procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'procurement_officer', 'senior_manager'],
+                'data': None,
+                'requires_asset': True
+            }
+        ]
+        
+        # Execute test scenarios
+        for scenario in test_scenarios:
+            print(f"\n--- Testing {scenario['operation']} Operation ---")
+            
+            # Test users that should pass
+            for user_key in scenario['should_pass']:
+                print(f"\n🔹 Testing {user_key} (should PASS)")
+                if self.login_rbac_user(user_key):
+                    result = self._execute_asset_operation(scenario)
+                    if result['success']:
+                        print(f"✅ {user_key}: {scenario['operation']} operation PASSED as expected")
+                        self.test_results['assets'][f"{scenario['operation']}_{user_key}"] = "PASS"
+                    else:
+                        print(f"❌ {user_key}: {scenario['operation']} operation FAILED unexpectedly - {result['error']}")
+                        self.test_results['assets'][f"{scenario['operation']}_{user_key}"] = f"FAIL - {result['error']}"
+                else:
+                    print(f"❌ {user_key}: Login failed")
+                    self.test_results['assets'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+            
+            # Test users that should fail
+            for user_key in scenario['should_fail']:
+                print(f"\n🔹 Testing {user_key} (should FAIL)")
+                if self.login_rbac_user(user_key):
+                    result = self._execute_asset_operation(scenario)
+                    if not result['success'] and result['status_code'] == 403:
+                        print(f"✅ {user_key}: {scenario['operation']} operation correctly DENIED (403)")
+                        self.test_results['assets'][f"{scenario['operation']}_{user_key}"] = "PASS - Correctly denied"
+                    else:
+                        print(f"❌ {user_key}: {scenario['operation']} operation should have been DENIED but got status {result['status_code']}")
+                        self.test_results['assets'][f"{scenario['operation']}_{user_key}"] = f"FAIL - Should be denied but got {result['status_code']}"
+                else:
+                    print(f"❌ {user_key}: Login failed")
+                    self.test_results['assets'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+        
+        return True
+
+    def _execute_asset_operation(self, scenario):
+        """Execute an asset operation and return result"""
+        try:
+            endpoint = scenario['endpoint']
+            
+            # Handle operations that require an asset ID
+            if scenario.get('requires_asset') and '{asset_id}' in endpoint:
+                # Create an asset first or use existing one
+                if not self.created_entities['assets']:
+                    # Login as admin to create an asset for testing
+                    current_user = self.current_user
+                    if self.login_rbac_user('admin'):
+                        create_result = self._execute_asset_operation({
+                            'method': 'POST',
+                            'endpoint': '/assets',
+                            'data': {
+                                "name": "Test Asset for RBAC",
+                                "category_id": "test-category-id",
+                                "building_id": "test-building-id",
+                                "floor_id": "test-floor-id",
+                                "room_location": "Test Room",
+                                "model": "Test Model",
+                                "serial_number": "TEST-RBAC-001",
+                                "manufacturer": "Test Manufacturer",
+                                "status": "active",
+                                "condition": "good"
+                            }
+                        })
+                        if create_result['success']:
+                            asset_data = create_result['response'].json()
+                            self.created_entities['assets'].append(asset_data['id'])
+                    
+                    # Switch back to original user
+                    if current_user:
+                        for key, user_info in RBAC_TEST_USERS.items():
+                            if user_info['email'] == current_user['email']:
+                                self.login_rbac_user(key)
+                                break
+                
+                if self.created_entities['assets']:
+                    asset_id = self.created_entities['assets'][0]
+                    endpoint = endpoint.replace('{asset_id}', asset_id)
+                else:
+                    return {'success': False, 'status_code': 500, 'error': 'No asset available for testing'}
+            
+            # Execute the operation
+            url = f"{BASE_URL}{endpoint}"
+            
+            if scenario['method'] == 'GET':
+                response = self.session.get(url)
+            elif scenario['method'] == 'POST':
+                response = self.session.post(url, json=scenario['data'])
+            elif scenario['method'] == 'PUT':
+                response = self.session.put(url, json=scenario['data'])
+            elif scenario['method'] == 'DELETE':
+                response = self.session.delete(url)
+            else:
+                return {'success': False, 'status_code': 500, 'error': f'Unsupported method: {scenario["method"]}'}
+            
+            # Store created asset ID for future operations
+            if scenario['method'] == 'POST' and endpoint.endswith('/assets') and response.status_code in [200, 201]:
+                try:
+                    asset_data = response.json()
+                    if 'id' in asset_data:
+                        self.created_entities['assets'].append(asset_data['id'])
+                except:
+                    pass
+            
+            return {
+                'success': response.status_code in [200, 201, 204],
+                'status_code': response.status_code,
+                'response': response,
+                'error': response.text if response.status_code not in [200, 201, 204] else None
+            }
+            
+        except Exception as e:
+            return {'success': False, 'status_code': 500, 'error': str(e)}
+
+    def test_rbac_osrs_module(self):
+        """Test RBAC for Service Requests/OSR Module (/api/osrs)"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING: SERVICE REQUESTS/OSR MODULE")
+        print(f"="*80)
+        
+        # Test scenarios based on permissions matrix
+        test_scenarios = [
+            # CREATE (POST /api/osrs) - Should work for all roles (all have REQUESTER or higher)
+            {
+                'operation': 'CREATE',
+                'method': 'POST',
+                'endpoint': '/osrs',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': {
+                    "title": "RBAC Test OSR",
+                    "description": "Test OSR for RBAC testing",
+                    "type": "maintenance",
+                    "category": "software",
+                    "priority": "medium",
+                    "asset_id": "test-asset-id",
+                    "location": "Test Location",
+                    "requested_completion_date": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+                }
+            },
+            # LIST (GET /api/osrs) - Should work for all roles
+            {
+                'operation': 'LIST',
+                'method': 'GET',
+                'endpoint': '/osrs',
+                'should_pass': ['user', 'direct_manager', 'procurement_officer', 'senior_manager', 'procurement_manager', 'admin'],
+                'should_fail': [],
+                'data': None
+            },
+            # UPDATE (PUT /api/osrs/{id}) - Should work for procurement_officer, procurement_manager (VERIFIER/APPROVER)
+            {
+                'operation': 'UPDATE',
+                'method': 'PUT',
+                'endpoint': '/osrs/{osr_id}',
+                'should_pass': ['procurement_officer', 'procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'senior_manager'],
+                'data': {
+                    "title": "Updated RBAC Test OSR",
+                    "status": "in_progress"
+                },
+                'requires_osr': True
+            },
+            # DELETE (DELETE /api/osrs/{id}) - Should work for procurement_manager, admin
+            {
+                'operation': 'DELETE',
+                'method': 'DELETE',
+                'endpoint': '/osrs/{osr_id}',
+                'should_pass': ['procurement_manager', 'admin'],
+                'should_fail': ['user', 'direct_manager', 'procurement_officer', 'senior_manager'],
+                'data': None,
+                'requires_osr': True
+            }
+        ]
+        
+        # Execute test scenarios
+        for scenario in test_scenarios:
+            print(f"\n--- Testing {scenario['operation']} Operation ---")
+            
+            # Test users that should pass
+            for user_key in scenario['should_pass']:
+                print(f"\n🔹 Testing {user_key} (should PASS)")
+                if self.login_rbac_user(user_key):
+                    result = self._execute_osr_operation(scenario)
+                    if result['success']:
+                        print(f"✅ {user_key}: {scenario['operation']} operation PASSED as expected")
+                        self.test_results['osrs'][f"{scenario['operation']}_{user_key}"] = "PASS"
+                    else:
+                        print(f"❌ {user_key}: {scenario['operation']} operation FAILED unexpectedly - {result['error']}")
+                        self.test_results['osrs'][f"{scenario['operation']}_{user_key}"] = f"FAIL - {result['error']}"
+                else:
+                    print(f"❌ {user_key}: Login failed")
+                    self.test_results['osrs'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+            
+            # Test users that should fail
+            for user_key in scenario['should_fail']:
+                print(f"\n🔹 Testing {user_key} (should FAIL)")
+                if self.login_rbac_user(user_key):
+                    result = self._execute_osr_operation(scenario)
+                    if not result['success'] and result['status_code'] == 403:
+                        print(f"✅ {user_key}: {scenario['operation']} operation correctly DENIED (403)")
+                        self.test_results['osrs'][f"{scenario['operation']}_{user_key}"] = "PASS - Correctly denied"
+                    else:
+                        print(f"❌ {user_key}: {scenario['operation']} operation should have been DENIED but got status {result['status_code']}")
+                        self.test_results['osrs'][f"{scenario['operation']}_{user_key}"] = f"FAIL - Should be denied but got {result['status_code']}"
+                else:
+                    print(f"❌ {user_key}: Login failed")
+                    self.test_results['osrs'][f"{scenario['operation']}_{user_key}"] = "FAIL - Login failed"
+        
+        return True
+
+    def _execute_osr_operation(self, scenario):
+        """Execute an OSR operation and return result"""
+        try:
+            endpoint = scenario['endpoint']
+            
+            # Handle operations that require an OSR ID
+            if scenario.get('requires_osr') and '{osr_id}' in endpoint:
+                # Create an OSR first or use existing one
+                if not self.created_entities['osrs']:
+                    # Login as admin to create an OSR for testing
+                    current_user = self.current_user
+                    if self.login_rbac_user('admin'):
+                        create_result = self._execute_osr_operation({
+                            'method': 'POST',
+                            'endpoint': '/osrs',
+                            'data': {
+                                "title": "Test OSR for RBAC",
+                                "description": "Test OSR for RBAC operations",
+                                "type": "maintenance",
+                                "category": "software",
+                                "priority": "low",
+                                "location": "Test Location"
+                            }
+                        })
+                        if create_result['success']:
+                            osr_data = create_result['response'].json()
+                            self.created_entities['osrs'].append(osr_data['id'])
+                    
+                    # Switch back to original user
+                    if current_user:
+                        for key, user_info in RBAC_TEST_USERS.items():
+                            if user_info['email'] == current_user['email']:
+                                self.login_rbac_user(key)
+                                break
+                
+                if self.created_entities['osrs']:
+                    osr_id = self.created_entities['osrs'][0]
+                    endpoint = endpoint.replace('{osr_id}', osr_id)
+                else:
+                    return {'success': False, 'status_code': 500, 'error': 'No OSR available for testing'}
+            
+            # Execute the operation
+            url = f"{BASE_URL}{endpoint}"
+            
+            if scenario['method'] == 'GET':
+                response = self.session.get(url)
+            elif scenario['method'] == 'POST':
+                response = self.session.post(url, json=scenario['data'])
+            elif scenario['method'] == 'PUT':
+                response = self.session.put(url, json=scenario['data'])
+            elif scenario['method'] == 'DELETE':
+                response = self.session.delete(url)
+            else:
+                return {'success': False, 'status_code': 500, 'error': f'Unsupported method: {scenario["method"]}'}
+            
+            # Store created OSR ID for future operations
+            if scenario['method'] == 'POST' and endpoint.endswith('/osrs') and response.status_code in [200, 201]:
+                try:
+                    osr_data = response.json()
+                    if 'id' in osr_data:
+                        self.created_entities['osrs'].append(osr_data['id'])
+                except:
+                    pass
+            
+            return {
+                'success': response.status_code in [200, 201, 204],
+                'status_code': response.status_code,
+                'response': response,
+                'error': response.text if response.status_code not in [200, 201, 204] else None
+            }
+            
+        except Exception as e:
+            return {'success': False, 'status_code': 500, 'error': str(e)}
+
+    def print_rbac_test_summary(self):
+        """Print comprehensive RBAC test summary"""
+        print(f"\n" + "="*80)
+        print(f"RBAC TESTING SUMMARY")
+        print(f"="*80)
+        
+        total_tests = 0
+        passed_tests = 0
+        failed_tests = 0
+        
+        for module, results in self.test_results.items():
+            if not results:
+                continue
+                
+            print(f"\n📋 {module.upper()} MODULE:")
+            print("-" * 40)
+            
+            for test_name, result in results.items():
+                total_tests += 1
+                if "PASS" in result:
+                    passed_tests += 1
+                    status_icon = "✅"
+                else:
+                    failed_tests += 1
+                    status_icon = "❌"
+                
+                print(f"{status_icon} {test_name}: {result}")
+        
+        print(f"\n" + "="*80)
+        print(f"OVERALL RESULTS:")
+        print(f"Total Tests: {total_tests}")
+        print(f"Passed: {passed_tests}")
+        print(f"Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%" if total_tests > 0 else "No tests run")
+        print(f"="*80)
+        
+        return {
+            'total': total_tests,
+            'passed': passed_tests,
+            'failed': failed_tests,
+            'success_rate': (passed_tests/total_tests*100) if total_tests > 0 else 0
+        }
+
     def test_vendor_auto_numbering(self):
         """Test vendor auto-numbering system"""
         print(f"\n=== VENDOR AUTO-NUMBERING TEST ===")
