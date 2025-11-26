@@ -1885,8 +1885,10 @@ async def get_purchase_orders(request: Request):
 
 @api_router.get("/purchase-orders/{po_id}")
 async def get_purchase_order(po_id: str, request: Request):
-    """Get purchase order by ID"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    """Get purchase order by ID - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "purchase_orders", Permission.VIEWER)
     
     po = await db.purchase_orders.find_one({"id": po_id}, {"_id": 0})
     if not po:
