@@ -13,7 +13,8 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: ''
+    name: '',
+    role: 'user'  // Default role
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
