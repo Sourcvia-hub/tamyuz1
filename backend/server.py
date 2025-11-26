@@ -749,8 +749,10 @@ async def get_vendors(request: Request, status: Optional[VendorStatus] = None, s
 
 @api_router.get("/vendors/{vendor_id}")
 async def get_vendor(vendor_id: str, request: Request):
-    """Get vendor by ID"""
-    await require_auth(request)
+    """Get vendor by ID - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "vendors", Permission.VIEWER)
     
     vendor = await db.vendors.find_one({"id": vendor_id})
     if not vendor:
