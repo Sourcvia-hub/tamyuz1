@@ -1091,8 +1091,10 @@ async def get_tenders(request: Request, status: Optional[TenderStatus] = None, s
 
 @api_router.get("/tenders/{tender_id}")
 async def get_tender(tender_id: str, request: Request):
-    """Get tender by ID"""
-    await require_auth(request)
+    """Get tender by ID - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "tenders", Permission.VIEWER)
     
     tender = await db.tenders.find_one({"id": tender_id})
     if not tender:
