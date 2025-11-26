@@ -1197,8 +1197,9 @@ async def publish_tender(tender_id: str, request: Request):
 
 @api_router.post("/tenders/{tender_id}/proposals")
 async def submit_proposal(tender_id: str, proposal: Proposal, request: Request):
-    """Submit proposal for tender (Procurement Officer can submit on behalf of vendor)"""
-    await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN])
+    """Submit proposal for tender - RBAC: requires create permission on tender_proposals"""
+    from utils.auth import require_create_permission
+    await require_create_permission(request, "tender_proposals")
     
     proposal.tender_id = tender_id
     
