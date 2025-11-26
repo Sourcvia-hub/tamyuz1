@@ -2996,7 +2996,7 @@ if __name__ == "__main__":
         print("\n" + "="*80)
         print("PHASE 2: COMPREHENSIVE TESTING")
         print("="*80)
-        tester = ProcurementTester()
+        tester = RBACTester()
         comprehensive_success = tester.run_all_tests()
         
         # Overall result
