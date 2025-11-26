@@ -42,9 +42,18 @@ const Layout = ({ children }) => {
 
   const getRoleLabel = (role) => {
     const labels = {
+      user: 'User',
+      direct_manager: 'Direct Manager',
       procurement_officer: 'Procurement Officer',
+      senior_manager: 'Senior Manager',
+      procurement_manager: 'Procurement Manager',
+      admin: 'Admin',
+      // Legacy roles
+      requester: 'Requester',
+      pd_officer: 'PD Officer',
+      pd_manager: 'PD Manager',
       project_manager: 'Project Manager',
-      system_admin: 'System Admin',
+      system_admin: 'System Admin'
     };
     return labels[role] || role;
   };
