@@ -1898,8 +1898,9 @@ async def get_purchase_order(po_id: str, request: Request):
 
 @api_router.post("/purchase-orders/{po_id}/convert-to-contract")
 async def convert_po_to_contract(po_id: str, contract_data: dict, request: Request):
-    """Convert PO to contract"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.SYSTEM_ADMIN, UserRole.PD_OFFICER, UserRole.ADMIN])
+    """Convert PO to contract - RBAC: requires create permission on contracts"""
+    from utils.auth import require_create_permission
+    user = await require_create_permission(request, "contracts")
     
     po = await db.purchase_orders.find_one({"id": po_id})
     if not po:
