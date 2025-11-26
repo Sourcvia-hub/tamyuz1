@@ -31,7 +31,7 @@ TEST_USERS = {
     "manager": {"email": "manager@test.com", "password": "password"}
 }
 
-class ProcurementTester:
+class RBACTester:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
@@ -39,11 +39,19 @@ class ProcurementTester:
             'Accept': 'application/json'
         })
         self.auth_token = None
+        self.current_user = None
         self.created_entities = {
             'vendors': [],
             'tenders': [],
             'contracts': [],
-            'invoices': []
+            'invoices': [],
+            'assets': [],
+            'osrs': []
+        }
+        self.test_results = {
+            'vendors': {},
+            'assets': {},
+            'osrs': {}
         }
         
     def login(self, user_type="procurement"):
