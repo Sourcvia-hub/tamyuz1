@@ -36,12 +36,12 @@ const Invoices = () => {
 
   useEffect(() => {
     fetchInvoices();
-    if (user?.role === 'procurement_officer') {
+    if (canCreate(user?.role, Module.INVOICES)) {
       fetchContracts();
       fetchPurchaseOrders();
       fetchVendors();
     }
-  }, []);
+  }, [user]);
 
   const fetchInvoices = async () => {
     try {
