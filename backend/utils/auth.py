@@ -73,3 +73,114 @@ async def require_role(request: Request, allowed_roles: List):
     if user.role not in allowed_roles:
         raise HTTPException(status_code=403, detail="Forbidden")
     return user
+
+
+async def require_permission(request: Request, module: str, required_permission: str):
+    """
+    Require specific permission for a module using RBAC system
+    
+    Args:
+        request: FastAPI request object
+        module: Module name (e.g., "vendors", "tenders")
+        required_permission: Required permission (e.g., "viewer", "requester")
+    
+    Returns:
+        User object if permission granted
+    
+    Raises:
+        HTTPException 403 if permission denied
+    """
+    from utils.permissions import has_permission
+    
+    user = await require_auth(request)
+    
+    # Convert role enum to string for permission check
+    user_role_str = user.role.value.lower()
+    
+    if not has_permission(user_role_str, module, required_permission):
+        raise HTTPException(
+            status_code=403, 
+            detail=f"Insufficient permissions. Required: {required_permission} on {module}"
+        )
+    
+    return user
+
+
+async def require_create_permission(request: Request, module: str):
+    """Require permission to create items in a module"""
+    from utils.permissions import can_create
+    
+    user = await require_auth(request)
+    user_role_str = user.role.value.lower()
+    
+    if not can_create(user_role_str, module):
+        raise HTTPException(
+            status_code=403,
+            detail=f"You do not have permission to create items in {module}"
+        )
+    
+    return user
+
+
+async def require_edit_permission(request: Request, module: str):
+    """Require permission to edit items in a module"""
+    from utils.permissions import can_edit
+    
+    user = await require_auth(request)
+    user_role_str = user.role.value.lower()
+    
+    if not can_edit(user_role_str, module):
+        raise HTTPException(
+            status_code=403,
+            detail=f"You do not have permission to edit items in {module}"
+        )
+    
+    return user
+
+
+async def require_delete_permission(request: Request, module: str):
+    """Require permission to delete items in a module"""
+    from utils.permissions import can_delete
+    
+    user = await require_auth(request)
+    user_role_str = user.role.value.lower()
+    
+    if not can_delete(user_role_str, module):
+        raise HTTPException(
+            status_code=403,
+            detail=f"You do not have permission to delete items in {module}"
+        )
+    
+    return user
+
+
+async def require_verify_permission(request: Request, module: str):
+    """Require permission to verify items in a module"""
+    from utils.permissions import can_verify
+    
+    user = await require_auth(request)
+    user_role_str = user.role.value.lower()
+    
+    if not can_verify(user_role_str, module):
+        raise HTTPException(
+            status_code=403,
+            detail=f"You do not have permission to verify items in {module}"
+        )
+    
+    return user
+
+
+async def require_approve_permission(request: Request, module: str):
+    """Require permission to approve items in a module"""
+    from utils.permissions import can_approve
+    
+    user = await require_auth(request)
+    user_role_str = user.role.value.lower()
+    
+    if not can_approve(user_role_str, module):
+        raise HTTPException(
+            status_code=403,
+            detail=f"You do not have permission to approve items in {module}"
+        )
+    
+    return user
