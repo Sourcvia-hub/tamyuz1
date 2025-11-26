@@ -369,7 +369,7 @@ const Invoices = () => {
                       >
                         View Details
                       </Link>
-                      {invoice.status === 'pending' && user?.role === 'procurement_officer' && (
+                      {invoice.status === 'pending' && canVerify(user?.role, Module.INVOICES) && (
                         <button
                           onClick={() => handleVerify(invoice.id)}
                           className="text-green-600 hover:text-green-900 font-medium"
@@ -377,7 +377,7 @@ const Invoices = () => {
                           Verify
                         </button>
                       )}
-                      {invoice.status === 'verified' && user?.role === 'project_manager' && (
+                      {invoice.status === 'verified' && canApprove(user?.role, Module.INVOICES) && (
                         <button
                           onClick={() => handleApprove(invoice.id)}
                           className="text-green-600 hover:text-green-900 font-medium"
