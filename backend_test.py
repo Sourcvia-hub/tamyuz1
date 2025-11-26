@@ -2881,6 +2881,40 @@ class RBACTester:
             traceback.print_exc()
             return False
 
+    def run_rbac_tests(self):
+        """Run comprehensive RBAC tests for Phase 1 modules"""
+        print("🚀 Starting RBAC Testing for Phase 1 Modules...")
+        print("=" * 80)
+        print("Testing modules: Vendors, Assets, Service Requests (OSR)")
+        print("Testing with 6 user roles: user, direct_manager, procurement_officer, senior_manager, procurement_manager, admin")
+        print("=" * 80)
+        
+        # Run RBAC tests for each module
+        rbac_test_methods = [
+            ("Vendors Module RBAC", self.test_rbac_vendors_module),
+            ("Assets Module RBAC", self.test_rbac_assets_module),
+            ("OSR Module RBAC", self.test_rbac_osrs_module)
+        ]
+        
+        results = []
+        for test_name, test_method in rbac_test_methods:
+            print(f"\n{'='*20} {test_name} {'='*20}")
+            try:
+                result = test_method()
+                results.append((test_name, result))
+                if result:
+                    print(f"✅ {test_name} COMPLETED")
+                else:
+                    print(f"❌ {test_name} FAILED")
+            except Exception as e:
+                print(f"❌ {test_name} ERROR: {str(e)}")
+                results.append((test_name, False))
+        
+        # Print comprehensive summary
+        summary = self.print_rbac_test_summary()
+        
+        return summary['success_rate'] > 80  # Consider successful if >80% pass rate
+
     def run_all_tests(self):
         """Run all comprehensive backend tests"""
         print("=" * 80)
