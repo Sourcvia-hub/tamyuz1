@@ -1740,8 +1740,10 @@ async def get_invoices(request: Request, status: Optional[InvoiceStatus] = None,
 
 @api_router.get("/invoices/{invoice_id}")
 async def get_invoice(invoice_id: str, request: Request):
-    """Get invoice by ID"""
-    await require_auth(request)
+    """Get invoice by ID - RBAC: requires viewer permission"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    await require_permission(request, "invoices", Permission.VIEWER)
     
     invoice = await db.invoices.find_one({"id": invoice_id})
     if not invoice:
