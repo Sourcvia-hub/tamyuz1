@@ -112,7 +112,22 @@ const OSRForm = () => {
       navigate(`/osr/${response.data.osr.id}`);
     } catch (error) {
       console.error('Error creating OSR:', error);
-      alert(error.response?.data?.detail || 'Error creating service request');
+      
+      // Handle error message properly
+      let errorMessage = 'Error creating service request';
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (typeof errorData.detail === 'string') {
+          errorMessage = errorData.detail;
+        } else if (typeof errorData.detail === 'object') {
+          // Handle validation errors
+          errorMessage = 'Validation error:\n' + JSON.stringify(errorData.detail, null, 2);
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
