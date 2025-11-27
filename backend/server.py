@@ -3543,6 +3543,11 @@ async def create_osr(request: Request, osr: OSR):
     osr_dict["created_at"] = datetime.now(timezone.utc)
     
     await db.osr.insert_one(osr_dict)
+    
+    # Remove MongoDB _id to avoid serialization issues
+    if "_id" in osr_dict:
+        del osr_dict["_id"]
+    
     return {"message": "OSR created successfully", "osr": osr_dict}
 
 @api_router.put("/osrs/{osr_id}")
