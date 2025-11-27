@@ -81,7 +81,20 @@ const FacilitiesSettings = () => {
       fetchAllData();
     } catch (error) {
       console.error('Error deleting:', error);
-      alert(error.response?.data?.detail || 'Error deleting item');
+      
+      let errorMessage = 'Error deleting item';
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (typeof errorData.detail === 'string') {
+          errorMessage = errorData.detail;
+        } else if (typeof errorData.detail === 'object') {
+          errorMessage = JSON.stringify(errorData.detail, null, 2);
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      }
+      
+      alert(errorMessage);
     }
   };
 
