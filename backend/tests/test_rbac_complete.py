@@ -625,7 +625,7 @@ class RBACCompleteTester:
             "description": "Testing RBAC permissions for OSR creation",
             "request_type": "general_request",
             "category": "maintenance",
-            "priority": "medium",
+            "priority": "normal",
             "building_id": "test-building-rbac",
             "floor_id": "test-floor-rbac",
             "created_by": "rbac-test-user"
