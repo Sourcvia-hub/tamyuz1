@@ -435,6 +435,22 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/cctv"
+        element={
+          <ProtectedRoute>
+            <CCTVLiveView />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/access-management"
+        element={
+          <ProtectedRoute>
+            <AccessManagement />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };
