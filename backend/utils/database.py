@@ -6,7 +6,8 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs
 
-load_dotenv()
+# Load .env file but don't override existing environment variables (K8s deployment)
+load_dotenv(override=False)
 
 def extract_db_name_from_url(mongo_url):
     """
