@@ -3734,3 +3734,83 @@ Call backend testing agent to comprehensively test all secured endpoints with di
 **Data Filtering:** 3 critical modules secured ✅
 **Permission Hierarchy:** Working correctly ✅
 
+
+## RBAC Testing - Session Complete (2025-11-28)
+**Date:** 2025-11-28
+
+### Testing Summary:
+Comprehensive RBAC testing was performed after inheriting the application from a previous fork. All critical issues identified by initial automated testing have been resolved.
+
+### Issues Found & Fixed:
+
+#### 1. ✅ Dashboard 500 Error - FIXED
+**Issue:** Dashboard endpoint returned 500 error due to timezone-naive datetime comparison
+**Root Cause:** `warranty_end` datetime from database was timezone-naive, being compared with timezone-aware `current_date`
+**Fix:** Added timezone conversion for warranty_end dates before comparison
+**File:** `/app/backend/server.py` line 519
+**Status:** RESOLVED - Dashboard now returns proper statistics for all user roles
+
+#### 2. ✅ OSR Data Filtering Not Working - FIXED
+**Issue:** OSR endpoint returned 0 results for user role instead of their own OSRs
+**Root Cause:** Query dictionary was set to `{"_id": 0}` (a projection) instead of empty `{}`
+**Fix:** Changed `query = {"_id": 0}` to `query = {}` and moved projection to find() call
+**File:** `/app/backend/server.py` line 3498
+**Testing:** Verified user sees only their 4 OSRs, procurement_officer sees all OSRs
+**Status:** RESOLVED
+
+#### 3. ✅ Missing OSR Approve Endpoint - FIXED
+**Issue:** PUT /api/osrs/{osr_id}/approve returned 404
+**Root Cause:** Endpoint was not implemented
+**Fix:** Added new approve endpoint with proper RBAC (requires APPROVER permission)
+**File:** `/app/backend/server.py` after line 3591
+**Functionality:** Updates OSR status to "assigned", tracks approval metadata
+**Status:** RESOLVED - Endpoint now working with proper permission checks
+
+#### 4. ✅ Missing Vendor Approve Endpoint - FIXED
+**Issue:** PUT /api/vendors/{vendor_id}/approve returned 404
+**Root Cause:** Endpoint was not implemented (only due-diligence approval existed)
+**Fix:** Added new general vendor approval endpoint with RBAC
+**File:** `/app/backend/server.py` after line 1039
+**Functionality:** Updates vendor status to APPROVED, tracks approval metadata
+**Status:** RESOLVED - Successfully tested with real vendor ID
+
+### Data Filtering Verification:
+**Test Results:**
+- ✅ **test_user** (role: user): Sees 7 tenders (all with matching created_by ID)
+- ✅ **test_po** (role: procurement_officer): Sees ALL 20 tenders (no filtering)
+- ✅ **test_user** OSRs: Sees 4 OSRs (all with matching created_by ID)
+- ✅ Dashboard: Returns proper statistics for both user and admin roles
+
+**Conclusion:** Data-level security (row-level filtering) is working correctly as per RBAC specification.
+
+### UI Verification (Screenshots):
+1. Login page working correctly
+2. User dashboard displays properly with role-based statistics
+3. Tenders page shows filtered data based on role:
+   - User role: 7 tenders (only own)
+   - PO role: 20 tenders (all)
+4. RBAC UI controls working (buttons shown/hidden based on permissions)
+
+### Current Test Status:
+- **Backend RBAC:** ✅ Fully functional with all endpoints secured
+- **Data Filtering:** ✅ Working correctly for user role vs higher roles
+- **Frontend UI:** ✅ Conditional rendering based on permissions
+- **New Endpoints:** ✅ Vendor approve and OSR approve added and tested
+- **Dashboard:** ✅ Fixed and returning proper statistics
+
+### Remaining Known Issues:
+None critical. All RBAC functionality is working as designed.
+
+### Test Coverage:
+- Authentication for 6 user roles: ✅
+- Permission hierarchy: ✅
+- Data filtering for user role: ✅
+- Dashboard statistics: ✅
+- Missing endpoints added: ✅
+- Negative testing (403 errors): ✅
+
+### Next Steps:
+- User verification of the fixes
+- Consider adding more granular permissions if needed in future
+- Consider implementing team/domain filtering for direct_manager role (currently future enhancement)
+
