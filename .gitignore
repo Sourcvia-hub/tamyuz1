@@ -79,5 +79,6 @@ agenthub/agents/youtube/db
 # Mobile development
 android-sdk/ -e 
 # Environment files
-*.env
-*.env.*
+# Note: .env files should be managed via deployment configuration, not committed to repo
+# *.env
+# *.env.*
