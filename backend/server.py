@@ -3663,10 +3663,12 @@ async def seed_facilities_data(request: Request):
 
 # ==================== APP SETUP ====================
 # Configure CORS middleware (must be before including router)
+# Get CORS origins from environment variable or use default
+cors_origins = os.environ.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
