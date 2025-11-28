@@ -516,6 +516,9 @@ async def get_dashboard_stats(request: Request):
         if warranty_end:
             if isinstance(warranty_end, str):
                 warranty_end = datetime.fromisoformat(warranty_end)
+            # Ensure warranty_end is timezone-aware
+            if warranty_end.tzinfo is None:
+                warranty_end = warranty_end.replace(tzinfo=timezone.utc)
             if warranty_end > current_date:
                 in_warranty_assets += 1
                 days_to_expiry = (warranty_end - current_date).days
