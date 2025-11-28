@@ -26,9 +26,20 @@ const Layout = ({ children }) => {
     { name: 'Service Requests', path: '/osr', icon: '🔧', module: Module.SERVICE_REQUESTS },
   ];
 
+  // Special links for Procurement Manager and Admin only
+  const specialLinks = [
+    { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin'] },
+    { name: 'Access Management', path: '/access-management', icon: '🚪', roles: ['procurement_manager', 'admin'] },
+  ];
+
   // Filter navigation based on user permissions
   const filteredNavigation = navigation.filter(item => 
     canAccessModule(user?.role, item.module)
+  );
+
+  // Filter special links based on user role
+  const filteredSpecialLinks = specialLinks.filter(item =>
+    item.roles.includes(user?.role)
   );
 
   const getRoleBadgeColor = (role) => {
