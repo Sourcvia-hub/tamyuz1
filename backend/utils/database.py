@@ -39,12 +39,13 @@ def extract_db_name_from_url(mongo_url):
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/')
 
 # Database name priority:
-# 1. Explicitly set MONGO_DB_NAME environment variable
-# 2. Database name extracted from MONGO_URL
+# 1. Database name extracted from MONGO_URL (for MongoDB Atlas compatibility)
+# 2. Explicitly set MONGO_DB_NAME environment variable (for local development)
 # 3. Default fallback to 'procurement_db'
+db_name_from_url = extract_db_name_from_url(MONGO_URL)
 MONGO_DB_NAME = (
+    db_name_from_url or 
     os.environ.get('MONGO_DB_NAME') or 
-    extract_db_name_from_url(MONGO_URL) or 
     'procurement_db'
 )
 
