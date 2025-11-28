@@ -43,7 +43,8 @@ from utils.auth import hash_password, verify_password, get_current_user, require
 from utils.helpers import generate_number, determine_outsourcing_classification, determine_noc_requirement
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+# Load .env file but don't override existing environment variables (K8s deployment)
+load_dotenv(ROOT_DIR / '.env', override=False)
 
 # Create the main app without a prefix
 app = FastAPI()
