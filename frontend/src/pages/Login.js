@@ -189,22 +189,44 @@ const Login = () => {
         <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
           <button
             type="button"
-            onClick={() => !isRegistering && toggleMode()}
+            onClick={() => {
+              if (isRegistering) {
+                setIsRegistering(false);
+                setError('');
+                setFormData({
+                  email: '',
+                  password: '',
+                  name: '',
+                  role: 'user'
+                });
+              }
+            }}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
               !isRegistering
                 ? 'bg-white text-blue-600 shadow'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-gray-600 hover:text-gray-900 cursor-pointer'
             }`}
           >
             Login
           </button>
           <button
             type="button"
-            onClick={() => isRegistering && toggleMode()}
+            onClick={() => {
+              if (!isRegistering) {
+                setIsRegistering(true);
+                setError('');
+                setFormData({
+                  email: '',
+                  password: '',
+                  name: '',
+                  role: 'user'
+                });
+              }
+            }}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
               isRegistering
                 ? 'bg-white text-blue-600 shadow'
-                : 'text-gray-600 hover:text-gray-900'
+                : 'text-gray-600 hover:text-gray-900 cursor-pointer'
             }`}
           >
             Register
