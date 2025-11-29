@@ -6,6 +6,9 @@ import { API_URL } from '../config/api';
 
 const API = API_URL;
 
+// DEV MODE: Set to true to skip validation and bypass backend
+const DEV_MODE_SKIP_VALIDATION = process.env.REACT_APP_DEV_MODE === 'true';
+
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
