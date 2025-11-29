@@ -50,6 +50,27 @@ const Login = () => {
     setLoading(true);
     setError('');
 
+    // DEV MODE: Skip all validation and backend calls
+    if (DEV_MODE_SKIP_VALIDATION) {
+      console.warn('🔧 DEV MODE: Skipping validation and backend calls');
+      
+      // Set fake auth token
+      localStorage.setItem('dev_token', 'DEV_MODE_TOKEN');
+      localStorage.setItem('dev_user', JSON.stringify({
+        email: formData.email || 'dev@test.com',
+        name: formData.name || 'Dev User',
+        role: formData.role || 'admin'
+      }));
+      
+      // Navigate directly to dashboard
+      setTimeout(() => {
+        navigate('/dashboard');
+        setLoading(false);
+      }, 500); // Small delay to show loading state
+      return;
+    }
+
+    // Normal validation flow
     if (!formData.name || !formData.email || !formData.password) {
       setError('All fields are required');
       setLoading(false);
