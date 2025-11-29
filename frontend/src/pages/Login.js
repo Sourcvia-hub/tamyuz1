@@ -35,6 +35,27 @@ const Login = () => {
     setLoading(true);
     setError('');
 
+    // DEV MODE: Skip backend login
+    if (DEV_MODE_SKIP_VALIDATION) {
+      console.warn('🔧 DEV MODE: Skipping login validation');
+      
+      // Set fake auth token
+      localStorage.setItem('dev_token', 'DEV_MODE_TOKEN');
+      localStorage.setItem('dev_user', JSON.stringify({
+        email: formData.email || 'dev@test.com',
+        name: 'Dev User',
+        role: 'admin'
+      }));
+      
+      // Navigate directly to dashboard
+      setTimeout(() => {
+        navigate('/dashboard');
+        setLoading(false);
+      }, 500);
+      return;
+    }
+
+    // Normal login flow
     try {
       await login(formData.email, formData.password);
       navigate('/dashboard');
