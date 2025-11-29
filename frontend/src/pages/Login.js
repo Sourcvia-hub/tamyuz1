@@ -100,6 +100,13 @@ const Login = () => {
       return;
     }
 
+    console.log('📝 Attempting registration to:', `${API_URL}/auth/register`);
+    console.log('👤 User data:', {
+      name: formData.name.trim(),
+      email: formData.email.trim().toLowerCase(),
+      role: formData.role
+    });
+
     try {
       // Step 1: Register the user
       const registerResponse = await axios.post(`${API_URL}/auth/register`, {
@@ -112,9 +119,10 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
-      console.log('Registration successful:', registerResponse.data);
+      console.log('✅ Registration successful:', registerResponse.data);
 
       // Step 2: Auto-login after successful registration
+      console.log('🔐 Auto-login after registration...');
       const loginResponse = await axios.post(`${API_URL}/auth/login`, {
         email: formData.email.trim().toLowerCase(),
         password: formData.password
@@ -123,20 +131,30 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' }
       });
 
+      console.log('✅ Auto-login successful:', loginResponse.data);
+
       if (loginResponse.data.user) {
         localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
         navigate('/dashboard');
       }
     } catch (err) {
-      console.error('Registration error:', err);
+      console.error('❌ Registration error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        config: err.config
+      });
+      
       if (err.response?.data?.detail === 'User already exists') {
         setError('This email is already registered. Please login instead.');
       } else if (err.response?.status === 422) {
         setError('Please check all fields are filled correctly');
-      } else if (err.message === 'Network Error') {
-        setError('Cannot connect to server');
+      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        setError('Cannot connect to server. Please check your internet connection or try again later.');
+      } else if (err.response?.status === 500) {
+        setError('Server error. Please try again later.');
       } else {
-        setError(err.response?.data?.detail || 'Registration failed');
+        setError(err.response?.data?.detail || 'Registration failed. Please try again.');
       }
     } finally {
       setLoading(false);
