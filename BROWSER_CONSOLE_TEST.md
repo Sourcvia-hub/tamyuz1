@@ -143,7 +143,7 @@ FIX: Set this environment variable in your deployment:
 ## Alternative: Test from this Workspace
 
 You can also test the working version here:
-`https://sourcevia-secure.preview.emergentagent.com/test-connection.html`
+`https://sourcevia-app.preview.emergentagent.com/test-connection.html`
 
 This will show you how it SHOULD work.
 

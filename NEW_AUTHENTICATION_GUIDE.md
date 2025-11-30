@@ -31,7 +31,7 @@
 ## How to Use
 
 ### Login:
-1. Go to: https://sourcevia-secure.preview.emergentagent.com/login
+1. Go to: https://sourcevia-app.preview.emergentagent.com/login
 2. Click "Login" tab (default)
 3. Enter email and password from table above
 4. Click "Login" button
@@ -187,7 +187,7 @@ Content-Type: application/json
 
 ### Test Registration:
 ```bash
-curl -X POST "https://sourcevia-secure.preview.emergentagent.com/api/auth/register" \
+curl -X POST "https://sourcevia-app.preview.emergentagent.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "New User",
@@ -199,7 +199,7 @@ curl -X POST "https://sourcevia-secure.preview.emergentagent.com/api/auth/regist
 
 ### Test Login:
 ```bash
-curl -X POST "https://sourcevia-secure.preview.emergentagent.com/api/auth/login" \
+curl -X POST "https://sourcevia-app.preview.emergentagent.com/api/auth/login" \
   -H "Content-Type: application/json" \
   -c cookies.txt \
   -d '{
@@ -236,7 +236,7 @@ mongosh procurement_db --eval "db.users.find({}, {name:1, email:1, role:1, _id:0
 3. Use this script:
 
 ```bash
-curl -X POST "https://sourcevia-secure.preview.emergentagent.com/api/auth/register" \
+curl -X POST "https://sourcevia-app.preview.emergentagent.com/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Your Name",

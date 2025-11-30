@@ -18,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 import sys
 
 # Configuration
-BASE_URL = "https://sourcevia-secure.preview.emergentagent.com/api"
+BASE_URL = "https://sourcevia-app.preview.emergentagent.com/api"
 
 # RBAC Test Users (all with password: "password")
 RBAC_TEST_USERS = {
@@ -3078,7 +3078,7 @@ class RBACTester:
                 preflight_headers = {
                     'Access-Control-Request-Method': 'POST',
                     'Access-Control-Request-Headers': 'Content-Type',
-                    'Origin': 'https://sourcevia-secure.preview.emergentagent.com'
+                    'Origin': 'https://sourcevia-app.preview.emergentagent.com'
                 }
                 
                 preflight_response = self.session.options(f"{BASE_URL}/auth/login", headers=preflight_headers)

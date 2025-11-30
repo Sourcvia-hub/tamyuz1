@@ -25,7 +25,7 @@ import sys
 import os
 
 # Configuration
-BASE_URL = "https://sourcevia-secure.preview.emergentagent.com/api"
+BASE_URL = "https://sourcevia-app.preview.emergentagent.com/api"
 
 # Test Users as specified in review request
 TEST_USERS = {
