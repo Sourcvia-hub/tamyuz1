@@ -138,7 +138,8 @@ const Login = () => {
 
       if (loginResponse.data.user) {
         localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
-        navigate('/dashboard');
+        // Force page reload to trigger auth check
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       console.error('❌ Registration error:', err);
