@@ -70,9 +70,20 @@ if db_name_from_url:
     print(f"\n✅ [DECISION] Using database name from MONGO_URL: '{MONGO_DB_NAME}'")
     print(f"   (Ignoring any MONGO_DB_NAME environment variable)")
 else:
-    # No database in URL - use environment variable or default
-    MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME', 'procurement_db')
-    print(f"\n✅ [DECISION] No database in URL, using MONGO_DB_NAME or default: '{MONGO_DB_NAME}'")
+    # No database in URL - check if using Atlas (which requires DB in URL)
+    if 'mongodb+srv://' in MONGO_URL or 'mongodb.net' in MONGO_URL:
+        # Using MongoDB Atlas but no DB name in URL - this is an error
+        print(f"\n❌ [ERROR] MongoDB Atlas URL detected but no database name found in URL!")
+        print(f"   MongoDB Atlas requires database name in the connection string.")
+        print(f"   Current MONGO_URL: {MONGO_URL[:70]}...")
+        print(f"\n   Please update MONGO_URL to include database name:")
+        print(f"   Example: mongodb+srv://user:pass@cluster.net/sourcevia?options")
+        print(f"\n   Using fallback 'sourcevia' to prevent 'procurement_db' authorization errors.")
+        MONGO_DB_NAME = 'sourcevia'  # Use 'sourcevia' as safe default for Atlas
+    else:
+        # Local MongoDB - use environment variable or default
+        MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME', 'sourcevia')
+        print(f"\n✅ [DECISION] Local MongoDB, using MONGO_DB_NAME or default: '{MONGO_DB_NAME}'")
 
 print(f"\n{'='*80}")
 print(f"🔗 FINAL MongoDB Configuration:")
