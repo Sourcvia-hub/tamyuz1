@@ -80,12 +80,18 @@ else:
         print(f"   Current MONGO_URL: {MONGO_URL[:70]}...")
         print(f"\n   Please update MONGO_URL to include database name:")
         print(f"   Example: mongodb+srv://user:pass@cluster.net/sourcevia?options")
-        print(f"\n   Using fallback 'sourcevia' to prevent 'procurement_db' authorization errors.")
-        MONGO_DB_NAME = 'sourcevia'  # Use 'sourcevia' as safe default for Atlas
+        print(f"\n   FORCING database name to 'sourcevia' to prevent authorization errors.")
+        MONGO_DB_NAME = 'sourcevia'  # Force 'sourcevia' for Atlas
     else:
-        # Local MongoDB - use environment variable or default
-        MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME', 'sourcevia')
-        print(f"\n✅ [DECISION] Local MongoDB, using MONGO_DB_NAME or default: '{MONGO_DB_NAME}'")
+        # Local MongoDB - check environment variable but NEVER allow 'procurement_db'
+        env_db_name = os.environ.get('MONGO_DB_NAME', 'sourcevia')
+        if env_db_name == 'procurement_db':
+            print(f"\n⚠️  WARNING: MONGO_DB_NAME is set to 'procurement_db' - this is deprecated!")
+            print(f"   Overriding to 'sourcevia' to prevent authorization errors.")
+            MONGO_DB_NAME = 'sourcevia'
+        else:
+            MONGO_DB_NAME = env_db_name
+        print(f"\n✅ [DECISION] Local MongoDB, using database: '{MONGO_DB_NAME}'")
 
 print(f"\n{'='*80}")
 print(f"🔗 FINAL MongoDB Configuration:")
