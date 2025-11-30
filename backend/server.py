@@ -3717,12 +3717,29 @@ async def seed_facilities_data(request: Request):
 # Configure CORS middleware (must be before including router)
 # Get CORS origins from environment variable or use default
 # Supports: specific domains (https://example.com) or wildcard (*)
-cors_origins_str = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
-cors_origins = ["*"] if cors_origins_str == "*" else [origin.strip() for origin in cors_origins_str.split(',')]
+cors_origins_str = os.environ.get('CORS_ORIGINS', '')
+
+# DEFAULT PRODUCTION ORIGINS - These will ALWAYS be allowed
+DEFAULT_PRODUCTION_ORIGINS = [
+    "https://sourcevia.xyz",
+    "https://www.sourcevia.xyz",
+    "http://localhost:3000",  # For local development
+]
+
+# Parse environment variable and combine with defaults
+if cors_origins_str == "*":
+    cors_origins = ["*"]
+elif cors_origins_str:
+    # Combine environment variable origins with defaults
+    env_origins = [origin.strip() for origin in cors_origins_str.split(',')]
+    cors_origins = list(set(DEFAULT_PRODUCTION_ORIGINS + env_origins))
+else:
+    # No environment variable set - use defaults only
+    cors_origins = DEFAULT_PRODUCTION_ORIGINS
 
 print(f"🔒 CORS Configuration:")
 print(f"   Allowed Origins: {cors_origins}")
-print(f"   Source: {'Wildcard (*)' if cors_origins_str == '*' else 'Environment Variable'}")
+print(f"   Source: {'Wildcard' if cors_origins_str == '*' else 'Default Production Origins' if not cors_origins_str else 'Environment Variable + Defaults'}")
 
 app.add_middleware(
     CORSMiddleware,
