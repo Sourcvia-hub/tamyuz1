@@ -53,11 +53,11 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    const loginUrl = `${API_URL}/api/auth/login`;
+    const loginUrl = `${BACKEND_URL.replace(/\/+$/, "")}/api/auth/login`;
     
     console.log('🔐 Attempting login...');
     console.log('  Full URL:', loginUrl);
-    console.log('  Backend:', API_URL);
+    console.log('  Backend:', BACKEND_URL);
     console.log('  Email:', email);
 
     // Validation check
