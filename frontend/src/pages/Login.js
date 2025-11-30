@@ -13,13 +13,28 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('checking'); // checking, connected, error
 
-  // Import API configuration
-  const API_URL = process.env.REACT_APP_BACKEND_URL || window.location.origin;
+  // Get backend URL with proper fallback
+  const getBackendURL = () => {
+    // Check environment variable first
+    if (process.env.REACT_APP_BACKEND_URL) {
+      return process.env.REACT_APP_BACKEND_URL;
+    }
+    // Check window config
+    if (window.APP_CONFIG?.BACKEND_URL) {
+      return window.APP_CONFIG.BACKEND_URL;
+    }
+    // Default to same origin
+    return window.location.origin;
+  };
+
+  const API_URL = getBackendURL();
 
   // Test backend connection on mount
   React.useEffect(() => {
     console.log('🔧 Login Page Loaded');
     console.log('  Backend URL:', API_URL);
+    console.log('  process.env.REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+    console.log('  window.location.origin:', window.location.origin);
     
     // Test connection
     const testConnection = async () => {
