@@ -23,15 +23,32 @@ const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const checkAuth = async () => {
+    // First check localStorage for user
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        console.log('✅ User found in localStorage:', userData.email);
+        setUser(userData);
+        setLoading(false);
+        return;
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+        localStorage.removeItem('user');
+      }
+    }
+
+    // If no stored user, check with backend
     try {
       const response = await axios.get(`${API}/auth/me`, { 
         withCredentials: true,
-        timeout: 5000  // 5 second timeout
+        timeout: 5000
       });
       setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
       setError(null);
     } catch (error) {
-      console.log('checkAuth: User not authenticated or error occurred');
+      console.log('checkAuth: User not authenticated');
       setUser(null);
     } finally {
       setLoading(false);
