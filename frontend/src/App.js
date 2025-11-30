@@ -24,10 +24,14 @@ const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await axios.get(`${API}/auth/me`, { withCredentials: true });
+      const response = await axios.get(`${API}/auth/me`, { 
+        withCredentials: true,
+        timeout: 5000  // 5 second timeout
+      });
       setUser(response.data);
       setError(null);
     } catch (error) {
+      console.log('checkAuth: User not authenticated or error occurred');
       setUser(null);
     } finally {
       setLoading(false);
