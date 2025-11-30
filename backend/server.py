@@ -245,6 +245,28 @@ class ProposalEvaluationRequest(BaseModel):
     cost_score: float
     meets_requirements: float
 
+# ==================== HEALTH & STATUS ENDPOINTS ====================
+@api_router.get("/health")
+async def api_health_check():
+    """Health check endpoint under /api prefix"""
+    try:
+        # Test database connection
+        await db.command('ping')
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    return {
+        "status": "ok",
+        "database": db_status,
+        "api_version": "1.0",
+        "endpoints": {
+            "login": "/api/auth/login",
+            "register": "/api/auth/register",
+            "docs": "/docs"
+        }
+    }
+
 # ==================== AUTH ENDPOINTS ====================
 @api_router.post("/auth/register")
 async def register(register_data: RegisterRequest):
