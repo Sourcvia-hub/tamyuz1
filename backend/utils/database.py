@@ -94,15 +94,12 @@ print(f"   Database: '{MONGO_DB_NAME}'")
 print(f"   Source: {'URL' if db_name_from_url else 'Environment Variable or Default'}")
 print(f"{'='*80}")
 
-# CRITICAL VALIDATION: Check for common misconfigurations
-if 'mongodb+srv://' in MONGO_URL and MONGO_DB_NAME == 'procurement_db' and not db_name_from_url:
-    print(f"\n⚠️  WARNING: Possible misconfiguration detected!")
-    print(f"   - You're using MongoDB Atlas (mongodb+srv://)")
-    print(f"   - But database name is 'procurement_db' (likely from env var)")
-    print(f"   - And no database name was found in the URL")
-    print(f"   - This may cause authentication errors!")
-    print(f"   - Solution: Add database name to MONGO_URL after cluster address")
-    print(f"   - Example: mongodb+srv://user:pass@cluster.net/your_db_name?options")
+# CRITICAL VALIDATION: Verify Atlas URLs have database name
+if ('mongodb+srv://' in MONGO_URL or 'mongodb.net' in MONGO_URL) and not db_name_from_url:
+    print(f"\n⚠️  CRITICAL: MongoDB Atlas URL missing database name!")
+    print(f"   Using fallback database 'sourcevia' to prevent authorization errors.")
+    print(f"   For production, please update MONGO_URL to include database name:")
+    print(f"   Example: mongodb+srv://user:pass@cluster.net/sourcevia?options")
     print(f"\n")
 
 print(f"\n[DB Init] Creating MongoDB client...")
