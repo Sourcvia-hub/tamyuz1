@@ -3757,7 +3757,7 @@ cors_origins_str = os.environ.get('CORS_ORIGINS', '')
 DEFAULT_PRODUCTION_ORIGINS = [
     "https://sourcevia.xyz",
     "https://www.sourcevia.xyz",
-    "https://sourcevia-mgmt.emergent.host",  # Backend URL
+    "https://sourcevia-secure.emergent.host",  # Backend URL
     "http://localhost:3000",  # For local development
 ]
 
