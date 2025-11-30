@@ -114,9 +114,16 @@ if ('mongodb+srv://' in MONGO_URL or 'mongodb.net' in MONGO_URL) and not db_name
     print(f"   Example: mongodb+srv://user:pass@cluster.net/sourcevia?options")
     print(f"\n")
 
-# Final assertion to guarantee we never use wrong database
-assert MONGO_DB_NAME != 'procurement_db', "FATAL: Cannot use 'procurement_db' database!"
-assert MONGO_DB_NAME == 'sourcevia' or 'mongodb://' in MONGO_URL, "Database name must be 'sourcevia' for Atlas!"
+# Final validation to guarantee we never use wrong database
+if MONGO_DB_NAME == 'procurement_db':
+    raise ValueError("FATAL: Cannot use 'procurement_db' database! This will cause authorization errors.")
+
+# For Atlas URLs, warn if not using 'sourcevia' but don't crash
+if ('mongodb+srv://' in MONGO_URL or 'mongodb.net' in MONGO_URL) and MONGO_DB_NAME != 'sourcevia':
+    print(f"\n⚠️  WARNING: Using database '{MONGO_DB_NAME}' with MongoDB Atlas.")
+    print(f"   Make sure your Atlas user has permissions for this database.")
+    print(f"   Recommended database name: 'sourcevia'")
+    print()
 
 print(f"\n[DB Init] Creating MongoDB client...")
 client = AsyncIOMotorClient(MONGO_URL)
