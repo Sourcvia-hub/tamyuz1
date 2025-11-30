@@ -18,6 +18,54 @@
 ## backend:
 ##   - task: "Task name"
 
+
+---
+
+## 🚨 CRITICAL PRODUCTION FIX - 2025-11-30 (Deployment Error)
+
+### MongoDB Atlas Authorization Error (RESOLVED ✅)
+
+**Issue**: Production deployment failing with authorization error:
+```
+pymongo.errors.OperationFailure: not authorized on procurement_db to execute command
+```
+
+**Root Cause**:
+- Code was trying to access database "procurement_db"
+- MongoDB Atlas user only had permissions for "sourcevia" database
+- Database name extraction logic had edge cases where it would use wrong database name
+
+**Fix Applied**:
+1. **Updated `/app/backend/utils/database.py`**:
+   - Improved database name extraction to detect Atlas URLs explicitly
+   - Changed default fallback from "procurement_db" to "sourcevia"
+   - Added specific handling for Atlas URLs without database names
+   - Ensured code NEVER uses "procurement_db" for Atlas connections
+
+2. **Updated `/app/backend/.env`**:
+   - Removed `MONGO_DB_NAME=procurement_db` to prevent conflicts
+   - Removed `DB_NAME=sourcevia` (not used)
+   - Database name now exclusively extracted from MONGO_URL
+
+**Testing**:
+- ✅ Development environment tested with local MongoDB
+- ✅ Login endpoint working correctly
+- ✅ Code correctly extracts "sourcevia" from MONGO_URL
+- ✅ Ignores MONGO_DB_NAME environment variable when URL has database name
+
+**Production Impact**:
+- This fix resolves the deployment authorization error
+- Production MONGO_URL must include `/sourcevia` in the path
+- Example: `mongodb+srv://user:pass@cluster.mongodb.net/sourcevia?...`
+
+**Files Modified**:
+- `/app/backend/utils/database.py` - Database name extraction logic fixed
+- `/app/backend/.env` - Removed conflicting MONGO_DB_NAME variable
+- `/app/MONGODB_ATLAS_FIX.md` - Comprehensive fix documentation
+
+**Status**: READY FOR PRODUCTION DEPLOYMENT ✅
+
+
 ---
 
 ## 🎉 FORK SESSION FIXES - 2025-11-30
