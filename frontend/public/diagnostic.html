@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sourcevia Backend Diagnostic Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-green { background: #28a745; }
+        .status-red { background: #dc3545; }
+        .status-yellow { background: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Sourcevia Backend Diagnostic Tool</h1>
+        <p class="subtitle">Test your production backend connection and configuration</p>
+
+        <!-- Configuration Section -->
+        <div class="section">
+            <h2>📝 Configuration</h2>
+            <label>Backend URL:</label>
+            <input type="text" id="backendUrl" value="https://sourcevia-mgmt.emergent.host" placeholder="https://your-backend.com">
+            <label>Test Email:</label>
+            <input type="text" id="testEmail" value="admin@sourcevia.com" placeholder="admin@sourcevia.com">
+            <label>Test Password:</label>
+            <input type="password" id="testPassword" value="admin123" placeholder="password">
+        </div>
+
+        <!-- Test Buttons -->
+        <div class="section">
+            <h2>🧪 Run Tests</h2>
+            <button onclick="runAllTests()">▶️ Run All Tests</button>
+            <button onclick="testBackendReachable()">Test 1: Backend Reachable</button>
+            <button onclick="testCORS()">Test 2: CORS Configuration</button>
+            <button onclick="testLogin()">Test 3: Login Endpoint</button>
+            <button onclick="testRegistration()">Test 4: Registration</button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="section">
+            <h2>📊 Test Results</h2>
+            <div id="results"></div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="section">
+            <h2>📋 Summary</h2>
+            <div id="summary">Run tests to see results...</div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('summary').innerHTML = 'Running tests...';
+            testResults = [];
+        }
+
+        function addTestResult(name, passed, message) {
+            testResults.push({ name, passed, message });
+        }
+
+        function updateSummary() {
+            const passed = testResults.filter(t => t.passed).length;
+            const failed = testResults.filter(t => !t.passed).length;
+            const total = testResults.length;
+
+            let summaryHTML = `
+                <div style="margin-bottom: 15px;">
+                    <strong>Tests Run:</strong> ${total} | 
+                    <strong style="color: #28a745;">Passed:</strong> ${passed} | 
+                    <strong style="color: #dc3545;">Failed:</strong> ${failed}
+                </div>
+            `;
+
+            testResults.forEach(test => {
+                const icon = test.passed ? '✅' : '❌';
+                const color = test.passed ? '#28a745' : '#dc3545';
+                summaryHTML += `
+                    <div style="margin: 8px 0; padding: 8px; background: ${test.passed ? '#d4edda' : '#f8d7da'}; border-radius: 4px;">
+                        <span style="color: ${color};">${icon} ${test.name}</span>
+                        ${test.message ? `<br><small style="color: #666;">${test.message}</small>` : ''}
+                    </div>
+                `;
+            });
+
+            document.getElementById('summary').innerHTML = summaryHTML;
+        }
+
+        async function testBackendReachable() {
+            log('🔍 Testing if backend is reachable...', 'info');
+            const backendUrl = document.getElementById('backendUrl').value;
+
+            try {
+                const response = await fetch(`${backendUrl}/api/auth/login`, {
+                    method: 'OPTIONS'
+                });
+
+                if (response.ok || response.status === 204) {
+                    log(`✅ Backend is reachable! (Status: ${response.status})`, 'success');
+                    addTestResult('Backend Reachable', true);
+                    return true;
+                } else {
+                    log(`⚠️ Backend responded but with unexpected status: ${response.status}`, 'warning');
+                    addTestResult('Backend Reachable', true, `Status: ${response.status}`);
+                    return true;
+                }
+            } catch (error) {
+                log(`❌ Cannot reach backend: ${error.message}`, 'error');
+                addTestResult('Backend Reachable', false, error.message);
+                return false;
+            }
+        }
+
+        async function testCORS() {
+            log('🔍 Testing CORS configuration...', 'info');
+            const backendUrl = document.getElementById('backendUrl').value;
+
+            try {
+                const response = await fetch(`${backendUrl}/api/auth/login`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type'
+                    }
+                });
+
+                const allowOrigin = response.headers.get('access-control-allow-origin');
+                const allowCredentials = response.headers.get('access-control-allow-credentials');
+                const allowMethods = response.headers.get('access-control-allow-methods');
+
+                log(`CORS Headers:\n  Allow-Origin: ${allowOrigin}\n  Allow-Credentials: ${allowCredentials}\n  Allow-Methods: ${allowMethods}`, 'info');
+
+                if (allowOrigin === window.location.origin || allowOrigin === '*') {
+                    log('✅ CORS is configured correctly!', 'success');
+                    addTestResult('CORS Configuration', true);
+                    return true;
+                } else {
+                    log(`⚠️ CORS may be misconfigured. Expected: ${window.location.origin}, Got: ${allowOrigin}`, 'warning');
+                    addTestResult('CORS Configuration', false, `Origin mismatch: ${allowOrigin}`);
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ CORS test failed: ${error.message}`, 'error');
+                addTestResult('CORS Configuration', false, error.message);
+                return false;
+            }
+        }
+
+        async function testLogin() {
+            log('🔍 Testing login endpoint...', 'info');
+            const backendUrl = document.getElementById('backendUrl').value;
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+
+            try {
+                const response = await fetch(`${backendUrl}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+
+                if (response.ok && data.user) {
+                    log(`✅ Login successful!\nUser: ${data.user.name}\nEmail: ${data.user.email}\nRole: ${data.user.role}`, 'success');
+                    addTestResult('Login Endpoint', true);
+                    return true;
+                } else if (response.status === 401) {
+                    log(`⚠️ Login endpoint works but credentials are invalid (401).\nThis means backend is working!`, 'warning');
+                    addTestResult('Login Endpoint', true, 'Endpoint works, invalid credentials');
+                    return true;
+                } else if (response.status === 500) {
+                    log(`❌ Backend error (500): ${JSON.stringify(data)}\nThis usually means MongoDB connection issue!`, 'error');
+                    addTestResult('Login Endpoint', false, 'Backend 500 error - check MongoDB');
+                    return false;
+                } else {
+                    log(`❌ Login failed (${response.status}): ${JSON.stringify(data)}`, 'error');
+                    addTestResult('Login Endpoint', false, `Status ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Login test failed: ${error.message}\nThis could be a network issue or CORS blocking.`, 'error');
+                addTestResult('Login Endpoint', false, error.message);
+                return false;
+            }
+        }
+
+        async function testRegistration() {
+            log('🔍 Testing registration endpoint...', 'info');
+            const backendUrl = document.getElementById('backendUrl').value;
+            const testEmail = `test${Date.now()}@test.com`;
+
+            try {
+                const response = await fetch(`${backendUrl}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: testEmail,
+                        password: 'test123456',
+                        role: 'user'
+                    })
+                });
+
+                const data = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+
+                if (response.ok && data.user) {
+                    log(`✅ Registration successful!\nCreated user: ${data.user.email}`, 'success');
+                    addTestResult('Registration Endpoint', true);
+                    return true;
+                } else if (response.status === 500) {
+                    log(`❌ Backend error (500): ${JSON.stringify(data)}`, 'error');
+                    addTestResult('Registration Endpoint', false, 'Backend 500 error');
+                    return false;
+                } else {
+                    log(`⚠️ Registration returned status ${response.status}: ${JSON.stringify(data)}`, 'warning');
+                    addTestResult('Registration Endpoint', false, `Status ${response.status}`);
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Registration test failed: ${error.message}`, 'error');
+                addTestResult('Registration Endpoint', false, error.message);
+                return false;
+            }
+        }
+
+        async function runAllTests() {
+            clearResults();
+            log('🚀 Starting comprehensive backend tests...', 'info');
+            log('═'.repeat(60), 'info');
+
+            await testBackendReachable();
+            log('─'.repeat(60), 'info');
+            
+            await testCORS();
+            log('─'.repeat(60), 'info');
+            
+            await testLogin();
+            log('─'.repeat(60), 'info');
+            
+            await testRegistration();
+            log('═'.repeat(60), 'info');
+            
+            log('✅ All tests completed!', 'success');
+            updateSummary();
+        }
+
+        // Log initial info
+        log(`📍 Current Page: ${window.location.origin}`, 'info');
+        log(`🎯 Testing Against: ${document.getElementById('backendUrl').value}`, 'info');
+        log(`ℹ️  Click "Run All Tests" to start diagnostics`, 'info');
+    </script>
+</body>
+</html>
