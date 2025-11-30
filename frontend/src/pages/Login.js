@@ -1,233 +1,227 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
 import axios from 'axios';
-import { API_URL } from '../config/api';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    role: 'user'
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('admin');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setError(''); // Clear error when user types
+  // Get backend URL - try multiple sources
+  const getBackendUrl = () => {
+    // Try environment variable first
+    if (process.env.REACT_APP_BACKEND_URL) {
+      return process.env.REACT_APP_BACKEND_URL;
+    }
+    // Try runtime config
+    if (window.APP_CONFIG?.BACKEND_URL) {
+      return window.APP_CONFIG.BACKEND_URL;
+    }
+    // Default to same origin
+    return window.location.origin;
   };
 
-  // Handle Login
+  const API_URL = getBackendUrl();
+
+  // Log configuration for debugging
+  React.useEffect(() => {
+    console.log('🔧 Login Page Configuration:');
+    console.log('  Backend URL:', API_URL);
+    console.log('  Current Origin:', window.location.origin);
+    console.log('  Env Variable:', process.env.REACT_APP_BACKEND_URL);
+  }, [API_URL]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    console.log('🔐 Attempting login to:', `${API_URL}/auth/login`);
-    console.log('📧 Email:', formData.email);
+    console.log('🔐 Attempting login...');
+    console.log('  URL:', `${API_URL}/api/auth/login`);
+    console.log('  Email:', email);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email: formData.email,
-        password: formData.password
-      }, {
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axios.post(`${API_URL}/api/auth/login`, 
+        { email, password },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        }
+      );
 
-      console.log('✅ Login successful:', response.data);
-
+      console.log('✅ Login successful!', response.data);
+      
       if (response.data.user) {
-        // Store user info if needed
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        // Navigate to dashboard
         navigate('/dashboard');
       }
     } catch (err) {
-      console.error('❌ Login error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        config: err.config
-      });
+      console.error('❌ Login error:', err);
       
-      if (err.response?.status === 401) {
-        setError('Invalid email or password');
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. Server is not responding.');
       } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-        setError('Cannot connect to server. Please check your internet connection or try again later.');
+        setError(`Cannot reach server at ${API_URL}. Please check if backend is running.`);
+      } else if (err.response?.status === 401) {
+        setError('Invalid email or password');
       } else if (err.response?.status === 500) {
-        setError('Server error. Please try again later.');
+        setError('Server error. Backend may have database issues.');
       } else {
-        setError(err.response?.data?.detail || 'Login failed. Please try again.');
+        setError(err.response?.data?.detail || err.message || 'Login failed');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle Registration
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Basic validation
-    if (!formData.name.trim()) {
-      setError('Name is required');
+    if (!name || !email || !password) {
+      setError('All fields are required');
       setLoading(false);
       return;
     }
 
-    if (!formData.email.trim()) {
-      setError('Email is required');
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.password || formData.password.length < 6) {
+    if (password.length < 6) {
       setError('Password must be at least 6 characters');
       setLoading(false);
       return;
     }
 
-    console.log('📝 Attempting registration to:', `${API_URL}/auth/register`);
-    console.log('👤 User data:', {
-      name: formData.name.trim(),
-      email: formData.email.trim().toLowerCase(),
-      role: formData.role
-    });
+    console.log('📝 Attempting registration...');
+    console.log('  URL:', `${API_URL}/api/auth/register`);
+    console.log('  Name:', name);
+    console.log('  Email:', email);
+    console.log('  Role:', role);
 
     try {
-      // Step 1: Register the user
-      const registerResponse = await axios.post(`${API_URL}/auth/register`, {
-        name: formData.name.trim(),
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
-        role: formData.role
-      }, {
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await axios.post(`${API_URL}/api/auth/register`,
+        { name, email, password, role },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        }
+      );
 
-      console.log('✅ Registration successful:', registerResponse.data);
+      console.log('✅ Registration successful!', response.data);
 
-      // Step 2: Auto-login after successful registration
-      console.log('🔐 Auto-login after registration...');
-      const loginResponse = await axios.post(`${API_URL}/auth/login`, {
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password
-      }, {
-        withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      console.log('✅ Auto-login successful:', loginResponse.data);
+      // Auto-login after registration
+      const loginResponse = await axios.post(`${API_URL}/api/auth/login`,
+        { email, password },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
 
       if (loginResponse.data.user) {
         localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
         navigate('/dashboard');
       }
     } catch (err) {
-      console.error('❌ Registration error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-        config: err.config
-      });
+      console.error('❌ Registration error:', err);
       
-      if (err.response?.data?.detail === 'User already exists') {
-        setError('This email is already registered. Please login instead.');
-      } else if (err.response?.status === 422) {
-        setError('Please check all fields are filled correctly');
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. Server is not responding.');
       } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-        setError('Cannot connect to server. Please check your internet connection or try again later.');
+        setError(`Cannot reach server at ${API_URL}. Please check if backend is running.`);
+      } else if (err.response?.status === 400 && err.response?.data?.detail === 'User already exists') {
+        setError('This email is already registered. Please login instead.');
       } else if (err.response?.status === 500) {
-        setError('Server error. Please try again later.');
+        setError('Server error. Backend may have database issues.');
       } else {
-        setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+        setError(err.response?.data?.detail || err.message || 'Registration failed');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Toggle between login and registration
-  const toggleMode = () => {
-    setIsRegistering(!isRegistering);
-    setError('');
-    setFormData({
-      email: '',
-      password: '',
-      name: '',
-      role: 'user'
-    });
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
-            <span className="text-white text-2xl font-bold">S</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Sourcevia</h1>
-          <p className="text-gray-600 mt-2">Procurement Management System</p>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '20px'
+    }}>
+      <div style={{
+        maxWidth: '450px',
+        width: '100%',
+        background: 'white',
+        borderRadius: '16px',
+        padding: '40px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            background: '#667eea',
+            borderRadius: '50%',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            marginBottom: '15px'
+          }}>S</div>
+          <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: '#333' }}>Sourcevia</h1>
+          <p style={{ color: '#666', fontSize: '14px' }}>Procurement Management</p>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+        <div style={{
+          display: 'flex',
+          background: '#f5f5f5',
+          borderRadius: '8px',
+          padding: '4px',
+          marginBottom: '30px'
+        }}>
           <button
             type="button"
-            onClick={() => {
-              if (isRegistering) {
-                setIsRegistering(false);
-                setError('');
-                setFormData({
-                  email: '',
-                  password: '',
-                  name: '',
-                  role: 'user'
-                });
-              }
+            onClick={() => setIsRegistering(false)}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: 'none',
+              borderRadius: '6px',
+              background: !isRegistering ? 'white' : 'transparent',
+              color: !isRegistering ? '#667eea' : '#666',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: !isRegistering ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
             }}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-              !isRegistering
-                ? 'bg-white text-blue-600 shadow'
-                : 'text-gray-600 hover:text-gray-900 cursor-pointer'
-            }`}
           >
             Login
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (!isRegistering) {
-                setIsRegistering(true);
-                setError('');
-                setFormData({
-                  email: '',
-                  password: '',
-                  name: '',
-                  role: 'user'
-                });
-              }
+            onClick={() => setIsRegistering(true)}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: 'none',
+              borderRadius: '6px',
+              background: isRegistering ? 'white' : 'transparent',
+              color: isRegistering ? '#667eea' : '#666',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: isRegistering ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
             }}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
-              isRegistering
-                ? 'bg-white text-blue-600 shadow'
-                : 'text-gray-600 hover:text-gray-900 cursor-pointer'
-            }`}
           >
             Register
           </button>
@@ -235,126 +229,136 @@ const Login = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
+          <div style={{
+            padding: '12px',
+            background: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '8px',
+            color: '#c33',
+            fontSize: '14px',
+            marginBottom: '20px'
+          }}>
+            {error}
           </div>
         )}
 
         {/* Form */}
         <form onSubmit={isRegistering ? handleRegister : handleLogin}>
-          {/* Name Field (Registration Only) */}
           {isRegistering && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+                Full Name
               </label>
               <input
                 type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your full name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required={isRegistering}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
               />
             </div>
           )}
 
-          {/* Email Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email <span className="text-red-500">*</span>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+              Email
             </label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
               required
             />
           </div>
 
-          {/* Password Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password <span className="text-red-500">*</span>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+              Password
             </label>
             <input
               type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder={isRegistering ? 'Create a password (min 6 characters)' : 'Enter your password'}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={isRegistering ? 'Minimum 6 characters' : 'Your password'}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
               required
-              minLength={isRegistering ? 6 : undefined}
             />
           </div>
 
-          {/* Role Selection (Registration Only) */}
           {isRegistering && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role <span className="text-red-500">*</span>
+            <div style={{ marginBottom: '25px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+                Role
               </label>
               <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
               >
-                <option value="user">User</option>
-                <option value="direct_manager">Direct Manager</option>
-                <option value="procurement_officer">Procurement Officer</option>
-                <option value="procurement_manager">Procurement Manager</option>
-                <option value="senior_manager">Senior Manager</option>
                 <option value="admin">Admin</option>
+                <option value="procurement_manager">Procurement Manager</option>
+                <option value="procurement_officer">Procurement Officer</option>
+                <option value="user">User</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Select your role in the organization
-              </p>
             </div>
           )}
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-all ${
-              loading
-                ? 'bg-blue-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
-            }`}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: loading ? '#ccc' : '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
           >
-            {loading ? (
-              <span className="flex items-center justify-center">
-                <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                {isRegistering ? 'Creating Account...' : 'Logging In...'}
-              </span>
-            ) : (
-              isRegistering ? 'Create Account' : 'Login'
-            )}
+            {loading ? 'Please wait...' : (isRegistering ? 'Create Account' : 'Login')}
           </button>
         </form>
 
-        {/* Toggle Link */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            {isRegistering ? 'Already have an account?' : "Don't have an account?"}{' '}
-            <button
-              type="button"
-              onClick={toggleMode}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              {isRegistering ? 'Login here' : 'Register here'}
-            </button>
-          </p>
+        {/* Debug Info */}
+        <div style={{
+          marginTop: '20px',
+          padding: '10px',
+          background: '#f9f9f9',
+          borderRadius: '6px',
+          fontSize: '12px',
+          color: '#666'
+        }}>
+          <strong>Debug Info:</strong><br/>
+          Backend: {API_URL}
         </div>
       </div>
     </div>
