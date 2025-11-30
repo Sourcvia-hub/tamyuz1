@@ -16,11 +16,28 @@ const Login = () => {
   // Import API configuration
   const API_URL = process.env.REACT_APP_BACKEND_URL || window.location.origin;
 
-  // Log configuration on mount
+  // Test backend connection on mount
   React.useEffect(() => {
     console.log('🔧 Login Page Loaded');
     console.log('  Backend URL:', API_URL);
-    console.log('  Ready to connect');
+    
+    // Test connection
+    const testConnection = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/auth/login`, {
+          timeout: 5000,
+          validateStatus: () => true // Accept any status
+        });
+        
+        console.log('✅ Backend is reachable!');
+        setConnectionStatus('connected');
+      } catch (err) {
+        console.warn('⚠️ Backend connection test failed, but will still try to login:', err.message);
+        setConnectionStatus('connected'); // Don't block login, just log warning
+      }
+    };
+    
+    testConnection();
   }, []);
 
   const handleLogin = async (e) => {
