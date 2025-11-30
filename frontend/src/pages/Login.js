@@ -128,11 +128,11 @@ const Login = () => {
       return;
     }
 
-    const registerUrl = `${API_URL}/api/auth/register`;
+    const registerUrl = `${BACKEND_URL.replace(/\/+$/, "")}/api/auth/register`;
     
     console.log('📝 Attempting registration...');
     console.log('  Full URL:', registerUrl);
-    console.log('  Backend:', API_URL);
+    console.log('  Backend:', BACKEND_URL);
     console.log('  Name:', name);
     console.log('  Email:', email);
     console.log('  Role:', role);
