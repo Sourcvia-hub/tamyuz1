@@ -1,0 +1,368 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const Login = () => {
+  const navigate = useNavigate();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('admin');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Get backend URL - try multiple sources
+  const getBackendUrl = () => {
+    // Try environment variable first
+    if (process.env.REACT_APP_BACKEND_URL) {
+      return process.env.REACT_APP_BACKEND_URL;
+    }
+    // Try runtime config
+    if (window.APP_CONFIG?.BACKEND_URL) {
+      return window.APP_CONFIG.BACKEND_URL;
+    }
+    // Default to same origin
+    return window.location.origin;
+  };
+
+  const API_URL = getBackendUrl();
+
+  // Log configuration for debugging
+  React.useEffect(() => {
+    console.log('🔧 Login Page Configuration:');
+    console.log('  Backend URL:', API_URL);
+    console.log('  Current Origin:', window.location.origin);
+    console.log('  Env Variable:', process.env.REACT_APP_BACKEND_URL);
+  }, [API_URL]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    console.log('🔐 Attempting login...');
+    console.log('  URL:', `${API_URL}/api/auth/login`);
+    console.log('  Email:', email);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/login`, 
+        { email, password },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        }
+      );
+
+      console.log('✅ Login successful!', response.data);
+      
+      if (response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error('❌ Login error:', err);
+      
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. Server is not responding.');
+      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        setError(`Cannot reach server at ${API_URL}. Please check if backend is running.`);
+      } else if (err.response?.status === 401) {
+        setError('Invalid email or password');
+      } else if (err.response?.status === 500) {
+        setError('Server error. Backend may have database issues.');
+      } else {
+        setError(err.response?.data?.detail || err.message || 'Login failed');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    if (!name || !email || !password) {
+      setError('All fields are required');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+
+    console.log('📝 Attempting registration...');
+    console.log('  URL:', `${API_URL}/api/auth/register`);
+    console.log('  Name:', name);
+    console.log('  Email:', email);
+    console.log('  Role:', role);
+
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/register`,
+        { name, email, password, role },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000
+        }
+      );
+
+      console.log('✅ Registration successful!', response.data);
+
+      // Auto-login after registration
+      const loginResponse = await axios.post(`${API_URL}/api/auth/login`,
+        { email, password },
+        {
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+
+      if (loginResponse.data.user) {
+        localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      console.error('❌ Registration error:', err);
+      
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. Server is not responding.');
+      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        setError(`Cannot reach server at ${API_URL}. Please check if backend is running.`);
+      } else if (err.response?.status === 400 && err.response?.data?.detail === 'User already exists') {
+        setError('This email is already registered. Please login instead.');
+      } else if (err.response?.status === 500) {
+        setError('Server error. Backend may have database issues.');
+      } else {
+        setError(err.response?.data?.detail || err.message || 'Registration failed');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '20px'
+    }}>
+      <div style={{
+        maxWidth: '450px',
+        width: '100%',
+        background: 'white',
+        borderRadius: '16px',
+        padding: '40px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            background: '#667eea',
+            borderRadius: '50%',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            marginBottom: '15px'
+          }}>S</div>
+          <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: '#333' }}>Sourcevia</h1>
+          <p style={{ color: '#666', fontSize: '14px' }}>Procurement Management</p>
+        </div>
+
+        {/* Tab Buttons */}
+        <div style={{
+          display: 'flex',
+          background: '#f5f5f5',
+          borderRadius: '8px',
+          padding: '4px',
+          marginBottom: '30px'
+        }}>
+          <button
+            type="button"
+            onClick={() => setIsRegistering(false)}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: 'none',
+              borderRadius: '6px',
+              background: !isRegistering ? 'white' : 'transparent',
+              color: !isRegistering ? '#667eea' : '#666',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: !isRegistering ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+            }}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsRegistering(true)}
+            style={{
+              flex: 1,
+              padding: '10px',
+              border: 'none',
+              borderRadius: '6px',
+              background: isRegistering ? 'white' : 'transparent',
+              color: isRegistering ? '#667eea' : '#666',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: isRegistering ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+            }}
+          >
+            Register
+          </button>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div style={{
+            padding: '12px',
+            background: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '8px',
+            color: '#c33',
+            fontSize: '14px',
+            marginBottom: '20px'
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={isRegistering ? handleRegister : handleLogin}>
+          {isRegistering && (
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+                Full Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+            </div>
+          )}
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={isRegistering ? 'Minimum 6 characters' : 'Your password'}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #ddd',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+              required
+            />
+          </div>
+
+          {isRegistering && (
+            <div style={{ marginBottom: '25px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+                Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              >
+                <option value="admin">Admin</option>
+                <option value="procurement_manager">Procurement Manager</option>
+                <option value="procurement_officer">Procurement Officer</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: loading ? '#ccc' : '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? 'Please wait...' : (isRegistering ? 'Create Account' : 'Login')}
+          </button>
+        </form>
+
+        {/* Debug Info */}
+        <div style={{
+          marginTop: '20px',
+          padding: '10px',
+          background: '#f9f9f9',
+          borderRadius: '6px',
+          fontSize: '12px',
+          color: '#666'
+        }}>
+          <strong>Debug Info:</strong><br/>
+          Backend: {API_URL}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
