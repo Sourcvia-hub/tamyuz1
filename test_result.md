@@ -476,9 +476,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "RBAC Vendors Module Testing"
-    - "RBAC Assets Module Testing" 
-    - "RBAC OSR Module Testing"
+    - "Complete Authentication Flow Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
