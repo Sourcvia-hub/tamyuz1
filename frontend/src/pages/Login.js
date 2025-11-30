@@ -13,21 +13,14 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('checking'); // checking, connected, error
 
-  // Get backend URL with proper fallback
-  const getBackendURL = () => {
-    // Check environment variable first
-    if (process.env.REACT_APP_BACKEND_URL) {
-      return process.env.REACT_APP_BACKEND_URL;
-    }
-    // Check window config
-    if (window.APP_CONFIG?.BACKEND_URL) {
-      return window.APP_CONFIG.BACKEND_URL;
-    }
-    // Default to same origin
-    return window.location.origin;
-  };
+  // Get backend URL with proper fallback and remove trailing slashes
+  const BACKEND_URL = (
+    window.APP_CONFIG?.BACKEND_URL ||
+    process.env.REACT_APP_BACKEND_URL ||
+    "https://sourcevia-secure.emergent.host"
+  ).replace(/\/+$/, "");
 
-  const API_URL = getBackendURL();
+  const API_URL = BACKEND_URL;
 
   // Test backend connection on mount
   React.useEffect(() => {
