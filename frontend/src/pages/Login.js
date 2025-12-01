@@ -101,8 +101,8 @@ const Login = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     if (!name || !email || !password) {
       setError('All fields are required');
@@ -116,58 +116,41 @@ const Login = () => {
       return;
     }
 
-    const registerUrl = `${BACKEND_URL}/api/auth/register`;
-    
-    console.log('📝 Attempting registration...');
-    console.log('  Full URL:', registerUrl);
-    console.log('  Backend:', BACKEND_URL);
-    console.log('  Name:', name);
-    console.log('  Email:', email);
-    console.log('  Role:', role);
-
     try {
-      const response = await axios.post(registerUrl, {
+      const payload = {
         name,
         email,
         password,
         role,
-      }, { withCredentials: true });
+      };
 
-      console.log('✅ Registration successful!', response.data);
+      const res = await axios.post(
+        `${BACKEND_URL}/api/auth/register`,
+        payload,
+        { withCredentials: true }
+      );
 
+      console.log('Registration OK', res.data);
+      
       // Auto-login after registration
-      const loginUrl = `${BACKEND_URL}/api/auth/login`;
-      const loginResponse = await axios.post(loginUrl, {
-        email,
-        password,
-      }, { withCredentials: true });
+      const loginRes = await axios.post(
+        `${BACKEND_URL}/api/auth/login`,
+        { email, password },
+        { withCredentials: true }
+      );
 
-      if (loginResponse.data.user) {
-        localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
-        // Force page reload to trigger auth check
+      if (loginRes.data.user) {
+        localStorage.setItem('user', JSON.stringify(loginRes.data.user));
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      console.error('❌ Registration error:', err);
-      
-      // Better error messages
-      let errorMessage = '';
-      
-      if (err.code === 'ECONNABORTED') {
-        errorMessage = 'Request timed out. Please try again.';
-      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-        errorMessage = 'Connection error. Please check your internet connection.';
-      } else if (err.response?.status === 400 && err.response?.data?.detail === 'User already exists') {
-        errorMessage = 'This email is already registered. Please login instead.';
-      } else if (err.response?.status === 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
+      console.error('Registration error:', err);
+
+      if (err.response?.status === 409 || err.response?.status === 400) {
+        setError('Email already exists');
       } else {
-        errorMessage = 'Registration failed. Please try again.';
+        setError('Server error. Please try again later.');
       }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
