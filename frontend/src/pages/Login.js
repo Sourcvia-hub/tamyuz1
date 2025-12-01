@@ -384,7 +384,7 @@ const Login = () => {
           color: '#666'
         }}>
           <strong>Debug Info:</strong><br/>
-          Backend: {API_URL}
+          <p>Backend: {BACKEND_URL}</p>
         </div>
       </div>
     </div>
