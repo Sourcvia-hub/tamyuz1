@@ -50,50 +50,30 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-
-    const loginUrl = `${BACKEND_URL}/api/auth/login`;
-    
-    console.log('🔐 Attempting login...');
-    console.log('  Full URL:', loginUrl);
-    console.log('  Backend:', BACKEND_URL);
-    console.log('  Email:', email);
+    setLoading(true);
 
     try {
-      const response = await axios.post(loginUrl, 
+      const res = await axios.post(
+        `${BACKEND_URL}/api/auth/login`,
         { email, password },
         { withCredentials: true }
       );
 
-      console.log('✅ Login successful!', response.data);
+      console.log('Login OK', res.data);
       
-      if (response.data.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        // Force page reload to trigger auth check
+      if (res.data.user) {
+        localStorage.setItem('user', JSON.stringify(res.data.user));
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      console.error('❌ Login error:', err);
-      
-      // Better error messages
-      let errorMessage = '';
-      
-      if (err.code === 'ECONNABORTED') {
-        errorMessage = 'Request timed out. Please try again.';
-      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-        errorMessage = 'Connection error. Please check your internet connection.';
-      } else if (err.response?.status === 401) {
-        errorMessage = 'Invalid email or password. Please try again.';
-      } else if (err.response?.status === 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
+      console.error('Login error:', err);
+
+      if (err.response?.status === 401) {
+        setError('Invalid email or password');
       } else {
-        errorMessage = 'Login failed. Please try again.';
+        setError('Server error. Please try again later.');
       }
-      
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
