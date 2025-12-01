@@ -130,3 +130,7 @@ client = AsyncIOMotorClient(MONGO_URL)
 db = client[MONGO_DB_NAME]
 print(f"[DB Init] Database client created successfully")
 print(f"[DB Init] Will connect to database: '{MONGO_DB_NAME}'\n")
+
+# Helper to get DB 
+def get_db():
+    return db
