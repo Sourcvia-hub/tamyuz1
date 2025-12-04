@@ -1,0 +1,388 @@
+{
+  "listName": "Vendors",
+  "description": "Vendor registration and due diligence management",
+  "template": "GenericList",
+  "enableVersioning": true,
+  "enableAttachments": false,
+  "fields": [
+    {
+      "name": "VendorID",
+      "displayName": "Vendor ID",
+      "type": "Text",
+      "required": true,
+      "indexed": true,
+      "maxLength": 255
+    },
+    {
+      "name": "VendorNumber",
+      "displayName": "Vendor Number",
+      "type": "Text",
+      "required": false,
+      "indexed": true,
+      "maxLength": 50
+    },
+    {
+      "name": "VendorType",
+      "displayName": "Vendor Type",
+      "type": "Choice",
+      "required": true,
+      "choices": ["local", "international"],
+      "defaultValue": "local"
+    },
+    {
+      "name": "NameEnglish",
+      "displayName": "Name (English)",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "CommercialName",
+      "displayName": "Commercial Name",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "EntityType",
+      "displayName": "Entity Type",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "VATNumber",
+      "displayName": "VAT Number",
+      "type": "Text",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "name": "UnifiedNumber",
+      "displayName": "Unified Number",
+      "type": "Text",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "name": "CRNumber",
+      "displayName": "CR Number",
+      "type": "Text",
+      "required": true,
+      "indexed": true,
+      "maxLength": 50
+    },
+    {
+      "name": "CRExpiryDate",
+      "displayName": "CR Expiry Date",
+      "type": "DateTime",
+      "required": true
+    },
+    {
+      "name": "CRCountryCity",
+      "displayName": "CR Country/City",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "LicenseNumber",
+      "displayName": "License Number",
+      "type": "Text",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "name": "LicenseExpiryDate",
+      "displayName": "License Expiry Date",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "name": "ActivityDescription",
+      "displayName": "Activity Description",
+      "type": "Note",
+      "required": true
+    },
+    {
+      "name": "NumberOfEmployees",
+      "displayName": "Number of Employees",
+      "type": "Number",
+      "required": true
+    },
+    {
+      "name": "Street",
+      "displayName": "Street",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "BuildingNo",
+      "displayName": "Building Number",
+      "type": "Text",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "name": "City",
+      "displayName": "City",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "District",
+      "displayName": "District",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "Country",
+      "displayName": "Country",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "Mobile",
+      "displayName": "Mobile",
+      "type": "Text",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "name": "Landline",
+      "displayName": "Landline",
+      "type": "Text",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "name": "Fax",
+      "displayName": "Fax",
+      "type": "Text",
+      "required": false,
+      "maxLength": 50
+    },
+    {
+      "name": "Email",
+      "displayName": "Email",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "RepresentativeName",
+      "displayName": "Representative Name",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "RepresentativeDesignation",
+      "displayName": "Representative Designation",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "RepresentativeIDType",
+      "displayName": "Representative ID Type",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "RepresentativeIDNumber",
+      "displayName": "Representative ID Number",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "RepresentativeNationality",
+      "displayName": "Representative Nationality",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "RepresentativeMobile",
+      "displayName": "Representative Mobile",
+      "type": "Text",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "name": "RepresentativeEmail",
+      "displayName": "Representative Email",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "BankAccountName",
+      "displayName": "Bank Account Name",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "BankName",
+      "displayName": "Bank Name",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "BankBranch",
+      "displayName": "Bank Branch",
+      "type": "Text",
+      "required": true,
+      "maxLength": 255
+    },
+    {
+      "name": "BankCountry",
+      "displayName": "Bank Country",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "IBAN",
+      "displayName": "IBAN",
+      "type": "Text",
+      "required": true,
+      "maxLength": 100
+    },
+    {
+      "name": "Currency",
+      "displayName": "Currency",
+      "type": "Text",
+      "required": true,
+      "maxLength": 10
+    },
+    {
+      "name": "SwiftCode",
+      "displayName": "SWIFT Code",
+      "type": "Text",
+      "required": true,
+      "maxLength": 50
+    },
+    {
+      "name": "RiskScore",
+      "displayName": "Risk Score",
+      "type": "Number",
+      "required": true,
+      "defaultValue": 0
+    },
+    {
+      "name": "RiskCategory",
+      "displayName": "Risk Category",
+      "type": "Choice",
+      "required": true,
+      "choices": ["low", "medium", "high"],
+      "defaultValue": "low"
+    },
+    {
+      "name": "RiskAssessmentDetails",
+      "displayName": "Risk Assessment Details",
+      "type": "Note",
+      "required": false,
+      "note": "Stores JSON string"
+    },
+    {
+      "name": "Status",
+      "displayName": "Status",
+      "type": "Choice",
+      "required": true,
+      "choices": ["pending", "pending_due_diligence", "approved", "rejected", "blacklisted"],
+      "defaultValue": "approved"
+    },
+    {
+      "name": "EvaluationNotes",
+      "displayName": "Evaluation Notes",
+      "type": "Note",
+      "required": false
+    },
+    {
+      "name": "OwnersManagers",
+      "displayName": "Owners/Managers",
+      "type": "Note",
+      "required": false,
+      "note": "Stores JSON array"
+    },
+    {
+      "name": "AuthorizedPersons",
+      "displayName": "Authorized Persons",
+      "type": "Note",
+      "required": false,
+      "note": "Stores JSON array"
+    },
+    {
+      "name": "Documents",
+      "displayName": "Documents",
+      "type": "Note",
+      "required": false,
+      "note": "Stores JSON array of file paths"
+    },
+    {
+      "name": "DDRequired",
+      "displayName": "Due Diligence Required",
+      "type": "Boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    {
+      "name": "DDCompleted",
+      "displayName": "Due Diligence Completed",
+      "type": "Boolean",
+      "required": true,
+      "defaultValue": false
+    },
+    {
+      "name": "DDCompletedBy",
+      "displayName": "DD Completed By",
+      "type": "Text",
+      "required": false,
+      "maxLength": 255
+    },
+    {
+      "name": "DDCompletedAt",
+      "displayName": "DD Completed At",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "name": "CreatedByUser",
+      "displayName": "Created By",
+      "type": "Text",
+      "required": false,
+      "maxLength": 255
+    }
+  ],
+  "views": [
+    {
+      "name": "All Vendors",
+      "default": true,
+      "fields": ["VendorNumber", "NameEnglish", "VendorType", "Status", "RiskCategory", "Created"]
+    },
+    {
+      "name": "Approved Vendors",
+      "filter": "Status eq 'approved'",
+      "fields": ["VendorNumber", "NameEnglish", "VendorType", "RiskCategory", "Created"]
+    },
+    {
+      "name": "Pending Due Diligence",
+      "filter": "DDRequired eq true and DDCompleted eq false",
+      "fields": ["VendorNumber", "NameEnglish", "Status", "DDRequired", "DDCompleted"]
+    }
+  ],
+  "notes": [
+    "Due Diligence questionnaire fields (70+ fields) are stored as individual Boolean/Text columns",
+    "See FIELD_DEFINITIONS.md for complete list of DD fields",
+    "File attachments should be stored in SharePoint Document Library and referenced here"
+  ]
+}
