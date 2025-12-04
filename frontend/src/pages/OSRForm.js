@@ -327,7 +327,12 @@ const OSRForm = () => {
 
           {/* Location Section */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Location Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Location Information
+              {formData.request_type === 'asset_related' && formData.asset_id && (
+                <span className="ml-2 text-sm font-normal text-green-600">✓ Auto-filled from asset</span>
+              )}
+            </h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Building *</label>
@@ -336,27 +341,33 @@ const OSRForm = () => {
                   value={formData.building_id}
                   onChange={(e) => setFormData({ ...formData, building_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  disabled={formData.request_type === 'asset_related' && formData.asset_id}
                 >
                   <option value="">Select Building</option>
                   {masterData.buildings.map((building) => (
                     <option key={building.id} value={building.id}>{building.name}</option>
                   ))}
                 </select>
+                {formData.request_type === 'asset_related' && formData.asset_id && (
+                  <p className="text-xs text-gray-500 mt-1">Auto-filled from selected asset</p>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Floor *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
                 <select
-                  required
                   value={formData.floor_id}
                   onChange={(e) => setFormData({ ...formData, floor_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  disabled={!formData.building_id}
+                  disabled={(!formData.building_id) || (formData.request_type === 'asset_related' && formData.asset_id)}
                 >
                   <option value="">Select Floor</option>
                   {availableFloors.map((floor) => (
                     <option key={floor.id} value={floor.id}>{floor.name}</option>
                   ))}
                 </select>
+                {formData.request_type === 'asset_related' && formData.asset_id && (
+                  <p className="text-xs text-gray-500 mt-1">Auto-filled from selected asset</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Room/Area</label>
@@ -366,7 +377,11 @@ const OSRForm = () => {
                   onChange={(e) => setFormData({ ...formData, room_area: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., Room 201"
+                  disabled={formData.request_type === 'asset_related' && formData.asset_id}
                 />
+                {formData.request_type === 'asset_related' && formData.asset_id && (
+                  <p className="text-xs text-gray-500 mt-1">Auto-filled from selected asset</p>
+                )}
               </div>
             </div>
           </div>
