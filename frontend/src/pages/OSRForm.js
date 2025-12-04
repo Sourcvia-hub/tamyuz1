@@ -386,33 +386,6 @@ const OSRForm = () => {
             </div>
           </div>
 
-          {/* Asset Selection (if asset-related) */}
-          {formData.request_type === 'asset_related' && (
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Asset Information</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Asset *</label>
-                <select
-                  required={formData.request_type === 'asset_related'}
-                  value={formData.asset_id}
-                  onChange={(e) => setFormData({ ...formData, asset_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  disabled={!formData.building_id}
-                >
-                  <option value="">Select Asset</option>
-                  {availableAssets.map((asset) => (
-                    <option key={asset.id} value={asset.id}>
-                      {asset.asset_number} - {asset.name} ({asset.category_name})
-                    </option>
-                  ))}
-                </select>
-                {!formData.building_id && (
-                  <p className="text-xs text-gray-500 mt-1">Please select a building first</p>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Assignment (Optional) */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Assignment (Optional)</h3>
