@@ -46,20 +46,21 @@ const OSRForm = () => {
   }, [formData.building_id]);
 
   useEffect(() => {
-    // When asset is selected, auto-populate location and asset details
-    if (formData.asset_id) {
+    // When asset is selected, auto-populate location, category, and asset details
+    if (formData.asset_id && formData.request_type === 'asset_related') {
       const asset = masterData.assets.find(a => a.id === formData.asset_id);
       if (asset) {
-        // Auto-populate location from asset
+        // Auto-populate location and category from asset
         setFormData(prev => ({
           ...prev,
           building_id: asset.building_id || prev.building_id,
           floor_id: asset.floor_id || prev.floor_id,
-          room_area: asset.room_area || prev.room_area
+          room_area: asset.room_area || prev.room_area,
+          category: 'maintenance' // Default category for asset-related requests
         }));
       }
     }
-  }, [formData.asset_id, masterData.assets]);
+  }, [formData.asset_id, formData.request_type, masterData.assets]);
 
   const fetchMasterData = async () => {
     try {
