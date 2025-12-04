@@ -1,0 +1,129 @@
+{
+  "listName": "Assets",
+  "description": "Asset and facilities management",
+  "template": "GenericList",
+  "enableVersioning": true,
+  "enableAttachments": false,
+  "fields": [
+    {
+      "name": "AssetID",
+      "displayName": "Asset ID",
+      "type": "Text",
+      "required": true,
+      "indexed": true
+    },
+    {
+      "name": "AssetNumber",
+      "displayName": "Asset Number",
+      "type": "Text",
+      "required": false,
+      "indexed": true
+    },
+    {
+      "name": "Name",
+      "displayName": "Asset Name",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "name": "CategoryID",
+      "displayName": "Category",
+      "type": "Lookup",
+      "required": true,
+      "lookupList": "AssetCategories",
+      "lookupField": "Title"
+    },
+    {
+      "name": "Model",
+      "displayName": "Model",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "name": "SerialNumber",
+      "displayName": "Serial Number",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "name": "Manufacturer",
+      "displayName": "Manufacturer",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "name": "BuildingID",
+      "displayName": "Building",
+      "type": "Lookup",
+      "required": true,
+      "lookupList": "Buildings",
+      "lookupField": "Title"
+    },
+    {
+      "name": "FloorID",
+      "displayName": "Floor",
+      "type": "Lookup",
+      "required": true,
+      "lookupList": "Floors",
+      "lookupField": "Title"
+    },
+    {
+      "name": "RoomArea",
+      "displayName": "Room/Area",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "name": "Custodian",
+      "displayName": "Custodian",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "name": "VendorID",
+      "displayName": "Vendor",
+      "type": "Lookup",
+      "required": false,
+      "lookupList": "Vendors",
+      "lookupField": "Title"
+    },
+    {
+      "name": "PurchaseDate",
+      "displayName": "Purchase Date",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "name": "Cost",
+      "displayName": "Cost",
+      "type": "Currency",
+      "required": false
+    },
+    {
+      "name": "WarrantyStartDate",
+      "displayName": "Warranty Start",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "name": "WarrantyEndDate",
+      "displayName": "Warranty End",
+      "type": "DateTime",
+      "required": false
+    },
+    {
+      "name": "Status",
+      "displayName": "Status",
+      "type": "Choice",
+      "required": true,
+      "choices": ["active", "under_maintenance", "out_of_service", "replaced", "decommissioned"]
+    },
+    {
+      "name": "Condition",
+      "displayName": "Condition",
+      "type": "Choice",
+      "required": false,
+      "choices": ["good", "fair", "poor"]
+    }
+  ]
+}

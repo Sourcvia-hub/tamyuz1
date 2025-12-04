@@ -1,0 +1,95 @@
+{
+  "listName": "PurchaseOrders",
+  "description": "Purchase order management with risk assessment",
+  "template": "GenericList",
+  "enableVersioning": true,
+  "enableAttachments": false,
+  "fields": [
+    {
+      "name": "POID",
+      "displayName": "PO ID",
+      "type": "Text",
+      "required": true,
+      "indexed": true
+    },
+    {
+      "name": "PONumber",
+      "displayName": "PO Number",
+      "type": "Text",
+      "required": false,
+      "indexed": true
+    },
+    {
+      "name": "TenderID",
+      "displayName": "Tender",
+      "type": "Lookup",
+      "required": false,
+      "lookupList": "Tenders",
+      "lookupField": "Title"
+    },
+    {
+      "name": "VendorID",
+      "displayName": "Vendor",
+      "type": "Lookup",
+      "required": true,
+      "lookupList": "Vendors",
+      "lookupField": "Title"
+    },
+    {
+      "name": "Items",
+      "displayName": "Items",
+      "type": "Note",
+      "required": true,
+      "note": "Stores JSON array of items"
+    },
+    {
+      "name": "TotalAmount",
+      "displayName": "Total Amount",
+      "type": "Currency",
+      "required": true
+    },
+    {
+      "name": "DeliveryTime",
+      "displayName": "Delivery Time",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "name": "HasDataAccess",
+      "displayName": "Data Access Required",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "HasOnsitePresence",
+      "displayName": "Onsite Presence",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "HasImplementation",
+      "displayName": "Implementation Involved",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "DurationMoreThanYear",
+      "displayName": "Duration > 1 Year",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "RequiresContract",
+      "displayName": "Requires Contract",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "Status",
+      "displayName": "Status",
+      "type": "Choice",
+      "required": true,
+      "choices": ["draft", "issued", "converted_to_contract", "cancelled"]
+    }
+  ]
+}

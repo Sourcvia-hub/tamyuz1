@@ -1,0 +1,121 @@
+{
+  "listName": "Contracts",
+  "description": "Contract management with outsourcing assessment",
+  "template": "GenericList",
+  "enableVersioning": true,
+  "enableAttachments": false,
+  "fields": [
+    {
+      "name": "ContractID",
+      "displayName": "Contract ID",
+      "type": "Text",
+      "required": true,
+      "indexed": true
+    },
+    {
+      "name": "ContractNumber",
+      "displayName": "Contract Number",
+      "type": "Text",
+      "required": false,
+      "indexed": true
+    },
+    {
+      "name": "TenderID",
+      "displayName": "Tender ID",
+      "type": "Lookup",
+      "required": true,
+      "lookupList": "Tenders",
+      "lookupField": "Title"
+    },
+    {
+      "name": "VendorID",
+      "displayName": "Vendor ID",
+      "type": "Lookup",
+      "required": true,
+      "lookupList": "Vendors",
+      "lookupField": "Title"
+    },
+    {
+      "name": "Title",
+      "displayName": "Contract Title",
+      "type": "Text",
+      "required": true
+    },
+    {
+      "name": "SOW",
+      "displayName": "Statement of Work",
+      "type": "Note",
+      "required": true
+    },
+    {
+      "name": "SLA",
+      "displayName": "Service Level Agreement",
+      "type": "Note",
+      "required": true
+    },
+    {
+      "name": "Milestones",
+      "displayName": "Milestones",
+      "type": "Note",
+      "required": false,
+      "note": "Stores JSON array"
+    },
+    {
+      "name": "Value",
+      "displayName": "Contract Value",
+      "type": "Currency",
+      "required": true
+    },
+    {
+      "name": "StartDate",
+      "displayName": "Start Date",
+      "type": "DateTime",
+      "required": true
+    },
+    {
+      "name": "EndDate",
+      "displayName": "End Date",
+      "type": "DateTime",
+      "required": true
+    },
+    {
+      "name": "IsOutsourcing",
+      "displayName": "Is Outsourcing",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "IsNOC",
+      "displayName": "NOC Required",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "name": "Status",
+      "displayName": "Status",
+      "type": "Choice",
+      "required": true,
+      "choices": ["draft", "under_review", "pending_due_diligence", "approved", "active", "expired"]
+    },
+    {
+      "name": "OutsourcingClassification",
+      "displayName": "Outsourcing Classification",
+      "type": "Choice",
+      "required": false,
+      "choices": ["not_outsourcing", "outsourcing", "insourcing", "exempted", "cloud_computing"]
+    },
+    {
+      "name": "Documents",
+      "displayName": "Documents",
+      "type": "Note",
+      "required": false
+    }
+  ],
+  "views": [
+    {
+      "name": "Active Contracts",
+      "filter": "Status eq 'active'",
+      "fields": ["ContractNumber", "Title", "VendorID", "Value", "StartDate", "EndDate"]
+    }
+  ]
+}
