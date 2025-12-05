@@ -7,47 +7,34 @@ configuration.
 """
 
 from functools import lru_cache
-from pydantic import BaseSettings, Field, AnyHttpUrl
+import os
+from dataclasses import dataclass
 from typing import Optional
 
 
-class ProcureFlixSettings(BaseSettings):
+@dataclass
+class ProcureFlixSettings:
     """ProcureFlix-specific settings.
 
     These are intentionally minimal for Phase 1 and will be extended as we
     wire more modules and integrate SharePoint.
+
+    We deliberately avoid pydantic's BaseSettings here to keep the
+    dependency surface small and compatible with the existing
+    environment.
     """
 
     # Application metadata
-    app_name: str = Field("ProcureFlix", description="Human-readable app name")
+    app_name: str = "ProcureFlix"
 
     # SharePoint integration placeholders (Phase 4 target)
-    sharepoint_site_url: Optional[AnyHttpUrl] = Field(
-        default=None, env="SHAREPOINT_SITE_URL",
-        description="Base URL of the SharePoint site to be used as primary data store."
-    )
-    sharepoint_tenant_id: Optional[str] = Field(
-        default=None, env="TENANT_ID",
-        description="Azure AD tenant ID for SharePoint integration."
-    )
-    sharepoint_client_id: Optional[str] = Field(
-        default=None, env="CLIENT_ID",
-        description="Client (application) ID for SharePoint integration."
-    )
-    sharepoint_client_secret: Optional[str] = Field(
-        default=None, env="CLIENT_SECRET",
-        description="Client secret for SharePoint integration."
-    )
+    sharepoint_site_url: Optional[str] = None
+    sharepoint_tenant_id: Optional[str] = None
+    sharepoint_client_id: Optional[str] = None
+    sharepoint_client_secret: Optional[str] = None
 
     # AI / LLM configuration (for later phases)
-    enable_ai: bool = Field(
-        default=True,
-        description="Whether AI-assisted features should be enabled if a key is available.",
-    )
-
-    class Config:
-        env_prefix = "PROCUREFLIX_"  # Optional prefix, e.g. PROCUREFLIX_ENABLE_AI
-        case_sensitive = False
+    enable_ai: bool = True
 
 
 @lru_cache(maxsize=1)
@@ -57,4 +44,10 @@ def get_settings() -> ProcureFlixSettings:
     Using lru_cache ensures we only parse environment variables once.
     """
 
-    return ProcureFlixSettings()  # type: ignore[arg-type]
+    return ProcureFlixSettings(
+        sharepoint_site_url=os.getenv("SHAREPOINT_SITE_URL"),
+        sharepoint_tenant_id=os.getenv("TENANT_ID"),
+        sharepoint_client_id=os.getenv("CLIENT_ID"),
+        sharepoint_client_secret=os.getenv("CLIENT_SECRET"),
+        enable_ai=os.getenv("PROCUREFLIX_ENABLE_AI", "true").lower() == "true",
+    )
