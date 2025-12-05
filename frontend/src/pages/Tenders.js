@@ -215,6 +215,9 @@ const Tenders = () => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-900">{tender.title}</h3>
+                    {tender.project_reference && (
+                      <p className="text-xs text-gray-500 mt-1">Ref: {tender.project_reference}</p>
+                    )}
                     <p className="text-sm text-gray-600 mt-1">{tender.project_name}</p>
                     {tender.tender_number && (
                       <p className="text-xs text-blue-600 font-medium mt-1">#{tender.tender_number}</p>
