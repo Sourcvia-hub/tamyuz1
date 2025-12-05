@@ -17,7 +17,7 @@ const Login = () => {
   const BACKEND_URL = (
     process.env.REACT_APP_BACKEND_URL ||      // 1) Read from .env first
     window.APP_CONFIG?.BACKEND_URL ||         // 2) Use APP_CONFIG if empty
-    "https://sourcevia-secure.emergent.host"  // 3) Safe fallback
+    window.location.origin                    // 3) Fallback to same-origin
   ).replace(/\/+$/, "");
 
   const API_URL = BACKEND_URL;
