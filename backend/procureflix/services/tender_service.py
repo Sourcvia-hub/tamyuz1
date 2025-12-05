@@ -142,7 +142,8 @@ class TenderService:
         # Placeholder behaviour
         if not ai.enabled:
             return {"summary": f"AI disabled for tender {tender.tender_number}", "details": []}
-        return {"summary": "Stub tender analysis", "details": []}
+        # Real implementation will delegate to ai.analyse_tender
+        return await ai.analyse_tender(payload)
 
     async def get_evaluation_suggestions(self, tender_id: str) -> Dict[str, object]:
         ai = get_ai_client()
