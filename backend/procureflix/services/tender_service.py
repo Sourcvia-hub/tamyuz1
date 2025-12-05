@@ -160,7 +160,7 @@ class TenderService:
                 "summary": f"AI disabled for tender {tender.tender_number}",
                 "details": [],
             }
-        return {"summary": "Stub evaluation suggestions", "details": []}
+        return await ai.analyse_tender_proposals(payload)
 
     # ------------------------------------------------------------------
     # Internal helpers
