@@ -38,8 +38,15 @@ router = APIRouter()
 
 _seed_dir = Path(__file__).resolve().parent.parent / "seed"
 _vendor_seed_path = _seed_dir / "vendors.json"
+_tender_seed_path = _seed_dir / "tenders.json"
+_proposal_seed_path = _seed_dir / "proposals.json"
+
 _vendor_repo = InMemoryVendorRepository(seed_path=_vendor_seed_path)
+_tender_repo = InMemoryTenderRepository(seed_path=_tender_seed_path)
+_proposal_repo = InMemoryProposalRepository(seed_path=_proposal_seed_path)
+
 _vendor_service = VendorService(repository=_vendor_repo)
+_tender_service = TenderService(tender_repo=_tender_repo, proposal_repo=_proposal_repo)
 
 
 @router.get("/health")
