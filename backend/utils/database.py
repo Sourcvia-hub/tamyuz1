@@ -76,38 +76,24 @@ else:
     env_db_name = os.environ.get('MONGO_DB_NAME')
     
     if 'mongodb+srv://' in MONGO_URL or 'mongodb.net' in MONGO_URL:
-        # Using MongoDB Atlas - extract username which is typically the database name
-        print("\n⚠️  [WARNING] MongoDB Atlas URL detected but no database name found in URL!")
-        
-        # For Emergent Atlas deployments, the database name MUST match the username
-        # This is because Atlas users are typically granted access only to their own database
-        # Extract username from connection string
+        # Using MongoDB Atlas - extract username which MUST match the database name
+        # For Emergent Atlas: username = database name = user's access scope
         try:
             # Format: mongodb+srv://username:password@host/...
             if '@' in MONGO_URL:
                 credentials = MONGO_URL.split('//')[1].split('@')[0]
                 if ':' in credentials:
                     atlas_username = credentials.split(':')[0]
-                    print(f"   ℹ️  Extracted Atlas username: '{atlas_username}'")
-                    
-                    # CRITICAL: For Atlas, username = database name (Emergent convention)
-                    # The user 'sourcevia-proc' only has access to database 'sourcevia-proc'
-                    print(f"   ℹ️  For Atlas authentication, using username as database name: '{atlas_username}'")
+                    # ALWAYS use username as database name for Atlas
                     MONGO_DB_NAME = atlas_username
-                    
-                    if env_db_name and env_db_name != atlas_username:
-                        print(f"   ⚠️  WARNING: MONGO_DB_NAME env var is '{env_db_name}' but Atlas user '{atlas_username}' likely only has access to '{atlas_username}' database")
-                        print(f"   ⚠️  Overriding to use '{atlas_username}' to prevent authorization errors")
                 else:
                     MONGO_DB_NAME = env_db_name if env_db_name else 'sourcevia'
             else:
                 MONGO_DB_NAME = env_db_name if env_db_name else 'sourcevia'
         except Exception as e:
-            print(f"   ⚠️  Could not extract username: {e}")
             MONGO_DB_NAME = env_db_name if env_db_name else 'sourcevia'
         
-        print(f"\n✅ [DECISION] Using database name: '{MONGO_DB_NAME}'")
-        print(f"   MongoDB Atlas URL should be: mongodb+srv://user:pass@host/{MONGO_DB_NAME}")
+        print(f"\n✅ [Atlas] Using database: '{MONGO_DB_NAME}' (extracted from username)")
     else:
         # Local MongoDB - use environment variable or default
         if env_db_name == 'procurement_db':
