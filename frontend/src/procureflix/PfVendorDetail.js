@@ -106,7 +106,7 @@ const PfVendorDetail = () => {
         onClick={() => navigate('/pf/vendors')}
         className="text-xs text-slate-500 hover:text-slate-700 hover:underline"
       >
-        1 Back to vendors
+        ← Back to vendors
       </button>
 
       <div className="flex items-start justify-between gap-4">
