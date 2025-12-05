@@ -246,6 +246,14 @@ import AccessManagement from './pages/AccessManagement';
 import ProtectedModule from './components/ProtectedModule';
 import { Module } from './utils/permissions';
 
+// ProcureFlix UI
+import ProcureFlixLayout from './procureflix/Layout';
+import PfDashboard from './procureflix/PfDashboard';
+import PfVendorsList from './procureflix/PfVendorsList';
+import PfVendorDetail from './procureflix/PfVendorDetail';
+import PfTendersList from './procureflix/PfTendersList';
+import PfTenderDetail from './procureflix/PfTenderDetail';
+
 // ==================== MAIN APP ====================
 const AppRoutes = () => {
   const { user, loading } = useAuth();
