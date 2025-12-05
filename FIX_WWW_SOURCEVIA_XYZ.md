@@ -187,14 +187,14 @@ console.log('Origin:', window.location.origin);
 
 ### Development Environment
 
-**Frontend:** `https://sourcevia-proc.preview.emergentagent.com`
+**Frontend:** `https://data-overhaul-1.preview.emergentagent.com`
 ```
-REACT_APP_BACKEND_URL=https://sourcevia-proc.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://data-overhaul-1.preview.emergentagent.com
 ```
 
-**Backend:** `https://sourcevia-proc.preview.emergentagent.com/api`
+**Backend:** `https://data-overhaul-1.preview.emergentagent.com/api`
 ```
-CORS_ORIGINS=https://sourcevia-proc.preview.emergentagent.com,http://localhost:3000
+CORS_ORIGINS=https://data-overhaul-1.preview.emergentagent.com,http://localhost:3000
 ```
 
 ### Production Environment

@@ -136,7 +136,7 @@ production_domains = [
     "https://www.sourcevia.xyz",
     "https://sourcevia-secure.emergent.host",
     "https://sourcevia-mgmt.emergent.host",
-    "https://sourcevia-proc.preview.emergentagent.com",
+    "https://data-overhaul-1.preview.emergentagent.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]

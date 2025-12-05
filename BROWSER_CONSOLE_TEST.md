@@ -143,7 +143,7 @@ FIX: Set this environment variable in your deployment:
 ## Alternative: Test from this Workspace
 
 You can also test the working version here:
-`https://sourcevia-proc.preview.emergentagent.com/test-connection.html`
+`https://data-overhaul-1.preview.emergentagent.com/test-connection.html`
 
 This will show you how it SHOULD work.
 
