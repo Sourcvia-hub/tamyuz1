@@ -40,6 +40,20 @@ class ProcureFlixAIClient:
         # Real implementation will call Emergent LLMs here.
         return {"summary": "Stub vendor analysis", "details": []}
 
+    # ------------------------------------------------------------------
+    # Tender / evaluation helpers
+    # ------------------------------------------------------------------
+
+    async def analyse_tender(self, tender_payload: Dict[str, Any]) -> Dict[str, Any]:
+        if not self.enabled:
+            return {"summary": "AI disabled", "details": []}
+        return {"summary": "Stub tender analysis", "details": []}
+
+    async def analyse_tender_proposals(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        if not self.enabled:
+            return {"summary": "AI disabled", "details": []}
+        return {"summary": "Stub tender proposals analysis", "details": []}
+
 
 _ai_client: Optional[ProcureFlixAIClient] = None
 
