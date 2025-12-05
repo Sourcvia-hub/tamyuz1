@@ -21,6 +21,7 @@ class Tender(BaseModel):
     tender_number: Optional[str] = None  # Auto-generated (e.g., TND-2025-0001)
     title: str
     description: str
+    project_reference: Optional[str] = None  # e.g., internal project number or JIRA ref
     project_name: str
     requirements: str
     budget: float
