@@ -17,9 +17,18 @@ from typing import Dict, List
 from fastapi import APIRouter, HTTPException
 
 from ..config import get_settings
-from ..models import Vendor, VendorStatus
-from ..repositories import InMemoryVendorRepository
-from ..services import VendorService
+from ..models import (
+    Vendor,
+    VendorStatus,
+    Tender,
+    Proposal,
+)
+from ..repositories import (
+    InMemoryVendorRepository,
+    InMemoryTenderRepository,
+    InMemoryProposalRepository,
+)
+from ..services import VendorService, TenderService
 
 
 router = APIRouter()
