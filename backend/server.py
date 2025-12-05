@@ -1149,6 +1149,7 @@ async def get_tenders(request: Request, status: Optional[TenderStatus] = None, s
         search_conditions = [
             {"tender_number": {"$regex": search, "$options": "i"}},
             {"title": {"$regex": search, "$options": "i"}},
+            {"project_reference": {"$regex": search, "$options": "i"}},
             {"project_name": {"$regex": search, "$options": "i"}}
         ]
         if "$or" in query:
