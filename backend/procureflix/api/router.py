@@ -68,6 +68,96 @@ async def list_vendors() -> List[Vendor]:
     return _vendor_service.list_vendors()
 
 
+# ---------------------------------------------------------------------------
+# Tender and proposal endpoints
+# ---------------------------------------------------------------------------
+
+
+@router.get("/tenders", response_model=List[Tender])
+async def list_tenders() -> List[Tender]:
+    return _tender_service.list_tenders()
+
+
+@router.get("/tenders/{tender_id}", response_model=Tender)
+async def get_tender(tender_id: str) -> Tender:
+    tender = _tender_service.get_tender(tender_id)
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return tender
+
+
+@router.post("/tenders", response_model=Tender, status_code=201)
+async def create_tender(tender: Tender) -> Tender:
+    if not tender.title:
+        raise HTTPException(status_code=400, detail="title is required")
+    if not tender.project_name:
+        raise HTTPException(status_code=400, detail="project_name is required")
+    return _tender_service.create_tender(tender)
+
+
+@router.put("/tenders/{tender_id}", response_model=Tender)
+async def update_tender(tender_id: str, tender: Tender) -> Tender:
+    updated = _tender_service.update_tender(tender_id, tender)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return updated
+
+
+@router.post("/tenders/{tender_id}/publish", response_model=Tender)
+async def publish_tender(tender_id: str) -> Tender:
+    updated = _tender_service.publish_tender(tender_id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return updated
+
+
+@router.post("/tenders/{tender_id}/close", response_model=Tender)
+async def close_tender(tender_id: str) -> Tender:
+    updated = _tender_service.close_tender(tender_id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return updated
+
+
+@router.get("/tenders/{tender_id}/proposals", response_model=List[Proposal])
+async def list_proposals(tender_id: str) -> List[Proposal]:
+    return _tender_service.list_proposals_for_tender(tender_id)
+
+
+@router.post("/tenders/{tender_id}/proposals", response_model=Proposal, status_code=201)
+async def submit_proposal(tender_id: str, proposal: Proposal) -> Proposal:
+    created = _tender_service.submit_proposal(tender_id, proposal)
+    if not created:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    return created
+
+
+@router.get("/tenders/{tender_id}/evaluation")
+async def get_tender_evaluation(tender_id: str) -> Dict[str, object]:
+    result = _tender_service.get_evaluation(tender_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Tender not found or no proposals")
+    return result
+
+
+@router.post("/tenders/{tender_id}/evaluate")
+async def evaluate_tender_now(tender_id: str) -> Dict[str, object]:
+    result = _tender_service.evaluate_now(tender_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Tender not found or no proposals")
+    return result
+
+
+@router.get("/tenders/{tender_id}/ai/summary")
+async def tender_ai_summary(tender_id: str) -> Dict[str, object]:
+    return await _tender_service.get_tender_summary(tender_id)
+
+
+@router.get("/tenders/{tender_id}/ai/evaluation-suggestions")
+async def tender_ai_evaluation_suggestions(tender_id: str) -> Dict[str, object]:
+    return await _tender_service.get_evaluation_suggestions(tender_id)
+
+
 @router.get("/vendors/{vendor_id}", response_model=Vendor)
 async def get_vendor(vendor_id: str) -> Vendor:
     vendor = _vendor_service.get_vendor(vendor_id)
