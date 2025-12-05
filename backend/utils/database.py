@@ -121,13 +121,6 @@ print(f"{'='*80}")
 if MONGO_DB_NAME == 'procurement_db':
     raise ValueError("FATAL: Cannot use 'procurement_db' database! This will cause authorization errors.")
 
-# For Atlas URLs, verify the database name matches expectations
-if ('mongodb+srv://' in MONGO_URL or 'mongodb.net' in MONGO_URL):
-    if not db_name_from_url:
-        print(f"\nℹ️  Note: Atlas URL reconstructed to include database '{MONGO_DB_NAME}'")
-    print(f"ℹ️  Atlas user should have permissions on database: '{MONGO_DB_NAME}'")
-    print()
-
 print("\n[DB Init] Creating MongoDB client...")
 
 # For Atlas URLs without database name in URL, reconstruct the URL
