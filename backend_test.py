@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend RBAC Testing Script for Sourcevia Procurement Management System
-Tests Role-Based Access Control (RBAC) for ALL Secured Modules:
-- Vendors Module (/api/vendors) - 8 endpoints
-- Tenders Module (/api/tenders) - 7 endpoints  
-- Contracts Module (/api/contracts) - 7 endpoints
-- Invoices Module (/api/invoices) - 6 endpoints
-- Purchase Orders Module (/api/purchase-orders) - 4 endpoints
-- Resources Module (/api/resources) - 5 endpoints
-- Assets Module (/api/assets) - 5 endpoints
-- Service Requests/OSR Module (/api/osrs) - 5 endpoints
+Comprehensive Backend API Testing Script for ProcureFlix Application
+Tests all backend endpoints including:
+- Health & Configuration Endpoints
+- Authentication Endpoints  
+- Legacy App Endpoints (Sourcevia)
+- ProcureFlix Endpoints
+- RBAC Testing for ALL Secured Modules
 """
 
 import requests
 import json
 from datetime import datetime, timedelta, timezone
 import sys
+import os
 
-# Configuration
-BASE_URL = "https://procurement-app-1.preview.emergentagent.com/api"
+# Configuration - Use environment variable for backend URL
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://procurement-app-1.preview.emergentagent.com')
+BASE_URL = f"{BACKEND_URL}/api"
 
 # RBAC Test Users (all with password: "password")
 RBAC_TEST_USERS = {
