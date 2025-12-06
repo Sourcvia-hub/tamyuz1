@@ -22,13 +22,16 @@ from ..models import (
     VendorStatus,
     Tender,
     Proposal,
+    Contract,
+    ContractStatus,
 )
 from ..repositories import (
     InMemoryVendorRepository,
     InMemoryTenderRepository,
     InMemoryProposalRepository,
+    InMemoryContractRepository,
 )
-from ..services import VendorService, TenderService
+from ..services import VendorService, TenderService, ContractService
 
 
 router = APIRouter()
