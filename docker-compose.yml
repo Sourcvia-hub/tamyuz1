@@ -61,12 +61,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      # Optional: Pass backend URL at build time if you want to use a specific URL
+      # args:
+      #   REACT_APP_BACKEND_URL: http://your-domain.com
     container_name: procureflix-frontend
     restart: unless-stopped
     ports:
       - "80:80"
-    environment:
-      - REACT_APP_BACKEND_URL=http://localhost:8001
+    # No environment variables needed - nginx proxies /api/ to backend
     depends_on:
       backend:
         condition: service_healthy
