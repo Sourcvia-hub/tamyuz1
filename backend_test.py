@@ -3732,38 +3732,22 @@ class ProcureFlixTester:
             return False
 
 if __name__ == "__main__":
-    tester = RBACTester()
+    tester = ProcureFlixTester()
     
-    print(f"\n" + "="*100)
-    print(f"COMPREHENSIVE RBAC TESTING - ALL SECURED MODULES")
-    print(f"Testing 8 modules with 6 user roles as per review request")
-    print(f"="*100)
-    
-    # Run comprehensive RBAC tests
-    try:
-        results = tester.run_comprehensive_rbac_tests()
+    # Check command line arguments
+    if len(sys.argv) > 1:
+        test_type = sys.argv[1].lower()
         
-        # Print final summary
-        print(f"\n" + "="*100)
-        print(f"FINAL RBAC TESTING RESULTS")
-        print(f"="*100)
-        
-        passed_modules = sum(1 for result in results.values() if result)
-        total_modules = len(results)
-        
-        for module_name, result in results.items():
-            status = "✅ PASS" if result else "❌ FAIL"
-            print(f"{status} {module_name} Module")
-        
-        print(f"\nModule Summary: {passed_modules}/{total_modules} modules passed ({(passed_modules/total_modules*100):.1f}%)")
-        
-        if passed_modules == total_modules:
-            print("🎉 All RBAC modules passed!")
-            sys.exit(0)
+        if test_type == "procureflix":
+            print("Running comprehensive ProcureFlix API tests...")
+            tester.run_comprehensive_procureflix_tests()
+        elif test_type == "rbac":
+            print("Running comprehensive RBAC tests...")
+            tester.run_comprehensive_rbac_tests()
         else:
-            print("⚠️ Some RBAC modules failed - check the detailed output above")
-            sys.exit(1)
-            
-    except Exception as e:
-        print(f"❌ RBAC Testing failed with error: {str(e)}")
-        sys.exit(1)
+            print(f"Unknown test type: {test_type}")
+            print("Available test types: procureflix, rbac")
+    else:
+        # Default: run ProcureFlix tests as requested in review
+        print("Running comprehensive ProcureFlix API tests...")
+        tester.run_comprehensive_procureflix_tests()
