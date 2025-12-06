@@ -8,10 +8,12 @@ without touching the business logic.
 from .base import IRepository
 from .vendor_repository import InMemoryVendorRepository
 from .tender_repository import InMemoryTenderRepository, InMemoryProposalRepository
+from .contract_repository import InMemoryContractRepository
 
 __all__ = [
     "IRepository",
     "InMemoryVendorRepository",
     "InMemoryTenderRepository",
     "InMemoryProposalRepository",
+    "InMemoryContractRepository",
 ]
