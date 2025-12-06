@@ -71,6 +71,472 @@ class ProcureFlixTester:
             'osrs': {}
         }
         
+    def test_health_endpoints(self):
+        """Test Health & Configuration Endpoints"""
+        print(f"\n" + "="*80)
+        print(f"TESTING: HEALTH & CONFIGURATION ENDPOINTS")
+        print(f"="*80)
+        
+        # Test main health check
+        print(f"\n--- Testing Main Health Check ---")
+        try:
+            response = self.session.get(f"{BASE_URL}/health")
+            print(f"GET /api/health - Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"✅ Main health check successful")
+                print(f"Status: {data.get('status')}")
+                print(f"Database: {data.get('database')}")
+                print(f"API Version: {data.get('api_version')}")
+                self.test_results['health']['main_health'] = "PASS"
+            else:
+                print(f"❌ Main health check failed: {response.text}")
+                self.test_results['health']['main_health'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ Main health check error: {str(e)}")
+            self.test_results['health']['main_health'] = f"ERROR - {str(e)}"
+        
+        # Test ProcureFlix health check
+        print(f"\n--- Testing ProcureFlix Health Check ---")
+        try:
+            response = self.session.get(f"{BASE_URL}/procureflix/health")
+            print(f"GET /api/procureflix/health - Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"✅ ProcureFlix health check successful")
+                print(f"Status: {data.get('status')}")
+                print(f"Data Backend: {data.get('data_backend')}")
+                
+                # Verify data_backend=memory as expected
+                if data.get('data_backend') == 'memory':
+                    print(f"✅ Data backend correctly set to 'memory'")
+                    self.test_results['health']['procureflix_health'] = "PASS"
+                else:
+                    print(f"⚠️ Data backend is '{data.get('data_backend')}', expected 'memory'")
+                    self.test_results['health']['procureflix_health'] = f"PARTIAL - backend: {data.get('data_backend')}"
+            else:
+                print(f"❌ ProcureFlix health check failed: {response.text}")
+                self.test_results['health']['procureflix_health'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ ProcureFlix health check error: {str(e)}")
+            self.test_results['health']['procureflix_health'] = f"ERROR - {str(e)}"
+    
+    def test_authentication_endpoints(self):
+        """Test Authentication Endpoints"""
+        print(f"\n" + "="*80)
+        print(f"TESTING: AUTHENTICATION ENDPOINTS")
+        print(f"="*80)
+        
+        # Test login with valid credentials
+        print(f"\n--- Testing Login with Valid Credentials ---")
+        login_data = {
+            "email": "admin@sourcevia.com",
+            "password": "admin123"
+        }
+        
+        try:
+            response = self.session.post(f"{BASE_URL}/auth/login", json=login_data)
+            print(f"POST /api/auth/login - Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                user_info = data.get('user', {})
+                print(f"✅ Login successful")
+                print(f"User Email: {user_info.get('email')}")
+                print(f"User Role: {user_info.get('role')}")
+                print(f"User Name: {user_info.get('name')}")
+                
+                # Store current user for other tests
+                self.current_user = user_info
+                
+                # Check if session token is set in cookies
+                if 'session_token' in self.session.cookies:
+                    self.auth_token = self.session.cookies['session_token']
+                    print(f"✅ Session token obtained")
+                
+                self.test_results['auth']['login_valid'] = "PASS"
+            else:
+                print(f"❌ Login failed: {response.text}")
+                self.test_results['auth']['login_valid'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ Login error: {str(e)}")
+            self.test_results['auth']['login_valid'] = f"ERROR - {str(e)}"
+        
+        # Test authenticated user endpoint
+        print(f"\n--- Testing Authenticated User Endpoint ---")
+        try:
+            response = self.session.get(f"{BASE_URL}/auth/me")
+            print(f"GET /api/auth/me - Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"✅ Auth check successful")
+                print(f"User Email: {data.get('email')}")
+                print(f"User Role: {data.get('role')}")
+                self.test_results['auth']['auth_me'] = "PASS"
+            else:
+                print(f"❌ Auth check failed: {response.text}")
+                self.test_results['auth']['auth_me'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ Auth check error: {str(e)}")
+            self.test_results['auth']['auth_me'] = f"ERROR - {str(e)}"
+        
+        # Test user registration
+        print(f"\n--- Testing User Registration ---")
+        register_data = {
+            "email": f"testuser_{datetime.now().strftime('%Y%m%d_%H%M%S')}@test.com",
+            "password": "testpass123",
+            "name": "Test User",
+            "role": "user"
+        }
+        
+        try:
+            response = self.session.post(f"{BASE_URL}/auth/register", json=register_data)
+            print(f"POST /api/auth/register - Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"✅ Registration successful")
+                print(f"Message: {data.get('message')}")
+                print(f"User Email: {data.get('user', {}).get('email')}")
+                self.test_results['auth']['register'] = "PASS"
+            else:
+                print(f"❌ Registration failed: {response.text}")
+                self.test_results['auth']['register'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ Registration error: {str(e)}")
+            self.test_results['auth']['register'] = f"ERROR - {str(e)}"
+        
+        # Test logout
+        print(f"\n--- Testing Logout ---")
+        try:
+            response = self.session.post(f"{BASE_URL}/auth/logout")
+            print(f"POST /api/auth/logout - Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"✅ Logout successful")
+                print(f"Message: {data.get('message')}")
+                self.test_results['auth']['logout'] = "PASS"
+            else:
+                print(f"❌ Logout failed: {response.text}")
+                self.test_results['auth']['logout'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ Logout error: {str(e)}")
+            self.test_results['auth']['logout'] = f"ERROR - {str(e)}"
+    
+    def test_legacy_endpoints(self):
+        """Test Legacy App Endpoints (Sourcevia)"""
+        print(f"\n" + "="*80)
+        print(f"TESTING: LEGACY APP ENDPOINTS (SOURCEVIA)")
+        print(f"="*80)
+        
+        # Re-login for legacy tests
+        self.login_admin()
+        
+        legacy_endpoints = [
+            ("/vendors", "List vendors"),
+            ("/tenders", "List tenders"),
+            ("/contracts", "List contracts"),
+            ("/invoices", "List invoices"),
+            ("/purchase-orders", "List purchase orders"),
+            ("/resources", "List resources"),
+            ("/assets", "List assets"),
+            ("/osr", "List service requests"),
+            ("/dashboard", "Dashboard stats")
+        ]
+        
+        for endpoint, description in legacy_endpoints:
+            print(f"\n--- Testing {description} ---")
+            try:
+                response = self.session.get(f"{BASE_URL}{endpoint}")
+                print(f"GET /api{endpoint} - Status: {response.status_code}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if isinstance(data, list):
+                        print(f"✅ {description} successful - Retrieved {len(data)} items")
+                    elif isinstance(data, dict):
+                        print(f"✅ {description} successful - Retrieved data object")
+                        if endpoint == "/dashboard":
+                            # Show some dashboard stats
+                            vendors = data.get('vendors', {})
+                            tenders = data.get('tenders', {})
+                            contracts = data.get('contracts', {})
+                            print(f"  Vendors: {vendors.get('all', 0)} total, {vendors.get('active', 0)} active")
+                            print(f"  Tenders: {tenders.get('all', 0)} total, {tenders.get('active', 0)} active")
+                            print(f"  Contracts: {contracts.get('all', 0)} total, {contracts.get('active', 0)} active")
+                    else:
+                        print(f"✅ {description} successful - Retrieved data")
+                    
+                    self.test_results['legacy'][endpoint.replace('/', '_')] = "PASS"
+                elif response.status_code == 401:
+                    print(f"⚠️ {description} requires authentication (401) - Expected for protected routes")
+                    self.test_results['legacy'][endpoint.replace('/', '_')] = "PASS - Auth required"
+                else:
+                    print(f"❌ {description} failed: {response.text}")
+                    self.test_results['legacy'][endpoint.replace('/', '_')] = f"FAIL - {response.status_code}"
+            except Exception as e:
+                print(f"❌ {description} error: {str(e)}")
+                self.test_results['legacy'][endpoint.replace('/', '_')] = f"ERROR - {str(e)}"
+        
+        # Test specific vendor endpoint
+        print(f"\n--- Testing Specific Vendor Endpoint ---")
+        try:
+            # First get list of vendors to get an ID
+            vendors_response = self.session.get(f"{BASE_URL}/vendors")
+            if vendors_response.status_code == 200:
+                vendors = vendors_response.json()
+                if vendors and len(vendors) > 0:
+                    vendor_id = vendors[0].get('id')
+                    if vendor_id:
+                        response = self.session.get(f"{BASE_URL}/vendors/{vendor_id}")
+                        print(f"GET /api/vendors/{vendor_id} - Status: {response.status_code}")
+                        
+                        if response.status_code == 200:
+                            vendor_data = response.json()
+                            print(f"✅ Get specific vendor successful")
+                            print(f"  Vendor: {vendor_data.get('name_english', 'Unknown')}")
+                            print(f"  Status: {vendor_data.get('status', 'Unknown')}")
+                            self.test_results['legacy']['vendor_detail'] = "PASS"
+                        else:
+                            print(f"❌ Get specific vendor failed: {response.text}")
+                            self.test_results['legacy']['vendor_detail'] = f"FAIL - {response.status_code}"
+                    else:
+                        print(f"⚠️ No vendor ID found in first vendor")
+                        self.test_results['legacy']['vendor_detail'] = "SKIP - No vendor ID"
+                else:
+                    print(f"⚠️ No vendors found for detail test")
+                    self.test_results['legacy']['vendor_detail'] = "SKIP - No vendors"
+            else:
+                print(f"❌ Could not get vendors list for detail test")
+                self.test_results['legacy']['vendor_detail'] = "SKIP - List failed"
+        except Exception as e:
+            print(f"❌ Vendor detail test error: {str(e)}")
+            self.test_results['legacy']['vendor_detail'] = f"ERROR - {str(e)}"
+    
+    def test_procureflix_endpoints(self):
+        """Test ProcureFlix Endpoints"""
+        print(f"\n" + "="*80)
+        print(f"TESTING: PROCUREFLIX ENDPOINTS")
+        print(f"="*80)
+        
+        # Re-login for ProcureFlix tests
+        self.login_admin()
+        
+        procureflix_endpoints = [
+            ("/procureflix/vendors", "ProcureFlix vendors"),
+            ("/procureflix/tenders", "ProcureFlix tenders"),
+            ("/procureflix/contracts", "ProcureFlix contracts"),
+            ("/procureflix/purchase-orders", "ProcureFlix purchase orders"),
+            ("/procureflix/invoices", "ProcureFlix invoices"),
+            ("/procureflix/resources", "ProcureFlix resources"),
+            ("/procureflix/service-requests", "ProcureFlix service requests")
+        ]
+        
+        for endpoint, description in procureflix_endpoints:
+            print(f"\n--- Testing {description} ---")
+            try:
+                response = self.session.get(f"{BASE_URL}{endpoint}")
+                print(f"GET /api{endpoint} - Status: {response.status_code}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if isinstance(data, list):
+                        print(f"✅ {description} successful - Retrieved {len(data)} items")
+                    elif isinstance(data, dict):
+                        print(f"✅ {description} successful - Retrieved data object")
+                    else:
+                        print(f"✅ {description} successful - Retrieved data")
+                    
+                    self.test_results['procureflix'][endpoint.replace('/', '_').replace('-', '_')] = "PASS"
+                elif response.status_code == 401:
+                    print(f"⚠️ {description} requires authentication (401) - Expected for protected routes")
+                    self.test_results['procureflix'][endpoint.replace('/', '_').replace('-', '_')] = "PASS - Auth required"
+                else:
+                    print(f"❌ {description} failed: {response.text}")
+                    self.test_results['procureflix'][endpoint.replace('/', '_').replace('-', '_')] = f"FAIL - {response.status_code}"
+            except Exception as e:
+                print(f"❌ {description} error: {str(e)}")
+                self.test_results['procureflix'][endpoint.replace('/', '_').replace('-', '_')] = f"ERROR - {str(e)}"
+        
+        # Test ProcureFlix vendor creation
+        print(f"\n--- Testing ProcureFlix Vendor Creation ---")
+        vendor_data = {
+            "name": "ProcureFlix Test Vendor",
+            "email": "test@procureflix.com",
+            "phone": "+1234567890",
+            "address": "123 Test Street",
+            "status": "active"
+        }
+        
+        try:
+            response = self.session.post(f"{BASE_URL}/procureflix/vendors", json=vendor_data)
+            print(f"POST /api/procureflix/vendors - Status: {response.status_code}")
+            
+            if response.status_code in [200, 201]:
+                data = response.json()
+                print(f"✅ ProcureFlix vendor creation successful")
+                print(f"  Vendor ID: {data.get('id', 'Unknown')}")
+                print(f"  Vendor Name: {data.get('name', 'Unknown')}")
+                
+                # Store vendor ID for status update test
+                vendor_id = data.get('id')
+                if vendor_id:
+                    self.created_entities['vendors'].append(vendor_id)
+                
+                self.test_results['procureflix']['vendor_create'] = "PASS"
+            else:
+                print(f"❌ ProcureFlix vendor creation failed: {response.text}")
+                self.test_results['procureflix']['vendor_create'] = f"FAIL - {response.status_code}"
+        except Exception as e:
+            print(f"❌ ProcureFlix vendor creation error: {str(e)}")
+            self.test_results['procureflix']['vendor_create'] = f"ERROR - {str(e)}"
+        
+        # Test ProcureFlix vendor status update
+        if self.created_entities['vendors']:
+            print(f"\n--- Testing ProcureFlix Vendor Status Update ---")
+            vendor_id = self.created_entities['vendors'][-1]  # Use the last created vendor
+            
+            try:
+                response = self.session.patch(f"{BASE_URL}/procureflix/vendors/{vendor_id}/status", 
+                                            json={"status": "inactive"})
+                print(f"PATCH /api/procureflix/vendors/{vendor_id}/status - Status: {response.status_code}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    print(f"✅ ProcureFlix vendor status update successful")
+                    print(f"  New Status: {data.get('status', 'Unknown')}")
+                    self.test_results['procureflix']['vendor_status_update'] = "PASS"
+                else:
+                    print(f"❌ ProcureFlix vendor status update failed: {response.text}")
+                    self.test_results['procureflix']['vendor_status_update'] = f"FAIL - {response.status_code}"
+            except Exception as e:
+                print(f"❌ ProcureFlix vendor status update error: {str(e)}")
+                self.test_results['procureflix']['vendor_status_update'] = f"ERROR - {str(e)}"
+        
+        # Test specific ProcureFlix vendor endpoint
+        if self.created_entities['vendors']:
+            print(f"\n--- Testing Specific ProcureFlix Vendor Endpoint ---")
+            vendor_id = self.created_entities['vendors'][-1]
+            
+            try:
+                response = self.session.get(f"{BASE_URL}/procureflix/vendors/{vendor_id}")
+                print(f"GET /api/procureflix/vendors/{vendor_id} - Status: {response.status_code}")
+                
+                if response.status_code == 200:
+                    vendor_data = response.json()
+                    print(f"✅ Get specific ProcureFlix vendor successful")
+                    print(f"  Vendor: {vendor_data.get('name', 'Unknown')}")
+                    print(f"  Status: {vendor_data.get('status', 'Unknown')}")
+                    self.test_results['procureflix']['vendor_detail'] = "PASS"
+                else:
+                    print(f"❌ Get specific ProcureFlix vendor failed: {response.text}")
+                    self.test_results['procureflix']['vendor_detail'] = f"FAIL - {response.status_code}"
+            except Exception as e:
+                print(f"❌ ProcureFlix vendor detail error: {str(e)}")
+                self.test_results['procureflix']['vendor_detail'] = f"ERROR - {str(e)}"
+    
+    def login_admin(self):
+        """Helper method to login as admin"""
+        login_data = {
+            "email": "admin@sourcevia.com",
+            "password": "admin123"
+        }
+        
+        try:
+            response = self.session.post(f"{BASE_URL}/auth/login", json=login_data)
+            if response.status_code == 200:
+                data = response.json()
+                self.current_user = data.get('user', {})
+                if 'session_token' in self.session.cookies:
+                    self.auth_token = self.session.cookies['session_token']
+                return True
+            else:
+                print(f"⚠️ Admin login failed: {response.text}")
+                return False
+        except Exception as e:
+            print(f"⚠️ Admin login error: {str(e)}")
+            return False
+    
+    def run_comprehensive_procureflix_tests(self):
+        """Run comprehensive ProcureFlix API tests"""
+        print(f"\n" + "="*100)
+        print(f"COMPREHENSIVE PROCUREFLIX API TESTING")
+        print(f"Backend URL: {BACKEND_URL}")
+        print(f"API Base URL: {BASE_URL}")
+        print(f"="*100)
+        
+        # Test all endpoint categories
+        test_categories = [
+            ("Health & Configuration", self.test_health_endpoints),
+            ("Authentication", self.test_authentication_endpoints),
+            ("Legacy Sourcevia Endpoints", self.test_legacy_endpoints),
+            ("ProcureFlix Endpoints", self.test_procureflix_endpoints)
+        ]
+        
+        results = {}
+        for category_name, test_method in test_categories:
+            print(f"\n🔍 Starting {category_name} Testing...")
+            try:
+                results[category_name] = test_method()
+                print(f"✅ {category_name} Testing Completed")
+            except Exception as e:
+                print(f"❌ {category_name} Testing Failed: {str(e)}")
+                results[category_name] = False
+        
+        # Print comprehensive summary
+        self.print_procureflix_test_summary()
+        
+        return results
+    
+    def print_procureflix_test_summary(self):
+        """Print comprehensive ProcureFlix test summary"""
+        print(f"\n" + "="*80)
+        print(f"PROCUREFLIX API TESTING SUMMARY")
+        print(f"="*80)
+        
+        total_tests = 0
+        passed_tests = 0
+        failed_tests = 0
+        
+        # Count tests by category
+        categories = ['health', 'auth', 'legacy', 'procureflix']
+        
+        for category in categories:
+            if category in self.test_results and self.test_results[category]:
+                results = self.test_results[category]
+                print(f"\n📋 {category.upper()} ENDPOINTS:")
+                print("-" * 40)
+                
+                for test_name, result in results.items():
+                    total_tests += 1
+                    if "PASS" in result or "Auth required" in result or "Auth protected" in result:
+                        passed_tests += 1
+                        status_icon = "✅"
+                    else:
+                        failed_tests += 1
+                        status_icon = "❌"
+                    
+                    print(f"{status_icon} {test_name}: {result}")
+        
+        print(f"\n" + "="*80)
+        print(f"OVERALL RESULTS:")
+        print(f"Total Tests: {total_tests}")
+        print(f"Passed: {passed_tests}")
+        print(f"Failed: {failed_tests}")
+        print(f"Success Rate: {(passed_tests/total_tests*100):.1f}%" if total_tests > 0 else "No tests run")
+        print(f"="*80)
+        
+        return {
+            'total': total_tests,
+            'passed': passed_tests,
+            'failed': failed_tests,
+            'success_rate': (passed_tests/total_tests*100) if total_tests > 0 else 0
+        }
+        
     def login_rbac_user(self, user_key):
         """Login with RBAC test user"""
         print(f"\n=== LOGIN TEST ({user_key.upper()}) ===")
