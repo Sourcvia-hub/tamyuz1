@@ -142,8 +142,7 @@ import ResourceDetail from './pages/ResourceDetail';
 import Assets from './pages/Assets';
 import AssetDetail from './pages/AssetDetail';
 import AssetForm from './pages/AssetForm';
-import ServiceRequests from './pages/ServiceRequests';
-import ServiceRequestDetail from './pages/ServiceRequestDetail';
+// ServiceRequests components not available in this version
 
 // ProcureFlix components
 import ProcureFlixLayout from './procureflix/Layout';
