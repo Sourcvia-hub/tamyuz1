@@ -16,7 +16,7 @@ import sys
 import os
 
 # Configuration - Use environment variable for backend URL
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://procurement-app-1.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://procure-hub-14.preview.emergentagent.com')
 BASE_URL = f"{BACKEND_URL}/api"
 
 # RBAC Test Users (all with password: "password")
@@ -3547,7 +3547,7 @@ class ProcureFlixTester:
                 preflight_headers = {
                     'Access-Control-Request-Method': 'POST',
                     'Access-Control-Request-Headers': 'Content-Type',
-                    'Origin': 'https://procurement-app-1.preview.emergentagent.com'
+                    'Origin': 'https://procure-hub-14.preview.emergentagent.com'
                 }
                 
                 preflight_response = self.session.options(f"{BASE_URL}/auth/login", headers=preflight_headers)

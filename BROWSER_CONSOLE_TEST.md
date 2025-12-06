@@ -143,7 +143,7 @@ FIX: Set this environment variable in your deployment:
 ## Alternative: Test from this Workspace
 
 You can also test the working version here:
-`https://procurement-app-1.preview.emergentagent.com/test-connection.html`
+`https://procure-hub-14.preview.emergentagent.com/test-connection.html`
 
 This will show you how it SHOULD work.
 

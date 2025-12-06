@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 import sys
 
 # Configuration
-BASE_URL = "https://procurement-app-1.preview.emergentagent.com/api"
+BASE_URL = "https://procure-hub-14.preview.emergentagent.com/api"
 
 # RBAC Test Users (password: "password")
 RBAC_TEST_USERS = {

@@ -8,7 +8,7 @@ import json
 import sys
 
 # Configuration
-BASE_URL = "https://procurement-app-1.preview.emergentagent.com/api"
+BASE_URL = "https://procure-hub-14.preview.emergentagent.com/api"
 TEST_CREDENTIALS = {"email": "procurement@test.com", "password": "password"}
 
 class DebugVendorsTest:

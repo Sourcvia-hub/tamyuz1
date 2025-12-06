@@ -187,14 +187,14 @@ console.log('Origin:', window.location.origin);
 
 ### Development Environment
 
-**Frontend:** `https://procurement-app-1.preview.emergentagent.com`
+**Frontend:** `https://procure-hub-14.preview.emergentagent.com`
 ```
-REACT_APP_BACKEND_URL=https://procurement-app-1.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://procure-hub-14.preview.emergentagent.com
 ```
 
-**Backend:** `https://procurement-app-1.preview.emergentagent.com/api`
+**Backend:** `https://procure-hub-14.preview.emergentagent.com/api`
 ```
-CORS_ORIGINS=https://procurement-app-1.preview.emergentagent.com,http://localhost:3000
+CORS_ORIGINS=https://procure-hub-14.preview.emergentagent.com,http://localhost:3000
 ```
 
 ### Production Environment

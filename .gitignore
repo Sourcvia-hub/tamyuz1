@@ -82,3 +82,4 @@ android-sdk/ -e
 # Note: .env files should be managed via deployment configuration, not committed to repo
 # *.env
 # *.env.*
+frontend/node_modules/.cache/default-development/0.pack

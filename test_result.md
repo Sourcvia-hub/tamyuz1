@@ -610,7 +610,7 @@ agent_communication:
     - agent: "testing"
       message: "✅ COMPREHENSIVE LEGACY PROCUREFLIX ROUTES TESTING COMPLETED: All three routes (OSR, CCTV, Access Management) are working perfectly. Successfully tested with admin@sourcevia.com/admin123 credentials. All pages load without 404 errors, display appropriate content with proper titles and UI elements. Routes are properly configured and functional. No critical issues found."
     - agent: "testing"
-      message: "✅ COMPREHENSIVE PROCUREFLIX API TESTING COMPLETED: Performed extensive backend API testing covering all requested endpoints. SUCCESS RATE: 91.7% (22/24 tests passed). ✅ WORKING: Health endpoints (main & ProcureFlix with data_backend=memory), Authentication (login with admin@sourcevia.com/admin123, registration, auth/me, logout), Legacy Sourcevia endpoints (vendors, tenders, contracts, invoices, purchase-orders, resources, assets, dashboard), ProcureFlix endpoints (vendors, tenders, contracts, purchase-orders, invoices, resources, service-requests). ❌ MINOR ISSUES: 1) Legacy OSR endpoint returns 404 (may need route fix), 2) ProcureFlix vendor creation requires full Sourcevia vendor model (not simplified). All critical endpoints functional with proper JSON responses and authentication protection. Backend URL correctly configured at https://procurement-app-1.preview.emergentagent.com/api."
+      message: "✅ COMPREHENSIVE PROCUREFLIX API TESTING COMPLETED: Performed extensive backend API testing covering all requested endpoints. SUCCESS RATE: 91.7% (22/24 tests passed). ✅ WORKING: Health endpoints (main & ProcureFlix with data_backend=memory), Authentication (login with admin@sourcevia.com/admin123, registration, auth/me, logout), Legacy Sourcevia endpoints (vendors, tenders, contracts, invoices, purchase-orders, resources, assets, dashboard), ProcureFlix endpoints (vendors, tenders, contracts, purchase-orders, invoices, resources, service-requests). ❌ MINOR ISSUES: 1) Legacy OSR endpoint returns 404 (may need route fix), 2) ProcureFlix vendor creation requires full Sourcevia vendor model (not simplified). All critical endpoints functional with proper JSON responses and authentication protection. Backend URL correctly configured at https://procure-hub-14.preview.emergentagent.com/api."
     - agent: "testing"
       message: "✅ COMPREHENSIVE END-TO-END PROCUREFLIX APPLICATION TESTING COMPLETED: Performed extensive testing covering all requested areas from review request. SUCCESS RATE: 95% (46/48 tests passed). **AUTHENTICATION & NAVIGATION**: ✅ Login page loads correctly, ✅ Admin login (admin@sourcevia.com/admin123) successful with dashboard redirect, ✅ Session persistence after page refresh working, ✅ All test credentials working (admin, user@sourcevia.com/user12345, po@sourcevia.com/po123456), ✅ Logout functionality working with proper session cleanup and protected route enforcement. **LEGACY APP MODULES**: ✅ All core modules accessible and loading correctly - Dashboard with stats cards, Vendors (3 detail links), Tenders, Contracts, Purchase Orders, Invoices, Resources, Assets, OSR (Operating Service Requests), CCTV Live View, Access Management. **PROCUREFLIX APP (/pf/* routes)**: ✅ All ProcureFlix routes working perfectly - Dashboard with KPIs showing real data (Total Vendors: 2, High-risk: 1, Active Tenders: 1, Contracts: 3, Service Requests: 2, Invoice Amount: 170,000 SAR), ✅ Sidebar navigation fully functional (9/9 nav items working), ✅ All module pages accessible (vendors, tenders, contracts, purchase-orders, invoices, resources, service-requests, cctv). **UI/UX VALIDATION**: ✅ No 404 errors on any routes (19/19 pages loaded successfully), ✅ Console error-free (0 errors, 0 warnings across 24 console messages), ✅ ProcureFlix branding correctly displayed (15 branding elements found), ✅ Navigation links functional (11 nav links working), ✅ Responsive layout considerations implemented. **MINOR OBSERVATIONS**: ⚠️ RBAC status buttons not visible on contract detail pages (may be conditional based on contract status), ⚠️ Limited data display in some ProcureFlix modules (0 items in vendor/tender/contract lists - may be due to in-memory data backend). **OVERALL ASSESSMENT**: ProcureFlix application is fully functional with excellent authentication, navigation, and UI/UX. All critical user journeys working correctly. No blocking issues found."
 
@@ -794,7 +794,7 @@ asset_management:
     status_history:
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE LOGIN TESTING COMPLETED: All login functionality working perfectly after deployment. VERIFIED TESTS: 1) **Login Endpoint** - POST /api/auth/login returns 200 OK with valid credentials (procurement@test.com/password), proper user data returned with email and role, session_token cookie set correctly with 72-character UUID format. 2) **Session Cookie** - Cookie attributes properly configured (HttpOnly=true, SameSite=lax, Path=/, Max-Age=604800), domain set to sourcevia-mgmt.preview.emergentagent.com. 3) **Auth Check** - GET /api/auth/me returns 200 OK with session cookie, returns correct user data, session persistence verified across multiple calls. 4) **CORS Configuration** - CORS preflight (OPTIONS) works correctly, Access-Control-Allow-Origin: https://procurement-app-1.preview.emergentagent.com, Access-Control-Allow-Credentials: true, proper CORS headers set. 5) **Invalid Credentials** - Returns 401 Unauthorized for wrong password with proper error message. 6) **Session Persistence** - Multiple /auth/me calls all return 200 OK, session remains valid across requests. **DEPLOYMENT VERIFICATION**: Login functionality is working correctly after deployment, session cookies are being set and accepted properly, CORS is configured correctly for the frontend domain, all authentication flows working as expected. No issues found - login system is fully functional."
+          comment: "✅ COMPREHENSIVE LOGIN TESTING COMPLETED: All login functionality working perfectly after deployment. VERIFIED TESTS: 1) **Login Endpoint** - POST /api/auth/login returns 200 OK with valid credentials (procurement@test.com/password), proper user data returned with email and role, session_token cookie set correctly with 72-character UUID format. 2) **Session Cookie** - Cookie attributes properly configured (HttpOnly=true, SameSite=lax, Path=/, Max-Age=604800), domain set to sourcevia-mgmt.preview.emergentagent.com. 3) **Auth Check** - GET /api/auth/me returns 200 OK with session cookie, returns correct user data, session persistence verified across multiple calls. 4) **CORS Configuration** - CORS preflight (OPTIONS) works correctly, Access-Control-Allow-Origin: https://procure-hub-14.preview.emergentagent.com, Access-Control-Allow-Credentials: true, proper CORS headers set. 5) **Invalid Credentials** - Returns 401 Unauthorized for wrong password with proper error message. 6) **Session Persistence** - Multiple /auth/me calls all return 200 OK, session remains valid across requests. **DEPLOYMENT VERIFICATION**: Login functionality is working correctly after deployment, session cookies are being set and accepted properly, CORS is configured correctly for the frontend domain, all authentication flows working as expected. No issues found - login system is fully functional."
 
   - task: "File Attachment Feature Across All Modules"
     implemented: true
@@ -833,7 +833,7 @@ asset_management:
     status_history:
         - working: true
           agent: "testing"
-          comment: "✅ COMPREHENSIVE AUTHENTICATION FLOW TESTING COMPLETED: All test scenarios from review request successfully verified with 95% success rate. **LOGIN FLOW TESTS**: ✅ Admin login (admin@sourcevia.com/admin123) successful with proper dashboard redirect and user info display, ✅ PO login (po@sourcevia.com/po123456) successful showing 'Welcome back, PO User!', ✅ User login (user@sourcevia.com/user12345) successful showing 'Welcome back, Regular User!'. **REGISTRATION FLOW**: ✅ Register tab functional, complete registration form with Name/Email/Password/Role fields, successfully registered testuser@sourcevia.com with auto-login to dashboard. **PROTECTED ROUTES**: ✅ All routes (/dashboard, /vendors, /tenders, /contracts) correctly redirect to /login when not authenticated, ✅ All protected routes accessible after login. **SESSION PERSISTENCE**: ✅ Login persists after page refresh, authentication state properly maintained. **API CONFIGURATION**: ✅ Backend URL properly configured (https://procurement-app-1.preview.emergentagent.com), no API malformation detected, no CORS errors. **MINOR ISSUE**: ⚠️ Logout functionality has incomplete session cleanup - dashboard still accessible via direct navigation after logout (security concern but doesn't prevent core functionality). **OVERALL**: Authentication system 95% functional, all core flows working correctly, all test credentials verified working."
+          comment: "✅ COMPREHENSIVE AUTHENTICATION FLOW TESTING COMPLETED: All test scenarios from review request successfully verified with 95% success rate. **LOGIN FLOW TESTS**: ✅ Admin login (admin@sourcevia.com/admin123) successful with proper dashboard redirect and user info display, ✅ PO login (po@sourcevia.com/po123456) successful showing 'Welcome back, PO User!', ✅ User login (user@sourcevia.com/user12345) successful showing 'Welcome back, Regular User!'. **REGISTRATION FLOW**: ✅ Register tab functional, complete registration form with Name/Email/Password/Role fields, successfully registered testuser@sourcevia.com with auto-login to dashboard. **PROTECTED ROUTES**: ✅ All routes (/dashboard, /vendors, /tenders, /contracts) correctly redirect to /login when not authenticated, ✅ All protected routes accessible after login. **SESSION PERSISTENCE**: ✅ Login persists after page refresh, authentication state properly maintained. **API CONFIGURATION**: ✅ Backend URL properly configured (https://procure-hub-14.preview.emergentagent.com), no API malformation detected, no CORS errors. **MINOR ISSUE**: ⚠️ Logout functionality has incomplete session cleanup - dashboard still accessible via direct navigation after logout (security concern but doesn't prevent core functionality). **OVERALL**: Authentication system 95% functional, all core flows working correctly, all test credentials verified working."
         - working: true
           agent: "testing"
           comment: "✅ COMPREHENSIVE END-TO-END AUTHENTICATION TESTING COMPLETED: All authentication flows working perfectly. **LOGIN TESTING**: ✅ Login page loads correctly with proper form elements, ✅ Admin login (admin@sourcevia.com/admin123) successful with dashboard redirect, ✅ Operations user login (user@sourcevia.com/user12345) successful, ✅ Procurement user login (po@sourcevia.com/po123456) successful. **SESSION MANAGEMENT**: ✅ Session persistence after page refresh working correctly, ✅ Logout functionality working with proper redirect to login page, ✅ Protected routes properly enforce authentication (redirect to /login when not authenticated). **SECURITY**: ✅ Complete session cleanup on logout (localStorage cleared), ✅ Protected route access properly blocked after logout. **OVERALL**: Authentication system is 100% functional with no critical issues found."
@@ -900,7 +900,7 @@ asset_management:
           comment: "✅ COMPREHENSIVE RBAC STATUS CHANGE TESTING COMPLETED - 100% SUCCESS RATE: Tested role-based access control for status change buttons across all 5 ProcureFlix detail pages with 3 different user roles (15 total test scenarios). **ADMIN ROLE (admin@sourcevia.com)**: ✅ All 5 modules PASS - Contracts, Purchase Orders, Invoices, Resources, Service Requests all have enabled status dropdowns and change buttons with no permission warnings (Expected: Full Access, Actual: Full Access). **PROCUREMENT ROLE (po@sourcevia.com)**: ✅ All 5 modules PASS - Contracts, Purchase Orders, Invoices, Resources, Service Requests all have enabled status dropdowns and change buttons with no permission warnings (Expected: Full Access, Actual: Full Access). **OPERATIONS ROLE (user@sourcevia.com)**: ✅ All 5 modules PASS - Financial modules (Contracts, Purchase Orders, Invoices) correctly show disabled dropdowns, disabled buttons, and '⚠ No permission' warnings (Expected: No Financial Access, Actual: No Financial Access). Operational modules (Resources, Service Requests) correctly show enabled dropdowns and buttons with no warnings (Expected: Operational Access, Actual: Operational Access). **PERMISSION MATRIX VERIFICATION**: ✅ Financial modules (Contracts, POs, Invoices) require canManageFinancialStatus permission (admin, procurement only), ✅ Operational modules (Resources, Service Requests) require canManageOperationalStatus permission (admin, procurement, operations), ✅ Visual indicators working correctly (disabled styling, cursor-not-allowed, permission warnings), ✅ All role mappings from frontend/src/procureflix/roles.js working as designed. **TECHNICAL VERIFICATION**: All status controls found on every page, proper disabled state detection, warning message detection working, login/logout flows successful for all test users. RBAC implementation is fully functional and enforcing permissions correctly across all ProcureFlix detail pages."
         - working: true
           agent: "testing"
-          comment: "✅ NEW DEPLOYMENT LOGIN FLOW TESTING COMPLETED - ALL REQUIREMENTS FROM REVIEW REQUEST SUCCESSFULLY VERIFIED: **DEPLOYMENT URL**: https://procurement-app-1.preview.emergentagent.com/login **TEST SCENARIO EXECUTION**: ✅ STEP 1: Successfully navigated to login page, login form loaded correctly with proper Sourcevia branding and debug info showing correct backend URL. ✅ STEP 2: Email field (admin@sourcevia.com) and password field (admin123) filled successfully using proper form selectors. ✅ STEP 3: Login button clicked successfully, form submission triggered. ✅ STEP 4: Successful redirect to /dashboard verified (URL: https://procurement-app-1.preview.emergentagent.com/dashboard). ✅ STEP 5: User info display confirmed - 'Welcome back, Admin User!' message visible, admin@sourcevia.com displayed in header, proper user authentication state. ✅ STEP 6: Session cookies properly set (session_token with 72-character UUID format), authentication persistence verified. **TECHNICAL VERIFICATION**: ✅ Backend API integration working (POST /api/auth/login returns 200 OK), ✅ Frontend properly configured with correct backend URL, ✅ No console errors during login process, ✅ CORS configuration working correctly, ✅ Session management functional with proper cookie handling. **SCREENSHOTS CAPTURED**: Before login, after login attempt, dashboard logged-in state. **OVERALL RESULT**: 100% success rate - complete login flow working perfectly on NEW deployment with local MongoDB integration as expected."
+          comment: "✅ NEW DEPLOYMENT LOGIN FLOW TESTING COMPLETED - ALL REQUIREMENTS FROM REVIEW REQUEST SUCCESSFULLY VERIFIED: **DEPLOYMENT URL**: https://procure-hub-14.preview.emergentagent.com/login **TEST SCENARIO EXECUTION**: ✅ STEP 1: Successfully navigated to login page, login form loaded correctly with proper Sourcevia branding and debug info showing correct backend URL. ✅ STEP 2: Email field (admin@sourcevia.com) and password field (admin123) filled successfully using proper form selectors. ✅ STEP 3: Login button clicked successfully, form submission triggered. ✅ STEP 4: Successful redirect to /dashboard verified (URL: https://procure-hub-14.preview.emergentagent.com/dashboard). ✅ STEP 5: User info display confirmed - 'Welcome back, Admin User!' message visible, admin@sourcevia.com displayed in header, proper user authentication state. ✅ STEP 6: Session cookies properly set (session_token with 72-character UUID format), authentication persistence verified. **TECHNICAL VERIFICATION**: ✅ Backend API integration working (POST /api/auth/login returns 200 OK), ✅ Frontend properly configured with correct backend URL, ✅ No console errors during login process, ✅ CORS configuration working correctly, ✅ Session management functional with proper cookie handling. **SCREENSHOTS CAPTURED**: Before login, after login attempt, dashboard logged-in state. **OVERALL RESULT**: 100% success rate - complete login flow working perfectly on NEW deployment with local MongoDB integration as expected."
 
 agent_communication:
     - agent: "main"
@@ -923,7 +923,7 @@ agent_communication:
         
         🔍 **TESTING SCOPE COMPLETED:**
         Tested complete authentication flow for Sourcevia Procurement Management System as requested in review.
-        Application URL: https://procurement-app-1.preview.emergentagent.com
+        Application URL: https://procure-hub-14.preview.emergentagent.com
         
         📊 **TEST RESULTS SUMMARY:**
         
@@ -969,9 +969,9 @@ agent_communication:
         - Authentication state properly maintained
         
         **✅ API CONFIGURATION VERIFICATION:**
-        - Backend URL properly configured: https://procurement-app-1.preview.emergentagent.com
+        - Backend URL properly configured: https://procure-hub-14.preview.emergentagent.com
         - No API URL malformation detected
-        - All API calls go to correct endpoint: https://procurement-app-1.preview.emergentagent.com/api/...
+        - All API calls go to correct endpoint: https://procure-hub-14.preview.emergentagent.com/api/...
     
     - agent: "testing"
       message: |
@@ -979,13 +979,13 @@ agent_communication:
         
         🔍 **TESTING SCOPE COMPLETED:**
         Comprehensive login page testing for Sourcevia Procurement System as requested in review.
-        Application URL: https://procurement-app-1.preview.emergentagent.com
+        Application URL: https://procure-hub-14.preview.emergentagent.com
         
         📊 **DETAILED TEST RESULTS:**
         
         **✅ TEST 1 - PAGE LOAD & CONFIGURATION - 100% SUCCESS:**
         - Login page loads correctly at /login
-        - Debug info shows correct backend URL: https://procurement-app-1.preview.emergentagent.com  
+        - Debug info shows correct backend URL: https://procure-hub-14.preview.emergentagent.com  
         - Page title "Sourcevia App" displays properly
         - No blocking console errors (minor 401s during auth check are expected)
         
@@ -1077,7 +1077,7 @@ agent_communication:
         - Backend logs show successful logins for other users (procurement@test.com, user@test.com, officer@test.com, etc.)
         
         🔧 **TECHNICAL FINDINGS:**
-        - Login page loads correctly at https://procurement-app-1.preview.emergentagent.com/login
+        - Login page loads correctly at https://procure-hub-14.preview.emergentagent.com/login
         - Login form has proper structure with email/password fields
         - Backend API is responding (no 500 errors)
         - Authentication endpoint working for existing users
@@ -1449,7 +1449,7 @@ agent_communication:
         - ✅ Clear visual feedback and loading indicators
         
         **APP DETAILS CONFIRMED:**
-        - ✅ URL: https://procurement-app-1.preview.emergentagent.com
+        - ✅ URL: https://procure-hub-14.preview.emergentagent.com
         - ✅ Auto-login: System automatically logs in (procurement@test.com)
         - ✅ Tech Stack: React frontend with AI-powered components using GPT-4o
         
@@ -1500,7 +1500,7 @@ agent_communication:
         
         🎉 **COMPREHENSIVE TEST RESULTS: ALL REQUIREMENTS MET**
         
-        **APP URL TESTED:** https://procurement-app-1.preview.emergentagent.com
+        **APP URL TESTED:** https://procure-hub-14.preview.emergentagent.com
         **CREDENTIALS:** procurement@test.com / password ✅
         **MODULES TESTED:** Contracts, Invoices, Resources, Purchase Orders ✅
         
@@ -1513,7 +1513,7 @@ agent_communication:
         ✅ **COMPREHENSIVE LOGIN TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://procurement-app-1.preview.emergentagent.com/api
+        - ✅ **APP URL:** https://procure-hub-14.preview.emergentagent.com/api
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **DEPLOYMENT:** Production environment testing completed
         
@@ -1531,7 +1531,7 @@ agent_communication:
         
         **3. CORS Preflight Test:**
         - ✅ **OPTIONS /api/auth/login:** Returns 200 OK with proper CORS headers
-        - ✅ **Access-Control-Allow-Origin:** https://procurement-app-1.preview.emergentagent.com
+        - ✅ **Access-Control-Allow-Origin:** https://procure-hub-14.preview.emergentagent.com
         - ✅ **Access-Control-Allow-Credentials:** true
         - ✅ **CORS Methods:** DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
         - ✅ **CORS Headers:** Content-Type allowed
@@ -1561,8 +1561,8 @@ agent_communication:
         - ✅ **Persistence:** Session persistence working across requests
         
         **TECHNICAL DETAILS:**
-        - **Backend URL:** https://procurement-app-1.preview.emergentagent.com/api
-        - **Frontend Domain:** https://procurement-app-1.preview.emergentagent.com
+        - **Backend URL:** https://procure-hub-14.preview.emergentagent.com/api
+        - **Frontend Domain:** https://procure-hub-14.preview.emergentagent.com
         - **Session Token Format:** UUID-based (72 characters)
         - **Cookie Security:** HttpOnly, SameSite=lax, 7-day expiry
         - **CORS Policy:** Specific origin with credentials allowed
@@ -1576,7 +1576,7 @@ agent_communication:
         ✅ **COMPREHENSIVE TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://procurement-app-1.preview.emergentagent.com
+        - ✅ **APP URL:** https://procure-hub-14.preview.emergentagent.com
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **LOGIN:** Successful authentication and navigation
         
@@ -1662,7 +1662,7 @@ agent_communication:
         ✅ **COMPREHENSIVE FILE ATTACHMENT TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://procurement-app-1.preview.emergentagent.com/api
+        - ✅ **APP URL:** https://procure-hub-14.preview.emergentagent.com/api
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **AUTO-LOGIN:** System automatically logs in as specified
         
@@ -1726,7 +1726,7 @@ agent_communication:
         ✅ **COMPREHENSIVE TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://procurement-app-1.preview.emergentagent.com
+        - ✅ **APP URL:** https://procure-hub-14.preview.emergentagent.com
         - ✅ **CREDENTIALS:** procurement@test.com / password (auto-login working)
         - ✅ **NAVIGATION:** Successfully accessed /purchase-orders page
         
@@ -1800,7 +1800,7 @@ agent_communication:
         ✅ **COMPREHENSIVE TEST RESULTS:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://procurement-app-1.preview.emergentagent.com
+        - ✅ **APP URL:** https://procure-hub-14.preview.emergentagent.com
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **NAVIGATION:** Successfully accessed /invoices page and Submit Invoice modal
         
@@ -1859,7 +1859,7 @@ agent_communication:
         ✅ **COMPREHENSIVE TEST RESULTS - ALL REQUIREMENTS MET:**
         
         **TEST CONTEXT VERIFIED:**
-        - ✅ **APP URL:** https://procurement-app-1.preview.emergentagent.com
+        - ✅ **APP URL:** https://procure-hub-14.preview.emergentagent.com
         - ✅ **CREDENTIALS:** procurement@test.com / password
         - ✅ **NAVIGATION:** Successfully accessed /invoices page and Submit Invoice modal
         
@@ -2147,7 +2147,7 @@ agent_communication:
       message: |
         DUE DILIGENCE WORKFLOW TESTING COMPLETED - Comprehensive testing of updated DD workflow as per review request:
         
-        ✅ DD WORKFLOW TEST RESULTS (API BASE URL: https://procurement-app-1.preview.emergentagent.com/api):
+        ✅ DD WORKFLOW TEST RESULTS (API BASE URL: https://procure-hub-14.preview.emergentagent.com/api):
         - Authentication: Successfully logged in with procurement@test.com/password credentials
         - STEP 1 - Vendor Creation with Checklist Items: ✅ PASSED
           * Created vendor "Workflow Test Vendor" with dd_checklist_supporting_documents=true, dd_checklist_related_party_checked=true, dd_checklist_sanction_screening=true
@@ -2257,7 +2257,7 @@ agent_communication:
         
         🎉 COMPREHENSIVE TEST RESULTS: 19/19 TESTS PASSED
         
-        API BASE URL TESTED: https://procurement-app-1.preview.emergentagent.com/api
+        API BASE URL TESTED: https://procure-hub-14.preview.emergentagent.com/api
         AUTHENTICATION: procurement@test.com / password ✅
         
         SUMMARY: All major modules of the Sourcevia Procurement Management System are working correctly. The system demonstrates robust functionality across authentication, vendor management, tender management, contract management, purchase orders, invoices, resources, due diligence workflows, and dashboard analytics. Auto-numbering, search functionality, data integrity, and complex business logic (DD workflows, contract status management) are all functioning as designed. No critical issues found.
@@ -2323,7 +2323,7 @@ agent_communication:
         - No isDisabled prop set on vendor SearchableSelect component
         - Proper state management for filteredContracts and form data
         
-        **APP URL TESTED:** https://procurement-app-1.preview.emergentagent.com
+        **APP URL TESTED:** https://procure-hub-14.preview.emergentagent.com
         **CREDENTIALS:** procurement@test.com / password ✅
         
         **CONCLUSION:** The vendor field is now fully editable at all times as requested. The fix successfully removed the previous blocking behavior where vendor field was disabled when contract was selected. All test scenarios from the review request have been verified and are working correctly.
@@ -2395,7 +2395,7 @@ agent_communication:
         
         🎉 COMPREHENSIVE FRONTEND TEST RESULTS: ALL MAJOR FEATURES WORKING
         
-        APP URL TESTED: https://procurement-app-1.preview.emergentagent.com
+        APP URL TESTED: https://procure-hub-14.preview.emergentagent.com
         CREDENTIALS: procurement@test.com / password ✅
         VIEWPORT: 1920x800 ✅
         
@@ -2511,7 +2511,7 @@ agent_communication:
       message: |
         VENDORS ENDPOINT VERIFICATION COMPLETED - Comprehensive testing of vendors endpoint data as per review request:
         
-        ✅ VENDORS ENDPOINT TEST RESULTS (API: https://procurement-app-1.preview.emergentagent.com/api):
+        ✅ VENDORS ENDPOINT TEST RESULTS (API: https://procure-hub-14.preview.emergentagent.com/api):
         
         **AUTHENTICATION & ACCESS:**
         - Login successful with procurement@test.com/password credentials ✅
@@ -3108,7 +3108,7 @@ if (!user) {
 
 **Test Results:**
 - ✅ Cleared cookies (fresh visit simulation)
-- ✅ Visited root URL: `https://procurement-app-1.preview.emergentagent.com`
+- ✅ Visited root URL: `https://procure-hub-14.preview.emergentagent.com`
 - ✅ **Redirected to:** `/dashboard` (immediate)
 - ✅ **No login page shown**
 - ✅ Dashboard fully loaded with all stats
@@ -3468,7 +3468,7 @@ Deployed app stuck on "Authenticating..." screen. Frontend could not reach backe
 1. Moved CORS middleware configuration BEFORE `app.include_router(api_router)` in server.py
 2. Updated `/app/backend/.env` to include both domains:
    ```
-   CORS_ORIGINS="https://procurement-app-1.preview.emergentagent.com,http://localhost:3000"
+   CORS_ORIGINS="https://procure-hub-14.preview.emergentagent.com,http://localhost:3000"
    ```
 3. Restarted backend service to load new environment variables
 
@@ -3629,7 +3629,7 @@ Created test users directly in production database via API.
 - Role: Procurement Officer
 
 ### Usage Instructions:
-1. Go to: https://procurement-app-1.preview.emergentagent.com
+1. Go to: https://procure-hub-14.preview.emergentagent.com
 2. Use either of the above credentials to login
 3. Or register a new account with any email/password
 
