@@ -9,6 +9,8 @@ from .base import IRepository
 from .vendor_repository import InMemoryVendorRepository
 from .tender_repository import InMemoryTenderRepository, InMemoryProposalRepository
 from .contract_repository import InMemoryContractRepository
+from .purchase_order_repository import InMemoryPurchaseOrderRepository
+from .invoice_repository import InMemoryInvoiceRepository
 
 __all__ = [
     "IRepository",
@@ -16,4 +18,6 @@ __all__ = [
     "InMemoryTenderRepository",
     "InMemoryProposalRepository",
     "InMemoryContractRepository",
+    "InMemoryPurchaseOrderRepository",
+    "InMemoryInvoiceRepository",
 ]
