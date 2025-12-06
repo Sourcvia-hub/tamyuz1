@@ -34,14 +34,16 @@ from ..models import (
     ServiceRequestStatus,
 )
 from ..repositories import (
-    InMemoryVendorRepository,
-    InMemoryTenderRepository,
-    InMemoryProposalRepository,
-    InMemoryContractRepository,
-    InMemoryPurchaseOrderRepository,
-    InMemoryInvoiceRepository,
     InMemoryResourceRepository,
     InMemoryServiceRequestRepository,
+)
+from ..repositories.factory import (
+    get_vendor_repository,
+    get_tender_repository,
+    get_proposal_repository,
+    get_contract_repository,
+    get_purchase_order_repository,
+    get_invoice_repository,
 )
 from ..services import (
     VendorService,
@@ -56,28 +58,25 @@ from ..services import (
 
 router = APIRouter()
 
-# For the current phase we wire a full vertical slice around vendors to
-# validate the architecture. Other modules will follow the same pattern.
+# Initialize repositories using factory functions
+# These will return either in-memory or SharePoint-backed implementations
+# based on the PROCUREFLIX_DATA_BACKEND environment variable
 
+_vendor_repo = get_vendor_repository()
+_tender_repo = get_tender_repository()
+_proposal_repo = get_proposal_repository()
+_contract_repo = get_contract_repository()
+_po_repo = get_purchase_order_repository()
+_invoice_repo = get_invoice_repository()
+
+# Resources and Service Requests still use in-memory for now
 _seed_dir = Path(__file__).resolve().parent.parent / "seed"
-_vendor_seed_path = _seed_dir / "vendors.json"
-_tender_seed_path = _seed_dir / "tenders.json"
-_proposal_seed_path = _seed_dir / "proposals.json"
-_contract_seed_path = _seed_dir / "contracts.json"
-_po_seed_path = _seed_dir / "purchase_orders.json"
-_invoice_seed_path = _seed_dir / "invoices.json"
 _resource_seed_path = _seed_dir / "resources.json"
 _service_request_seed_path = _seed_dir / "service_requests.json"
-
-_vendor_repo = InMemoryVendorRepository(seed_path=_vendor_seed_path)
-_tender_repo = InMemoryTenderRepository(seed_path=_tender_seed_path)
-_proposal_repo = InMemoryProposalRepository(seed_path=_proposal_seed_path)
-_contract_repo = InMemoryContractRepository(seed_path=_contract_seed_path)
-_po_repo = InMemoryPurchaseOrderRepository(seed_path=_po_seed_path)
-_invoice_repo = InMemoryInvoiceRepository(seed_path=_invoice_seed_path)
 _resource_repo = InMemoryResourceRepository(seed_path=_resource_seed_path)
 _sr_repo = InMemoryServiceRequestRepository(seed_path=_service_request_seed_path)
 
+# Initialize services with repositories
 _vendor_service = VendorService(repository=_vendor_repo)
 _tender_service = TenderService(tender_repo=_tender_repo, proposal_repo=_proposal_repo)
 _contract_service = ContractService(repository=_contract_repo)
