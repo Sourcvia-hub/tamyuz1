@@ -215,3 +215,73 @@ class Vendor(BaseModel):
 
     # Tags for searching / grouping in ProcureFlix
     tags: List[str] = Field(default_factory=list)
+
+
+
+class VendorCreateRequest(BaseModel):
+    """Simplified vendor creation request model.
+    
+    This model contains only the essential fields needed to create a new vendor.
+    System fields (vendor_number, risk_score, timestamps, etc.) are auto-generated.
+    """
+    
+    model_config = ConfigDict(extra="ignore")
+    
+    # Basic company information (required)
+    name_english: str = Field(..., description="Company legal name in English")
+    commercial_name: str = Field(..., description="Trading/commercial name")
+    entity_type: str = Field(..., description="e.g., LLC, Ltd, Corporation")
+    vendor_type: VendorType = VendorType.LOCAL
+    
+    # Registration & tax
+    vat_number: str = Field(..., description="VAT/Tax registration number")
+    cr_number: str = Field(..., description="Commercial registration number")
+    cr_expiry_date: datetime = Field(..., description="CR expiry date")
+    cr_country_city: str = Field(..., description="e.g., 'USA / San Francisco'")
+    
+    # Business details
+    activity_description: str = Field(..., description="Main business activity")
+    number_of_employees: int = Field(..., ge=1, description="Number of employees")
+    
+    # Contact information (required)
+    street: str
+    building_no: str
+    city: str
+    district: str
+    country: str
+    mobile: str
+    email: EmailStr
+    
+    # Representative (required)
+    representative_name: str
+    representative_designation: str
+    representative_id_type: str = Field(..., description="e.g., Passport, National ID")
+    representative_id_number: str
+    representative_nationality: str
+    representative_mobile: str
+    representative_email: EmailStr
+    
+    # Banking (required)
+    bank_account_name: str
+    bank_name: str
+    bank_branch: str
+    bank_country: str
+    iban: str
+    currency: str = Field(default="USD", description="Default currency")
+    swift_code: str
+    
+    # Optional fields
+    unified_number: Optional[str] = None
+    license_number: Optional[str] = None
+    license_expiry_date: Optional[datetime] = None
+    landline: Optional[str] = None
+    fax: Optional[str] = None
+    representative_residence_tel: Optional[str] = None
+    representative_phone_area_code: Optional[str] = None
+    
+    # Optional structured data
+    owners_managers: List[Dict[str, Any]] = Field(default_factory=list)
+    authorized_persons: List[Dict[str, Any]] = Field(default_factory=list)
+    documents: List[str] = Field(default_factory=list)
+    tags: List[str] = Field(default_factory=list)
+
