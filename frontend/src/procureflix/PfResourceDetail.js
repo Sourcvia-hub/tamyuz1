@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/App';
 import { fetchResourceById, changeResourceStatus } from './api';
+import { getProcureFlixRole, canManageOperationalStatus } from './roles';
 
 const statusOptions = ['active', 'inactive'];
 
 const PfResourceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const role = getProcureFlixRole(user?.email);
+  const canManageStatus = canManageOperationalStatus(role);
+
   const [resource, setResource] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -95,7 +101,8 @@ const PfResourceDetail = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="rounded border px-2 py-1 text-xs"
+              disabled={!canManageStatus}
+              className="rounded border px-2 py-1 text-xs disabled:bg-slate-100 disabled:cursor-not-allowed"
             >
               {statusOptions.map((s) => (
                 <option key={s} value={s}>
@@ -105,11 +112,14 @@ const PfResourceDetail = () => {
             </select>
             <button
               onClick={handleChangeStatus}
-              disabled={statusUpdating}
-              className="inline-flex items-center rounded-md bg-white border px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:bg-slate-100"
+              disabled={statusUpdating || !canManageStatus}
+              className="inline-flex items-center rounded-md bg-white border px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
             >
               {statusUpdating ? 'Updating...' : 'Change status'}
             </button>
+            {!canManageStatus && (
+              <span className="text-xs text-amber-600">⚠ No permission</span>
+            )}
           </div>
         </div>
       </div>
