@@ -36,7 +36,7 @@ services:
       - PROCUREFLIX_DATA_BACKEND=memory
       - PROCUREFLIX_AI_ENABLED=true
       - PROCUREFLIX_AI_PROVIDER=openai
-      - PROCUREFLIX_AI_MODEL=gpt-4
+      - PROCUREFLIX_AI_MODEL=gpt-4o
       - ENVIRONMENT=production
       - DEBUG=false
     env_file:
