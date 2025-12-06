@@ -1,23 +1,8 @@
-/* ProcureFlix routes snippet */
+/* ProcureFlix routes snippet with CCTV */
 // ...imports above
-import ProcureFlixLayout from './procureflix/Layout';
-import PfDashboard from './procureflix/PfDashboard';
-import PfVendorsList from './procureflix/PfVendorsList';
-import PfVendorDetail from './procureflix/PfVendorDetail';
-import PfTendersList from './procureflix/PfTendersList';
-import PfTenderDetail from './procureflix/PfTenderDetail';
-import PfContractsList from './procureflix/PfContractsList';
-import PfContractDetail from './procureflix/PfContractDetail';
-import PfPurchaseOrdersList from './procureflix/PfPurchaseOrdersList';
-import PfPurchaseOrderDetail from './procureflix/PfPurchaseOrderDetail';
-import PfInvoicesList from './procureflix/PfInvoicesList';
-import PfInvoiceDetail from './procureflix/PfInvoiceDetail';
-import PfResourcesList from './procureflix/PfResourcesList';
-import PfResourceDetail from './procureflix/PfResourceDetail';
-import PfServiceRequestsList from './procureflix/PfServiceRequestsList';
-import PfServiceRequestDetail from './procureflix/PfServiceRequestDetail';
+import PfCctvView from './procureflix/PfCctvView';
 
-// ... inside AppRoutes
+// inside ProcureFlix route block
 <Route
   path="/pf"
   element={
@@ -42,4 +27,5 @@ import PfServiceRequestDetail from './procureflix/PfServiceRequestDetail';
   <Route path="resources/:id" element={<PfResourceDetail />} />
   <Route path="service-requests" element={<PfServiceRequestsList />} />
   <Route path="service-requests/:id" element={<PfServiceRequestDetail />} />
+  <Route path="cctv" element={<PfCctvView />} />
 </Route>

@@ -1,25 +1,38 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/App';
+import { getProcureFlixRole, canSeeFinancialModules, canSeeOperationalModules } from './roles';
 
 const navItems = [
-  { to: '/pf/dashboard', label: 'Dashboard' },
-  { to: '/pf/vendors', label: 'Vendors' },
-  { to: '/pf/tenders', label: 'Tenders' },
-  { to: '/pf/contracts', label: 'Contracts' },
-  { to: '/pf/purchase-orders', label: 'Purchase Orders' },
-  { to: '/pf/invoices', label: 'Invoices' },
-  { to: '/pf/resources', label: 'Resources' },
-  { to: '/pf/service-requests', label: 'Service Requests' },
+  { to: '/pf/dashboard', label: 'Dashboard', key: 'dashboard', type: 'all' },
+  { to: '/pf/vendors', label: 'Vendors', key: 'vendors', type: 'operational' },
+  { to: '/pf/tenders', label: 'Tenders', key: 'tenders', type: 'operational' },
+  { to: '/pf/contracts', label: 'Contracts', key: 'contracts', type: 'financial' },
+  { to: '/pf/purchase-orders', label: 'Purchase Orders', key: 'pos', type: 'financial' },
+  { to: '/pf/invoices', label: 'Invoices', key: 'invoices', type: 'financial' },
+  { to: '/pf/resources', label: 'Resources', key: 'resources', type: 'operational' },
+  { to: '/pf/service-requests', label: 'Service Requests', key: 'osr', type: 'operational' },
+  { to: '/pf/cctv', label: 'CCTV Live View', key: 'cctv', type: 'operational' },
 ];
 
 const ProcureFlixLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const role = getProcureFlixRole(user?.email);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const canSeeNavItem = (item) => {
+    if (item.type === 'financial') {
+      return canSeeFinancialModules(role);
+    }
+    if (item.type === 'operational') {
+      return canSeeOperationalModules(role);
+    }
+    return true; // dashboard and others
   };
 
   return (
@@ -38,7 +51,7 @@ const ProcureFlixLayout = () => {
           </div>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 text-sm">
-          {navItems.map((item) => (
+          {navItems.filter(canSeeNavItem).map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -57,7 +70,7 @@ const ProcureFlixLayout = () => {
         <div className="px-4 py-4 border-t border-slate-800 text-xs text-slate-400">
           <div className="mb-2">
             <div className="font-medium text-slate-200 text-sm">{user?.email || 'User'}</div>
-            <div className="text-xs text-slate-400">ProcureFlix</div>
+            <div className="text-xs text-slate-400">Role: {role}</div>
           </div>
           <button
             onClick={handleLogout}
@@ -77,7 +90,7 @@ const ProcureFlixLayout = () => {
             <p className="text-xs text-slate-500">End-to-end procurement lifecycle</p>
           </div>
           <div className="text-xs text-slate-500">
-            Logged in as <span className="font-medium">{user?.email}</span>
+            Logged in as <span className="font-medium">{user?.email}</span> · Role: <span className="font-medium">{role}</span>
           </div>
         </header>
 
