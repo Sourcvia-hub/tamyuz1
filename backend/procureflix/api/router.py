@@ -128,12 +128,15 @@ async def get_tender(tender_id: str) -> Tender:
 
 
 @router.post("/tenders", response_model=Tender, status_code=201)
-async def create_tender(tender: Tender) -> Tender:
-    if not tender.title:
-        raise HTTPException(status_code=400, detail="title is required")
-    if not tender.project_name:
-        raise HTTPException(status_code=400, detail="project_name is required")
-    return _tender_service.create_tender(tender)
+async def create_tender(request: TenderCreateRequest) -> Tender:
+    """Create a new tender using simplified request model.
+    
+    This endpoint accepts a minimal TenderCreateRequest with essential fields.
+    System fields (tender_number, status, timestamps) are auto-generated.
+    
+    The full Tender model is returned in the response.
+    """
+    return _tender_service.create_tender_from_request(request)
 
 
 @router.put("/tenders/{tender_id}", response_model=Tender)
