@@ -59,6 +59,95 @@ class VendorService:
 
         return self._repository.add(vendor)
 
+
+    def create_vendor_from_request(self, request: VendorCreateRequest) -> Vendor:
+        """Create a vendor from simplified VendorCreateRequest.
+        
+        This method auto-generates:
+        - vendor_number
+        - risk_score and risk_category (initial assessment)
+        - status (defaults to pending_due_diligence)
+        - timestamps (created_at, updated_at)
+        - dd_required flag based on initial risk
+        """
+        from uuid import uuid4
+        
+        now = datetime.now(timezone.utc)
+        
+        # Create full Vendor model from request
+        vendor = Vendor(
+            id=str(uuid4()),
+            vendor_number=self._generate_vendor_number(now),
+            vendor_type=request.vendor_type,
+            
+            # Company information
+            name_english=request.name_english,
+            commercial_name=request.commercial_name,
+            entity_type=request.entity_type,
+            vat_number=request.vat_number,
+            unified_number=request.unified_number,
+            cr_number=request.cr_number,
+            cr_expiry_date=request.cr_expiry_date,
+            cr_country_city=request.cr_country_city,
+            license_number=request.license_number,
+            license_expiry_date=request.license_expiry_date,
+            activity_description=request.activity_description,
+            number_of_employees=request.number_of_employees,
+            
+            # Address & contact
+            street=request.street,
+            building_no=request.building_no,
+            city=request.city,
+            district=request.district,
+            country=request.country,
+            mobile=request.mobile,
+            landline=request.landline,
+            fax=request.fax,
+            email=request.email,
+            
+            # Representative
+            representative_name=request.representative_name,
+            representative_designation=request.representative_designation,
+            representative_id_type=request.representative_id_type,
+            representative_id_number=request.representative_id_number,
+            representative_nationality=request.representative_nationality,
+            representative_mobile=request.representative_mobile,
+            representative_residence_tel=request.representative_residence_tel,
+            representative_phone_area_code=request.representative_phone_area_code,
+            representative_email=request.representative_email,
+            
+            # Banking
+            bank_account_name=request.bank_account_name,
+            bank_name=request.bank_name,
+            bank_branch=request.bank_branch,
+            bank_country=request.bank_country,
+            iban=request.iban,
+            currency=request.currency,
+            swift_code=request.swift_code,
+            
+            # Structured data
+            owners_managers=request.owners_managers,
+            authorized_persons=request.authorized_persons,
+            documents=request.documents,
+            tags=request.tags,
+            
+            # Auto-generated system fields
+            risk_score=0.0,  # Will be calculated
+            risk_category=RiskCategory.MEDIUM,  # Default, will be adjusted
+            status=VendorStatus.PENDING_DUE_DILIGENCE,  # Default for new vendors
+            dd_required=True,  # Default for new vendors
+            dd_completed=False,
+            created_at=now,
+            updated_at=now,
+        )
+        
+        # Apply risk scoring and DD requirements
+        self._apply_registration_risk(vendor)
+        self._determine_dd_requirements(vendor)
+        
+        return self._repository.add(vendor)
+
+
     def update_vendor(self, vendor_id: str, updated: Vendor) -> Vendor | None:
         existing = self._repository.get(vendor_id)
         if not existing:
