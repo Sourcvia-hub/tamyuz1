@@ -153,7 +153,7 @@ Keep responses clear, professional, and actionable."""
                     "reason": "Failed to initialize AI client"
                 }
 
-            response = await chat.send_message(UserMessage(text=prompt))
+            response = await self._send_message(chat, prompt)
             
             # Try to parse JSON response
             try:
@@ -228,7 +228,7 @@ Keep responses professional, specific, and focused on risk mitigation."""
                     "reason": "Failed to initialize AI client"
                 }
 
-            response = await chat.send_message(UserMessage(text=prompt))
+            response = await self._send_message(chat, prompt)
             
             try:
                 result = json.loads(response)
@@ -291,7 +291,7 @@ Keep it concise and professional."""
                     "reason": "Failed to initialize AI client"
                 }
 
-            response = await chat.send_message(UserMessage(text=prompt))
+            response = await self._send_message(chat, prompt)
             
             try:
                 result = json.loads(response)
@@ -367,7 +367,7 @@ Remember: This is advisory only. The committee makes the final decision."""
                     "reason": "Failed to initialize AI client"
                 }
 
-            response = await chat.send_message(UserMessage(text=prompt))
+            response = await self._send_message(chat, prompt)
             
             try:
                 result = json.loads(response)
