@@ -221,12 +221,15 @@ async def get_contract(contract_id: str) -> Contract:
 
 
 @router.post("/contracts", response_model=Contract, status_code=201)
-async def create_contract(contract: Contract) -> Contract:
-    if not contract.title:
-        raise HTTPException(status_code=400, detail="title is required")
-    if not contract.vendor_id:
-        raise HTTPException(status_code=400, detail="vendor_id is required")
-    return _contract_service.create_contract(contract)
+async def create_contract(request: ContractCreateRequest) -> Contract:
+    """Create a new contract using simplified request model.
+    
+    This endpoint accepts a minimal ContractCreateRequest with essential fields.
+    System fields (contract_number, risk scores, DD/NOC flags, timestamps) are auto-generated.
+    
+    The full Contract model is returned in the response.
+    """
+    return _contract_service.create_contract_from_request(request)
 
 
 @router.put("/contracts/{contract_id}", response_model=Contract)
