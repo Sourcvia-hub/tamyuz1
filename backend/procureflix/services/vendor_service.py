@@ -16,6 +16,7 @@ from ..ai import get_ai_client
 from ..models import (
     RiskCategory,
     Vendor,
+    VendorCreateRequest,
     VendorStatus,
 )
 from ..repositories import InMemoryVendorRepository
