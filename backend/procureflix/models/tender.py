@@ -109,3 +109,49 @@ class Proposal(BaseModel):
 
     # Free-form metadata to keep the model extensible
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+
+class TenderCreateRequest(BaseModel):
+    """Simplified tender creation request model.
+    
+    This model contains only essential fields needed to create a new tender.
+    System fields (tender_number, status, timestamps, etc.) are auto-generated.
+    """
+    
+    model_config = ConfigDict(extra="ignore")
+    
+    # Basic tender information (required)
+    title: str = Field(..., min_length=5, description="Tender title")
+    description: str = Field(..., min_length=20, description="Detailed tender description")
+    project_name: str = Field(..., description="Project name")
+    requirements: str = Field(..., min_length=20, description="Technical and functional requirements")
+    
+    # Financial & timeline
+    budget: float = Field(..., gt=0, description="Total tender budget")
+    deadline: datetime = Field(..., description="Submission deadline")
+    
+    # Optional fields
+    project_reference: Optional[str] = Field(None, description="External project reference/code")
+    invited_vendors: List[str] = Field(default_factory=list, description="List of vendor IDs to invite")
+    
+    # Evaluation configuration (optional with defaults)
+    evaluation_method: EvaluationMethod = Field(
+        default=EvaluationMethod.TECHNICAL_FINANCIAL,
+        description="Evaluation method"
+    )
+    technical_weight: float = Field(
+        default=0.6,
+        ge=0.0,
+        le=1.0,
+        description="Technical evaluation weight (0-1)"
+    )
+    financial_weight: float = Field(
+        default=0.4,
+        ge=0.0,
+        le=1.0,
+        description="Financial evaluation weight (0-1)"
+    )
+    
+    created_by: Optional[str] = Field(None, description="User who created the tender")
+
