@@ -25,7 +25,7 @@ import sys
 import os
 
 # Configuration
-BASE_URL = "https://data-overhaul-1.preview.emergentagent.com/api"
+BASE_URL = "https://procurement-app-1.preview.emergentagent.com/api"
 
 # Test Users as specified in review request
 TEST_USERS = {

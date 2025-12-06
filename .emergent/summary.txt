@@ -1,120 +1,118 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was to get their production application at  working, which was plagued by persistent deployment, CORS, and MongoDB authorization errors.
+The user's initial problem was a persistent deployment issue where their custom domain () pointed to an old, broken deployment, causing Server error messages. This was compounded by MongoDB authorization errors in the backend.
 
-This goal has since evolved. The user has made a strategic decision to pivot away from MongoDB and re-architect the application to use **SharePoint as the primary data storage layer**.
+The project underwent two major pivots:
+1.  A user request to add a project number / jira reference field to the Tenders module of the existing Sourcevia application.
+2.  A complete strategic shift to rebuild the entire application from scratch under a new name, **ProcureFlix**. This new application was to replicate all of Sourcevia's business logic and modules but with a clean, modular architecture, no MongoDB dependency, and using in-memory data seeded from JSON files as a placeholder for a future SharePoint integration.
 
-In the last session, the user requested the following:
-1.  **Stop all MongoDB-related refactoring.**
-2.  Generate and deliver a complete **SharePoint-compatible schema package** (Excel, JSON, field definitions) based on the existing application's data models.
-3.  Fix several outstanding bugs in the current MongoDB-based application.
-4.  Remove a Debug Info panel from the login page.
-5.  Run a final deployment readiness check.
-6.  The underlying goal to make  functional remains, but is now secondary to the SharePoint pivot.
+**PRODUCT REQUIREMENTS for ProcureFlix:**
+- Rebuild all 11 modules from Sourcevia (Dashboard, Vendor Management, Tenders, POs, Contracts, etc.).
+- Use a clean, modular backend structure (routes, services, models, repositories).
+- Use a new, clean frontend with a sidebar layout under the  route.
+- **No MongoDB/Atlas**. Use in-memory data seeded from JSON files.
+- Design the data layer using a repository pattern to allow for future SharePoint integration.
+- Re-implement all AI-assisted features (e.g., vendor risk analysis) via a clean abstraction layer.
+- The existing Sourcevia application is to be treated as a Business Requirements Document (BRD) only; no code should be reused.
 
 **User's preferred language**: English
 
 **what currently exists?**
--   A full-stack React/FastAPI application that is still using MongoDB for its backend.
--   A new, fully functional deployment named **** which works correctly on its preview URL. The user's main domain () is still pointing to an old, broken deployment.
--   **A complete SharePoint schema package** located in . This includes field definitions, JSON schemas for lists, and an integration guide.
--   The backend database connection logic in  has been significantly hardened to correctly parse and handle MongoDB Atlas connection strings, preventing previous deployment authorization errors.
--   **Bug Fixes**:
-    -   RBAC permissions on the tender evaluation endpoints have been widened to fix an issue where proposals were not appearing.
-    -   Master data (Buildings, Asset Categories, OSR Categories) has been seeded into the database.
-    -   The Service Request (OSR) form in the frontend () has been improved to auto-populate asset details.
--   The debug information panel has been removed from the login page.
+- The legacy  application still exists but is non-functional due to MongoDB auth errors and is considered deprecated.
+- A new, fully functional prototype application named **ProcureFlix** has been built from the ground up.
+    - **Backend**: A modular FastAPI application under . It uses an in-memory, JSON-seeded data store with a repository pattern. It exposes a clean API under .
+    - **Frontend**: A new React-based UI under  served at the  route. It features a modern layout with a sidebar for navigation.
+- **Implemented Modules**: The ProcureFlix application includes complete backend and frontend implementations for: Vendors, Tenders (with Proposals & Evaluation), Contracts, Purchase Orders, Invoices, Resources, and Service Requests (OSR).
+- **Additional Features**: A functional Dashboard aggregating KPIs, a placeholder CCTV view, and a UI-level role-based access control (RBAC) system have also been implemented.
 
 **Last working item**:
-- Last item agent was working: The agent just removed a Debug Info section from the  and  files as requested by the user.
-- Status: USER VERIFICATION PENDING
-- Agent Testing Done: Y
-- Which testing method agent to use? screenshot tool
+- Last item agent was working: The user's last request was to enforce the newly created UI-level role permissions to disable/hide the Change status buttons on the detail pages for unauthorized users.
+- Status: NOT STARTED
+- Agent Testing Done: N
+- Which testing method agent to use? Frontend testing agent (to verify UI changes across multiple roles and components).
 - User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   Issue 1: Production Domain Not Pointing to Working Deployment (P0)
+-   Issue 1: Enforce UI-level role permissions for status change buttons (P0)
 
 Issues Detail:
--   **Issue 1: Production Domain Not Pointing to Working Deployment**
-    -   **Description**: This is the most critical and long-standing issue. The user's custom domain, , is still pointing to an old, broken deployment (). A new, fully functional deployment () exists and works perfectly on its preview URL, but the user has not successfully completed the DNS/domain linking process to make  point to it. This is why the user consistently sees Server error on their custom domain.
-    -   **Attempted fixes**: The agent has guided the user through the DNS linking process multiple times. The user has added DNS records, but caching (Cloudflare) and potentially the need to unlink the domain from the old deployment have prevented it from working.
+-   **Issue 1: Enforce UI-level role permissions for status change buttons**
+    -   **Description**: The UI-level role system has been created (), but the Change status buttons in the detail pages (Contracts, POs, Invoices, Resources, OSR) are still enabled for all roles. They need to be conditionally disabled or hidden based on the user's role.
+    -   **Attempted fixes**: None yet.
     -   **Next debug checklist**:
-        1.  Guide the user to the Emergent Deployments page.
-        2.  Instruct them to first **UNLINK**  from the OLD  deployment.
-        3.  Then, guide them to **LINK**  to the NEW, working  deployment.
-        4.  Have them follow the steps to add/verify the DNS records again.
-        5.  Wait for DNS propagation and test .
-    -   **Why fix this issue and what will be achieved with the fix?**: This will finally make the user's custom domain operational, resolving the primary source of their frustration.
-    -   **Status**: BLOCKED (on user action)
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Both (on the live  URL).
+        1.  Import the role helper functions (, ) into the relevant detail components: , , , , .
+        2.  Use these functions to add a  attribute to the Change status buttons based on the current user's role.
+        3.  Test the UI by logging in with users mapped to different roles (e.g., , , , ) to confirm the buttons are correctly enabled/disabled.
+    -   **Why fix this issue and what will be achieved with the fix?**: This will complete the UI-level access control feature, preventing users from performing actions they are not authorized for and making the prototype more robust for demos.
+    -   **Status**: NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend
     -   **Blocked on other issue**: No.
 
 **In progress Task List**:
--   There are no tasks currently in progress. The major refactoring for SharePoint was explicitly paused by the user.
+- There are no tasks currently in progress.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks:**
-  - **P0: Verify UI Change:** Ask the user to check the login page to confirm the Debug Info section is gone.
-  - **P1: Comprehensive User Testing:** Once the production domain is working, guide the user to test the recently fixed features (RFP proposal evaluation, Asset-linked Service Requests).
+-   **Upcoming Tasks:**
+    -   **P0:** Implement UI-level button restrictions as per the last user request.
 
-- **Future Tasks:**
-  - **P2: SharePoint-First Architecture Implementation:** This is the user's new strategic direction, currently paused.
-      - **Phase 1 (Completed):** Schema Generation.
-      - **Phase 2 (Paused):** Refactor the backend to use the Repository Pattern with JSON file storage instead of MongoDB.
-      - **Phase 3 (Paused):** Implement stateless JWT-based authentication.
-      - **Phase 4 (Paused):** Implement the actual SharePoint API integration.
-  - **P3: Global ObjectId Serialization Fix:** Implement a global custom JSON encoder in FastAPI.
-  - **P4: Refactor API Routes:** Split the monolithic  into a  directory.
+-   **Future Tasks:**
+    -   **P1: SharePoint Integration:** Replace the in-memory repositories (, etc.) with SharePoint-backed repositories to provide real data persistence. This is the primary long-term goal for ProcureFlix.
+    -   **P2: Activate AI Features:** Implement the logic within the  to call a real LLM service (using the Emergent LLM Key) for features like vendor risk explanation, contract analysis, and tender evaluation suggestions.
+    -   **P3: Implement Remaining Modules:** Build out the remaining modules from the original Sourcevia spec if needed (e.g., Asset Management).
+    -   **P4: Refine Dashboard:** Enhance the dashboard with more advanced visualizations or charts.
 
 **Completed work in this session**
-- **SharePoint Schema Generation (User's #1 Priority):**
-  - Analyzed all Pydantic models to extract fields.
-  - Created a complete schema package in  containing:
-    - : A document detailing all fields for each module.
-    - : Directory with JSON schema files for SharePoint list creation.
-    - : A guide for future integration.
-- **Critical Bug Fixes:**
-  - **RFP Proposals:** Fixed an RBAC issue in  that prevented proposals from appearing during evaluation by widening the required user roles.
-  - **Service Request Form:** Refactored  to auto-populate location and category details when an asset is selected for Asset Related requests.
-  - **Missing Master Data:** Created and executed a seed script () to populate Buildings, Floors, Asset Categories, and OSR Categories in the database, fixing issues where dropdowns were empty.
-- **Production Deployment Hardening:**
-  - **MongoDB Atlas URL Fix:** Rewrote the logic in  to be bulletproof. It now correctly infers the database name from the Atlas username when it's missing from the connection string, resolving critical deployment authorization errors.
-  - **Cleaned Startup Logs:** Removed all confusing, duplicate, and obsolete warning messages from the database initialization script.
-- **UI Cleanup:**
-  - Removed the Debug Info section from the frontend login pages (, ).
-
-**Earlier issues found/mentioned but not fixed**
--   **Issue 1: Global ObjectId Serialization Fix:** A global, robust solution (like a custom JSON encoder for FastAPI) has not yet been implemented. This remains a potential source of technical debt.
--   **Issue 2: Monolithic :** The backend logic is still concentrated in a single large file. Refactoring into a  structure is still pending.
-
-**Known issue recurrence from previous fork**
--   **Issue recurrence in this fork**: Production Connectivity and Deployment Failures.
--   **Recurrence count**: This has been the central theme of the entire session.
--   **Status**: RESOLVED (in code) / BLOCKED (on user deployment/DNS action). The code in  is now robust against the deployment errors, but the user's custom domain is not yet pointing to the fixed deployment.
+- **Legacy Sourcevia App Modification:**
+  - Added a new optional  field to the Tenders module, including backend model, API, and frontend UI updates.
+- **ProcureFlix Application Rebuild (from scratch):**
+  - **Backend Skeleton:** Created a clean, modular FastAPI application structure under .
+  - **Data Layer:** Implemented a repository pattern with in-memory data stores seeded from JSON files, completely removing the MongoDB dependency.
+  - **Vendor Module:** Full implementation of Vendor models, services (including risk/DD logic), API, and seed data.
+  - **Tenders Module:** Full implementation of Tenders, Proposals, and Evaluation logic, including weighted scoring.
+  - **Contracts Module:** Full implementation with contract classification (standard, outsourcing, cloud) and risk/NOC logic.
+  - **Purchase Orders & Invoices Modules:** Full implementation with auto-numbering and status workflows.
+  - **Resources & Service Requests (OSR) Modules:** Full implementation of operational modules.
+  - **Frontend Skeleton:** Created a new React UI under  with a dedicated layout, served at .
+  - **Frontend UI:** Built list and detail pages for all implemented backend modules (Vendors, Tenders, Contracts, POs, Invoices, Resources, OSR).
+  - **Dashboard:** Implemented a dashboard that aggregates and displays KPIs from all ProcureFlix modules.
+  - **Access Control:** Created a UI-level RBAC system based on user email.
+  - **CCTV Placeholder:** Added a placeholder UI for a future CCTV integration.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Architectural Pivot**: User decision to move from MongoDB to SharePoint as the primary data store.
--   **Schema Generation**: Extracting data model definitions (from Pydantic) to create schemas for an external system (SharePoint).
--   **DNS & Cloudflare Caching**: The root cause of the user's custom domain not working. The domain is pointing to an old server, and DNS/CDN caching is preventing it from updating.
--   **MongoDB Atlas Connection Strings**: Deep debugging and hardening of the logic to parse and reconstruct Atlas URLs, specifically ensuring the database name (often matching the username) is correctly used for authorization.
--   **RBAC (Role-Based Access Control)**: Debugged and fixed an issue where endpoints were too restrictive, preventing users from seeing necessary data.
+-   **Application Re-architecture**: Complete rebuild of a monolithic application into a modular, decoupled system.
+-   **Repository Pattern**: Abstracting the data access layer to allow for easy swapping of data sources (from in-memory to SharePoint).
+-   **In-Memory Database**: Using simple lists and dictionaries as a data store for rapid prototyping, seeded from JSON files.
+-   **API-First Development**: Building out the backend modules and APIs first, then wiring up the frontend.
+-   **UI-level Role-Based Access Control (RBAC)**: Implementing access control in the frontend for simplicity, without requiring backend changes.
+
+**key DB schema**
+The application uses Pydantic models instead of a traditional DB schema. Key models include:
+-   : Contains identity, company info, risk scores, status, and extensive due diligence fields.
+-   : Contains project details, budget, deadline, status, and evaluation criteria (e.g., ).
+-   : Linked to a  and , contains technical/financial scores.
+-   : Linked to  and , includes type (standard, outsourcing, cloud), value, dates, and risk flags ().
+-   : Linked to  and , includes amount and status.
+-   : Linked to , , , includes amount, dates, and status.
+-   : Linked to  and .
+-   : Linked to , , .
+
+**changes in tech stack**
+-   **Database**: Shifted from **MongoDB Atlas** to an **in-memory, JSON-seeded data store**. This was a deliberate choice to decouple from legacy issues and prepare for SharePoint.
 
 **All files of reference**
--   : Contains the critical fix for MongoDB Atlas deployment errors.
--   : Contains the updated UI logic for service requests.
--   : Contains the RBAC fix for tender evaluations.
--   : The new script for populating master data.
--   : The entire directory is a key deliverable from this session.
--   : The file where the debug info was removed.
+-   : Entire directory for the new backend.
+-   : Entire directory for the new frontend.
+-   : Directory containing all JSON seed files (, , etc.), which define the deterministic demo data.
+-   : Defines the UI-level roles and permissions.
 
 **Critical Info for New Agent**
--   **PRIORITY #1: FIX THE DOMAIN.** The user's custom domain  is broken. A new, working deployment () exists. Your immediate goal is to guide the user to **unlink** the domain from the old deployment and **re-link** it to the new one through the Emergent UI. Do not get sidetracked by other issues until this is resolved.
--   **SHAREPOINT IS THE FUTURE, BUT PAUSED.** The user has made a strategic decision to move to SharePoint. A complete schema package has been delivered. However, the user explicitly **paused** the major code refactoring required for this. Do not resume work on the Repository Pattern or SharePoint integration until the user explicitly approves it.
--   **CODE IS LIKELY STABLE.** The backend code, especially , has been significantly hardened to prevent the deployment errors the user was facing. Multiple bugs have also been fixed. Trust the current codebase and focus on the deployment/DNS issue.
+-   **FOCUS ON PROCUREFLIX**: The old  application is now legacy. All work must be done on the new ProcureFlix application under  and .
+-   **IN-MEMORY DATA**: The backend data is not persistent. It is reloaded from JSON files in the  directory every time the backend restarts. This is intentional.
+-   **MODULAR PATTERN**: Adhere to the established modular pattern: define a model, create a repository, add business logic to a service, and expose it via the API router. Repeat for the frontend (API client helpers, list page, detail page).
+-   **NEXT STEP**: The immediate task is to implement the UI-level button restrictions for status changes based on the roles defined in .
 
 **documents created in this job**
 -   
@@ -127,34 +125,33 @@ Issues Detail:
 -   
 
 **Last 10 User Messages and any pending user messages**
-1.  **User**: Asks to remove the Debug Info from the login page. (Status: **Completed**)
-2.  **User**: Asks to run a deployment health check. (Status: **Completed**)
-3.  **User**: Provides new deployment logs showing Atlas auth errors again. (Status: **Completed**, led to a permanent fix in )
-4.  **User**: Reports seeing conflicting warning messages in logs. (Status: **Completed**, agent cleaned up the logs)
-5.  **User**: Reports seeing duplicate warning messages again. (Status: **Completed**, agent did a final cleanup of )
-6.  **User**: Asks to remove debug info from login page. (Status: **Completed**)
-7.  **User**: Asks to run deployer agent and health check. (Status: **Completed**)
-8.  **User**: Server error?! - reports that  is still broken. (Status: **Pending**, this is the main P0 issue)
-9.  **User**: Asks to bind custom domain . (Status: **Pending**, this is the main P0 issue)
-10. **User**: Still the category in the general request not there. (Status: **Completed**, agent seeded the OSR categories)
+1.  **User**: Requested a complete rebuild of the application as ProcureFlix with a new architecture and no MongoDB. (Status: **Completed**)
+2.  **User**: Confirmed the plan for the ProcureFlix rebuild, specifying API/frontend routes and data persistence strategy. (Status: **Completed**)
+3.  **User**: Approved the Vendor module backend implementation and requested to proceed with the Tenders module. (Status: **Completed**)
+4.  **User**: Approved the Tenders module backend and requested to proceed with the frontend UI for Vendors and Tenders. (Status: **Completed**)
+5.  **User**: Approved the Vendors/Tenders frontend and requested to proceed with the Contracts module backend. (Status: **Completed**)
+6.  **User**: Approved the Contracts backend and requested the Contracts UI. (Status: **Completed**)
+7.  **User**: Approved the Contracts UI and requested the Purchase Orders & Invoices modules (backend & frontend). (Status: **Completed**)
+8.  **User**: Approved the PO/Invoices modules and requested the Resources & Service Requests modules (backend & frontend). (Status: **Completed**)
+9.  **User**: Approved the Resources/OSR modules and requested the Dashboard, UI-level Access Management, and a CCTV placeholder. (Status: **Completed**)
+10. **User**: Approved the latest phase and requested a final UI refinement: enforce role-based restrictions on status change buttons. (Status: **Pending**)
 
 **Project Health Check:**
--   **Broken:** The user's primary production domain () is non-functional due to incorrect DNS/linking.
--   **Working:** The application itself is stable and functional on its  URL.
+-   **Broken:** The original  application is non-functional due to unresolved MongoDB auth issues. It is now considered legacy.
+-   **Working:** The new  application is fully functional as a prototype on the local development server, with a complete end-to-end workflow across multiple modules.
 
 **3rd Party Integrations**:
-- None currently active. SharePoint integration is planned for the future.
+-   **SharePoint**: Planned for the future. The repository pattern is in place to facilitate this. Placeholders for SharePoint config (, etc.) exist in .
+-   **Emergent LLM Key**: Planned for the future. An AI client abstraction () has been created with stubbed methods, ready to be integrated with an LLM service.
 
 **Testing status**
--   **Testing agent used after significant changes**: YES (Used successfully to validate the new  deployment's login flow).
--   **Troubleshoot agent used after agent stuck in loop**: YES (Used to diagnose the production vs. dev environment mismatch early on).
--   **Test files created**: None in this session.
--   **Known regressions**: None in the code. The only regression is that the user's primary domain is still not pointing to the working application.
+-   **Testing agent used after significant changes**: NO (for the ProcureFlix rebuild).
+-   **Troubleshoot agent used after agent stuck in loop**: NO.
+-   **Test files created**: None.
+-   **Known regressions**: None in ProcureFlix. The legacy app is broken but has been superseded.
 
 **Credentials to test flow:**
--   **Email**: , **Password**: 
--   **Email**: , **Password**: 
--   **Email**: , **Password**: 
-
-**What agent forgot to execute**
--   The agent fixed a CORS warning found by the deployment agent by editing  but did not re-run the deployment readiness check to verify the fix was effective. This is a minor pending verification step.</analysis>
+-   **Email**: , **Password**:  (Role: )
+-   **Email**: , **Password**:  (Role: )
+-   **Email**: , **Password**:  (Role: )
+-   Other emails can be mapped to roles in .</analysis>

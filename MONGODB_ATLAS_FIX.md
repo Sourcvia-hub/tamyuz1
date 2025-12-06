@@ -94,7 +94,7 @@ REACT_APP_BACKEND_URL=https://sourcevia-mgmt.emergent.host
 
 **Development Environment Test:**
 ```bash
-curl -X POST https://data-overhaul-1.preview.emergentagent.com/api/auth/login \
+curl -X POST https://procurement-app-1.preview.emergentagent.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@sourcevia.com","password":"admin123"}'
 ```

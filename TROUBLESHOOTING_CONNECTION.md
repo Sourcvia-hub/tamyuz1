@@ -25,7 +25,7 @@ Look for:
 console.log(window.location.origin);
 ```
 
-**Expected:** `https://data-overhaul-1.preview.emergentagent.com`
+**Expected:** `https://procurement-app-1.preview.emergentagent.com`
 
 If it's different, that's the problem!
 
@@ -57,7 +57,7 @@ If it's different, that's the problem!
 
 **Action:**
 1. Open incognito window
-2. Go to: https://data-overhaul-1.preview.emergentagent.com/login
+2. Go to: https://procurement-app-1.preview.emergentagent.com/login
 3. Try to login with: `admin@sourcevia.com` / `admin123`
 
 If it works in incognito, the issue is:
@@ -70,7 +70,7 @@ If it works in incognito, the issue is:
 **Action:** Run this in browser console:
 
 ```javascript
-fetch('https://data-overhaul-1.preview.emergentagent.com/api/auth/login', {
+fetch('https://procurement-app-1.preview.emergentagent.com/api/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   credentials: 'include',
@@ -93,7 +93,7 @@ If this fails, share the error message.
 
 **Symptom:** Error about HTTP/HTTPS
 **Solution:** Make sure you're accessing via HTTPS (not HTTP)
-**URL:** https://data-overhaul-1.preview.emergentagent.com (not http://)
+**URL:** https://procurement-app-1.preview.emergentagent.com (not http://)
 
 ### Issue 2: AdBlocker Blocking Requests
 
@@ -143,7 +143,7 @@ This will tell us exactly what's happening.
 ## Backend Status (Verified Working)
 
 ✅ Backend is running on port 8001
-✅ API responds correctly: https://data-overhaul-1.preview.emergentagent.com/api
+✅ API responds correctly: https://procurement-app-1.preview.emergentagent.com/api
 ✅ Login endpoint works: `POST /api/auth/login`
 ✅ Registration endpoint works: `POST /api/auth/register`
 ✅ CORS configured correctly
@@ -189,7 +189,7 @@ If the issue persists, please share:
 Run this in your terminal to verify backend is working:
 
 ```bash
-curl -X POST "https://data-overhaul-1.preview.emergentagent.com/api/auth/login" \
+curl -X POST "https://procurement-app-1.preview.emergentagent.com/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@sourcevia.com","password":"admin123"}' \
   | python3 -m json.tool

@@ -9,7 +9,7 @@ import os
 import subprocess
 from datetime import datetime, timedelta, timezone
 
-BASE_URL = "https://data-overhaul-1.preview.emergentagent.com/api"
+BASE_URL = "https://procurement-app-1.preview.emergentagent.com/api"
 TEST_USER = {"email": "procurement@test.com", "password": "password"}
 
 def test_comprehensive_file_attachment():
