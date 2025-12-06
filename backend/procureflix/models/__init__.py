@@ -7,12 +7,13 @@ and are intentionally storage-agnostic.
 from .vendor import Vendor, VendorCreateRequest, VendorStatus, RiskCategory, VendorType
 from .tender import (
     Tender,
+    TenderCreateRequest,
     Proposal,
     TenderStatus,
     ProposalStatus,
     EvaluationMethod,
 )
-from .contract import Contract, ContractType, ContractStatus, CriticalityLevel
+from .contract import Contract, ContractCreateRequest, ContractType, ContractStatus, CriticalityLevel
 from .purchase_order import PurchaseOrder, PurchaseOrderStatus
 from .invoice import Invoice, InvoiceStatus
 from .resource import Resource, ResourceStatus
