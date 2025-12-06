@@ -194,7 +194,12 @@ const AppRoutes = () => {
       <Route path="/assets/:id" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
       <Route path="/assets/new" element={<ProtectedRoute><AssetForm /></ProtectedRoute>} />
       <Route path="/assets/:id/edit" element={<ProtectedRoute><AssetForm /></ProtectedRoute>} />
-      {/* Service requests routes not available in this version */}
+      <Route path="/osr" element={<ProtectedRoute><OSRList /></ProtectedRoute>} />
+      <Route path="/osr/:id" element={<ProtectedRoute><OSRDetail /></ProtectedRoute>} />
+      <Route path="/osr/new" element={<ProtectedRoute><OSRForm /></ProtectedRoute>} />
+      <Route path="/osr/:id/edit" element={<ProtectedRoute><OSRForm /></ProtectedRoute>} />
+      <Route path="/cctv" element={<ProtectedRoute><CCTVLiveView /></ProtectedRoute>} />
+      <Route path="/access-management" element={<ProtectedRoute><AccessManagement /></ProtectedRoute>} />
 
       {/* ProcureFlix routes */}
       <Route
