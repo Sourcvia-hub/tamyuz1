@@ -3,6 +3,9 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
+# Build argument for backend URL (optional - will use same-origin fallback if not provided)
+ARG REACT_APP_BACKEND_URL=""
+
 # Copy package files
 COPY package.json yarn.lock ./
 
@@ -13,6 +16,7 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 # Build the application
+# If REACT_APP_BACKEND_URL is empty, the app will use same-origin fallback via nginx proxy
 RUN yarn build
 
 # Production stage
