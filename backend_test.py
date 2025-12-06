@@ -35,7 +35,7 @@ TEST_USERS = {
     "manager": {"email": "manager@test.com", "password": "password"}
 }
 
-class RBACTester:
+class ProcureFlixTester:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
@@ -57,6 +57,10 @@ class RBACTester:
             'floors': []
         }
         self.test_results = {
+            'health': {},
+            'auth': {},
+            'legacy': {},
+            'procureflix': {},
             'vendors': {},
             'tenders': {},
             'contracts': {},
