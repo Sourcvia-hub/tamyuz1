@@ -253,6 +253,8 @@ import PfVendorsList from './procureflix/PfVendorsList';
 import PfVendorDetail from './procureflix/PfVendorDetail';
 import PfTendersList from './procureflix/PfTendersList';
 import PfTenderDetail from './procureflix/PfTenderDetail';
+import PfContractsList from './procureflix/PfContractsList';
+import PfContractDetail from './procureflix/PfContractDetail';
 
 // ==================== MAIN APP ====================
 const AppRoutes = () => {
@@ -495,6 +497,8 @@ const AppRoutes = () => {
         <Route path="vendors/:id" element={<PfVendorDetail />} />
         <Route path="tenders" element={<PfTendersList />} />
         <Route path="tenders/:id" element={<PfTenderDetail />} />
+        <Route path="contracts" element={<PfContractsList />} />
+        <Route path="contracts/:id" element={<PfContractDetail />} />
       </Route>
     </Routes>
   );

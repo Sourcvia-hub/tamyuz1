@@ -68,6 +68,28 @@ export const fetchTenderAISummary = async (id) => {
 };
 
 export const fetchTenderAIEvaluationSuggestions = async (id) => {
-  const res = await pfApi.get(`/tenders/${id}/ai/evaluation-suggestions`);
+  const res = await pfApi.post(`/tenders/${id}/ai/evaluation-suggestions`);
+  return res.data;
+};
+
+// CONTRACTS ---------------------------------------------------------------
+
+export const fetchContracts = async () => {
+  const res = await pfApi.get('/contracts');
+  return res.data;
+};
+
+export const fetchContractById = async (id) => {
+  const res = await pfApi.get(`/contracts/${id}`);
+  return res.data;
+};
+
+export const changeContractStatus = async (id, status) => {
+  const res = await pfApi.post(`/contracts/${id}/status/${status}`);
+  return res.data;
+};
+
+export const fetchContractAIAnalysis = async (id) => {
+  const res = await pfApi.get(`/contracts/${id}/ai/analysis`);
   return res.data;
 };
