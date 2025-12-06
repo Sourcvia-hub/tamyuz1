@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: procureflix-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: procureflix
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    networks:
+      - procureflix-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: procureflix-backend
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/procureflix
+      - PROCUREFLIX_DATA_BACKEND=memory
+      - PROCUREFLIX_AI_ENABLED=true
+      - PROCUREFLIX_AI_PROVIDER=openai
+      - PROCUREFLIX_AI_MODEL=gpt-4
+      - ENVIRONMENT=production
+      - DEBUG=false
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      - backend-logs:/var/log/procureflix
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - procureflix-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8001/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: procureflix-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8001
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - procureflix-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  procureflix-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+  backend-logs:
+    driver: local
