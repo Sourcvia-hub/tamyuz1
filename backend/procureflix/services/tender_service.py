@@ -11,6 +11,7 @@ from ..models import (
     Proposal,
     ProposalStatus,
     Tender,
+    TenderCreateRequest,
     TenderStatus,
 )
 from ..repositories.tender_repository import (
