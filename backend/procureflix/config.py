@@ -31,8 +31,11 @@ class ProcureFlixSettings:
     sharepoint_client_id: Optional[str] = None
     sharepoint_client_secret: Optional[str] = None
 
-    # AI / LLM configuration (for later phases)
+    # AI / LLM configuration
     enable_ai: bool = True
+    ai_provider: str = "emergent"
+    ai_model: str = "gpt-5"
+    emergent_llm_key: Optional[str] = None
 
 
 @lru_cache(maxsize=1)
