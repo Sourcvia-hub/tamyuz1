@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 from ..ai import get_ai_client
 from ..models import (
     Contract,
+    ContractCreateRequest,
     ContractStatus,
     ContractType,
     CriticalityLevel,
