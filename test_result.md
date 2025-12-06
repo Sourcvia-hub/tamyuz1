@@ -599,7 +599,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Application Branding Update Testing - ProcureFlix"
+    - "Legacy ProcureFlix Routes Testing - OSR, CCTV, Access Management"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
