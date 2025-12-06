@@ -58,10 +58,11 @@ class ProcureFlixAIClient:
                     system_message=system_message
                 )
                 chat.with_model("openai", self.model)
-                return chat
+                return {'type': 'emergent', 'chat': chat}
             # Fallback to OpenAI SDK
             elif OPENAI_AVAILABLE:
                 return {
+                    'type': 'openai',
                     'client': OpenAI(api_key=self.api_key),
                     'system_message': system_message,
                     'model': self.model
@@ -72,6 +73,30 @@ class ProcureFlixAIClient:
         except Exception as e:
             logger.error(f"Failed to create AI chat: {e}")
             return None
+    
+    async def _send_message(self, chat_obj, prompt: str) -> str:
+        """Send message to AI and get response (supports both Emergent and OpenAI)."""
+        if not chat_obj:
+            raise ValueError("No chat object provided")
+        
+        try:
+            if chat_obj['type'] == 'emergent':
+                response = await chat_obj['chat'].send_message(UserMessage(text=prompt))
+                return response
+            elif chat_obj['type'] == 'openai':
+                response = chat_obj['client'].chat.completions.create(
+                    model=chat_obj['model'],
+                    messages=[
+                        {"role": "system", "content": chat_obj['system_message']},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7,
+                    max_tokens=1000
+                )
+                return response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"Failed to send message to AI: {e}")
+            raise
 
     # ------------------------------------------------------------------
     # Vendor Risk Analysis
