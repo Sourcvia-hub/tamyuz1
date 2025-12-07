@@ -47,9 +47,9 @@ const PfServiceRequestsList = () => {
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
               <th className="px-4 py-2 text-left">Title</th>
-              <th className="px-4 py-2 text-left">Vendor ID</th>
-              <th className="px-4 py-2 text-left">Contract ID</th>
-              <th className="px-4 py-2 text-left">Asset ID</th>
+              <th className="px-4 py-2 text-left">Category</th>
+              <th className="px-4 py-2 text-left">Building</th>
+              <th className="px-4 py-2 text-left">Floor</th>
               <th className="px-4 py-2 text-left">Priority</th>
               <th className="px-4 py-2 text-left">Status</th>
             </tr>
@@ -62,16 +62,38 @@ const PfServiceRequestsList = () => {
                 onClick={() => navigate(`/pf/service-requests/${sr.id}`)}
               >
                 <td className="px-4 py-2 text-slate-900 text-sm">{sr.title}</td>
-                <td className="px-4 py-2 font-mono text-[11px] text-slate-500">{sr.vendor_id}</td>
-                <td className="px-4 py-2 font-mono text-[11px] text-slate-500">
-                  {sr.contract_id || '—'}
+                <td className="px-4 py-2 text-xs text-slate-700">
+                  <span className="inline-block px-2 py-1 rounded-full bg-blue-50 text-blue-700">
+                    {sr.category?.replace('_', ' ') || '—'}
+                  </span>
                 </td>
-                <td className="px-4 py-2 font-mono text-[11px] text-slate-500">
-                  {sr.asset_id || '—'}
+                <td className="px-4 py-2 text-xs text-slate-700">
+                  {sr.building_name || '—'}
                 </td>
-                <td className="px-4 py-2 text-xs text-slate-700">{sr.priority}</td>
-                <td className="px-4 py-2 text-xs uppercase tracking-wide text-slate-500">
-                  {sr.status}
+                <td className="px-4 py-2 text-xs text-slate-600">
+                  {sr.floor_name || '—'}
+                </td>
+                <td className="px-4 py-2">
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                    sr.priority === 'high' || sr.priority === 'urgent'
+                      ? 'bg-red-50 text-red-700'
+                      : sr.priority === 'medium'
+                      ? 'bg-yellow-50 text-yellow-700'
+                      : 'bg-green-50 text-green-700'
+                  }`}>
+                    {sr.priority}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium uppercase ${
+                    sr.status === 'closed'
+                      ? 'bg-gray-100 text-gray-600'
+                      : sr.status === 'in_progress'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'bg-green-50 text-green-700'
+                  }`}>
+                    {sr.status.replace('_', ' ')}
+                  </span>
                 </td>
               </tr>
             ))}
