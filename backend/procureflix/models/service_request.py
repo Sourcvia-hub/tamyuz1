@@ -47,7 +47,7 @@ class ServiceRequest(BaseModel):
     description: str
 
     # Category and Location
-    category: Optional[ServiceRequestCategory] = ServiceRequestCategory.OTHER
+    category: Optional[ServiceRequestCategory] = ServiceRequestCategory.GENERAL
     building_id: Optional[str] = None
     building_name: Optional[str] = None
     floor_id: Optional[str] = None
