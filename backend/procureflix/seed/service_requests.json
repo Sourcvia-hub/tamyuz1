@@ -79,7 +79,7 @@
     "id": "sr-training-session",
     "title": "Staff Training - Analytics Platform",
     "description": "Organize comprehensive training sessions for business analysts and department heads on the new DataFlow analytics platform. Training should cover platform navigation, report creation, and self-service analytics.",
-    "category": "other",
+    "category": "General",
     "building_id": "building-hq",
     "building_name": "Headquarters Building",
     "floor_id": "floor-3",
