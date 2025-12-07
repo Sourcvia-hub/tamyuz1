@@ -1,14 +1,20 @@
 """
-AI Helper Functions using OpenAI GPT-4o via Emergent Universal Key
+AI Helper Functions using OpenAI GPT-4o
 """
-from emergentintegrations.llm.chat import LlmChat, UserMessage
 import json
 import uuid
 import re
 import os
 
-# Emergent Universal Key - Load from environment
-EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+# Try to import OpenAI (standard SDK)
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+# API Key - Load from environment
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 
 def extract_json_from_response(response: str) -> dict:
     """
