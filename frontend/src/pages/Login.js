@@ -168,7 +168,7 @@ const Login = () => {
             fontWeight: 'bold',
             marginBottom: '15px'
           }}>PF</div>
-          <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: '#333' }}>ProcureFlix</h1>
+          <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: '#333' }}>Sourcevia</h1>
           <p style={{ color: '#666', fontSize: '14px' }}>Next-gen Procurement Lifecycle</p>
         </div>
 
