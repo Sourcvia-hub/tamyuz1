@@ -37,7 +37,7 @@ const PfContractsList = () => {
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Contracts</h2>
           <p className="text-sm text-slate-500 mt-1">
-            ProcureFlix contracts linked to vendors and, where applicable, tenders.
+            Sourcevia contracts linked to vendors and, where applicable, tenders.
           </p>
         </div>
       </div>
