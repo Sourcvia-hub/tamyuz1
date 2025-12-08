@@ -81,8 +81,8 @@ const Layout = ({ children }) => {
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-4 border-b">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg bg-sky-500 flex items-center justify-center text-white font-bold text-lg">
-                PF
+              <div className="w-10 h-10 rounded-lg bg-sky-500 flex items-center justify-center text-white font-bold text-xl">
+                S
               </div>
               <span className="text-xl font-bold text-gray-900">Sourcevia</span>
             </div>
