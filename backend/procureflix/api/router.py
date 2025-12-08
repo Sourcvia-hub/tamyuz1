@@ -14,7 +14,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 
 from ..config import get_settings
 from ..models import (
