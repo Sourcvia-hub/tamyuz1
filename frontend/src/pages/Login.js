@@ -164,10 +164,10 @@ const Login = () => {
             alignItems: 'center',
             justifyContent: 'center',
             color: 'white',
-            fontSize: '24px',
+            fontSize: '28px',
             fontWeight: 'bold',
             marginBottom: '15px'
-          }}>PF</div>
+          }}>S</div>
           <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: '#333' }}>Sourcevia</h1>
           <p style={{ color: '#666', fontSize: '14px' }}>Next-gen Procurement Lifecycle</p>
         </div>
