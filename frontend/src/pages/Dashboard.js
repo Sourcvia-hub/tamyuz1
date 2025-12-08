@@ -86,7 +86,7 @@ const Dashboard = () => {
         {/* Welcome Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.name}!</h1>
-          <p className="text-gray-600 mt-1">ProcureFlix - Next-gen Procurement Lifecycle Management</p>
+          <p className="text-gray-600 mt-1">Sourcevia - Procurement Lifecycle Management</p>
         </div>
 
         {/* Vendors Section */}
