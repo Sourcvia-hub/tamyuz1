@@ -45,7 +45,7 @@ const ProcureFlixLayout = () => {
               PF
             </div>
             <div>
-              <div className="text-sm font-semibold tracking-wide">ProcureFlix</div>
+              <div className="text-sm font-semibold tracking-wide">Sourcevia</div>
               <div className="text-xs text-slate-400">Next-gen procurement</div>
             </div>
           </div>
