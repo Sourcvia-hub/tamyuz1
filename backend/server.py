@@ -2235,6 +2235,80 @@ async def terminate_resource(resource_id: str, request: Request, reason: str = "
     
     return {"message": "Resource terminated successfully"}
 
+
+@api_router.post("/resources/{resource_id}/attendance-sheets")
+async def upload_resource_attendance_sheet(
+    resource_id: str,
+    request: Request,
+    file: UploadFile = File(...)
+):
+    """Upload attendance sheet for a resource"""
+    from utils.auth import require_permission
+    from utils.permissions import Permission
+    from pathlib import Path
+    
+    await require_permission(request, "resources", Permission.EDITOR)
+    
+    # Get resource
+    resource = await db.resources.find_one({"id": resource_id}, {"_id": 0})
+    if not resource:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    
+    # Check if resource is active
+    if resource.get("status") != "active":
+        raise HTTPException(
+            status_code=400,
+            detail="Can only upload attendance sheets for active resources"
+        )
+    
+    # Validate file type
+    allowed_extensions = [".xlsx", ".xls"]
+    file_extension = Path(file.filename).suffix.lower()
+    if file_extension not in allowed_extensions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Only Excel files ({', '.join(allowed_extensions)}) are allowed"
+        )
+    
+    # Create uploads directory
+    upload_dir = Path("/app/backend/uploads/attendance_sheets")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"{resource_id}_{timestamp}_{file.filename}"
+    file_path = upload_dir / safe_filename
+    
+    # Save file
+    try:
+        contents = await file.read()
+        with open(file_path, "wb") as f:
+            f.write(contents)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    
+    # Add to resource attendance_sheets
+    attendance_entry = {
+        "filename": file.filename,
+        "stored_filename": safe_filename,
+        "upload_date": datetime.now(timezone.utc).isoformat(),
+        "file_path": str(file_path),
+        "file_size": len(contents),
+        "uploaded_by": "current_user",
+    }
+    
+    # Update resource in database
+    await db.resources.update_one(
+        {"id": resource_id},
+        {"$push": {"attendance_sheets": attendance_entry}}
+    )
+    
+    return {
+        "message": "Attendance sheet uploaded successfully",
+        "file_info": attendance_entry
+    }
+
+
 # ==================== DASHBOARD ENDPOINTS ====================
 @api_router.get("/dashboard/stats")
 async def get_dashboard_summary_stats(request: Request):
