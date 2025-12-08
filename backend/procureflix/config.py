@@ -20,7 +20,7 @@ class ProcureFlixSettings:
     """
 
     # Application metadata
-    app_name: str = "ProcureFlix"
+    app_name: str = "Sourcevia"
 
     # Data backend selection: 'memory' or 'sharepoint'
     data_backend: Literal["memory", "sharepoint"] = "memory"
