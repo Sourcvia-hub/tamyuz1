@@ -561,10 +561,10 @@ async def get_asset_categories() -> List[Dict]:
 @router.post("/resources/{resource_id}/attendance-sheets")
 async def upload_attendance_sheet(
     resource_id: str,
-    file: "UploadFile",
+    file: UploadFile = File(...),
 ) -> Dict[str, object]:
     """Upload an attendance sheet (Excel file) for a resource."""
-    from fastapi import UploadFile, HTTPException
+    from fastapi import HTTPException
     from pathlib import Path
     import os
     from datetime import datetime, timezone
