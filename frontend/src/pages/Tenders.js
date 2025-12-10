@@ -137,36 +137,36 @@ const Tenders = () => {
             All ({tenders.length})
           </button>
           <button
-            onClick={() => setActiveFilter('open')}
+            onClick={() => setActiveFilter('draft')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeFilter === 'open' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+              activeFilter === 'draft' ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            Open ({tenders.filter(t => t.status === 'open').length})
+            Draft ({tenders.filter(t => t.status === 'draft').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('published')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'published' ? 'bg-green-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Published ({tenders.filter(t => t.status === 'published').length})
           </button>
           <button
             onClick={() => setActiveFilter('closed')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeFilter === 'closed' ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+              activeFilter === 'closed' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
             Closed ({tenders.filter(t => t.status === 'closed').length})
           </button>
           <button
-            onClick={() => setActiveFilter('evaluated')}
+            onClick={() => setActiveFilter('awarded')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeFilter === 'evaluated' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+              activeFilter === 'awarded' ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            Evaluated ({tenders.filter(t => t.status === 'evaluated').length})
-          </button>
-          <button
-            onClick={() => setActiveFilter('approved')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeFilter === 'approved' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-            }`}
-          >
-            Approved ({tenders.filter(t => t.status === 'approved').length})
+            Awarded ({tenders.filter(t => t.status === 'awarded').length})
           </button>
         </div>
 
