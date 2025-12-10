@@ -1584,14 +1584,19 @@ async def get_contracts(request: Request, status: Optional[ContractStatus] = Non
         if '_id' in contract:
             del contract['_id']
         
+        # Parse datetime strings and ensure timezone awareness
         if isinstance(contract.get('start_date'), str):
-            contract['start_date'] = datetime.fromisoformat(contract['start_date'])
+            dt = datetime.fromisoformat(contract['start_date'])
+            contract['start_date'] = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         if isinstance(contract.get('end_date'), str):
-            contract['end_date'] = datetime.fromisoformat(contract['end_date'])
+            dt = datetime.fromisoformat(contract['end_date'])
+            contract['end_date'] = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         if isinstance(contract.get('created_at'), str):
-            contract['created_at'] = datetime.fromisoformat(contract['created_at'])
+            dt = datetime.fromisoformat(contract['created_at'])
+            contract['created_at'] = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         if isinstance(contract.get('updated_at'), str):
-            contract['updated_at'] = datetime.fromisoformat(contract['updated_at'])
+            dt = datetime.fromisoformat(contract['updated_at'])
+            contract['updated_at'] = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         
         # Auto-mark expired contracts
         if (contract.get('end_date') and 
