@@ -3,6 +3,7 @@ import axios from 'axios';
 import Layout from '../components/Layout';
 import VendorForm from '../components/VendorForm';
 import { Link } from 'react-router-dom';
+import WorkflowStatusBadge from '../components/workflow/WorkflowStatusBadge';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
