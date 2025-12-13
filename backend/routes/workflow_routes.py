@@ -5,9 +5,9 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timezone
-from utils.auth import get_current_user
+from utils.auth import get_current_user, require_permission
 from utils.workflow import WorkflowManager, WorkflowStatus
-from utils.permissions import require_permission, Permission, Module
+from utils.permissions import Permission, Module
 from motor.motor_asyncio import AsyncIOMotorDatabase
 import os
 
