@@ -3886,6 +3886,7 @@ app.add_middleware(
 
 # Include workflow routes for all modules
 from routes.workflow_routes import create_workflow_router
+from routes.vendor_workflow import router as vendor_special_router
 
 # Create workflow routers for each module
 vendors_workflow_router = create_workflow_router("Vendor", "vendors", "vendors")
@@ -3898,6 +3899,7 @@ resources_workflow_router = create_workflow_router("Resource", "resources", "res
 
 # Include workflow routers
 api_router.include_router(vendors_workflow_router)
+api_router.include_router(vendor_special_router)  # Special vendor workflow
 api_router.include_router(tenders_workflow_router)
 api_router.include_router(contracts_workflow_router)
 api_router.include_router(pos_workflow_router)
