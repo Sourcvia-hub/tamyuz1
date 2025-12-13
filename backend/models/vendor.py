@@ -67,14 +67,14 @@ class Vendor(BaseModel):
     representative_phone_area_code: Optional[str] = None
     representative_email: Optional[str] = None  # Changed from EmailStr to allow empty
     
-    # Bank Account Information
-    bank_account_name: str
-    bank_name: str
-    bank_branch: str
-    bank_country: str
-    iban: str
-    currency: str
-    swift_code: str
+    # Bank Account Information - All Optional
+    bank_account_name: Optional[str] = None
+    bank_name: Optional[str] = None
+    bank_branch: Optional[str] = None
+    bank_country: Optional[str] = None
+    iban: Optional[str] = None
+    currency: Optional[str] = None
+    swift_code: Optional[str] = None
     
     # Owners/Partners/Managers (stored as JSON)
     owners_managers: List[Dict[str, Any]] = []
