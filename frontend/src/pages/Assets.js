@@ -161,7 +161,7 @@ const Assets = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <input
               type="text"
               placeholder="Search assets..."
@@ -169,6 +169,26 @@ const Assets = () => {
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
+            <select
+              value={filters.category}
+              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Categories</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+            <select
+              value={filters.building}
+              onChange={(e) => setFilters({ ...filters, building: e.target.value })}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Buildings</option>
+              {buildings.map(building => (
+                <option key={building.id} value={building.id}>{building.name}</option>
+              ))}
+            </select>
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
@@ -196,11 +216,13 @@ const Assets = () => {
             >
               Clear Filters
             </button>
+          </div>
+          <div className="mt-4">
             <Link
               to="/facilities-settings"
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center"
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors inline-block"
             >
-              ⚙️ Settings
+              ⚙️ Manage Categories & Buildings
             </Link>
           </div>
         </div>
