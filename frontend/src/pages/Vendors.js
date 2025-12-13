@@ -219,12 +219,20 @@ const Vendors = () => {
             Approved ({vendors.filter(v => v.status === 'approved').length})
           </button>
           <button
-            onClick={() => setActiveFilter('pending')}
+            onClick={() => setActiveFilter('draft')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeFilter === 'pending' ? 'bg-yellow-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+              activeFilter === 'draft' ? 'bg-gray-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
             }`}
           >
-            Pending ({vendors.filter(v => v.status === 'pending' || v.status === 'pending_due_diligence').length})
+            Draft ({vendors.filter(v => v.status === 'draft').length})
+          </button>
+          <button
+            onClick={() => setActiveFilter('pending')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'pending' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            Pending Review ({vendors.filter(v => v.status === 'pending_review' || v.status === 'reviewed').length})
           </button>
           <button
             onClick={() => setActiveFilter('high_risk')}
