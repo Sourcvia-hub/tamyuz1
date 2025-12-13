@@ -303,12 +303,10 @@ const Vendors = () => {
                   )}
                   <p className="text-sm text-gray-600 mt-1">{vendor.commercial_name || vendor.company_name}</p>
                   <p className="text-sm text-gray-600">{vendor.email || vendor.contact_email}</p>
-                  <div className="mt-2">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadgeColor(vendor.status)}`}>
-                      {vendor.status.replace('_', ' ').toUpperCase()}
-                    </span>
+                  <div className="mt-2 flex items-center gap-2">
+                    <WorkflowStatusBadge status={vendor.status} />
                     {vendor.vendor_type && (
-                      <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                      <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
                         {vendor.vendor_type === 'international' ? '🌍 International' : '🏠 Local'}
                       </span>
                     )}
