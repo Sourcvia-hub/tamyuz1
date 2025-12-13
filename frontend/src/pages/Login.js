@@ -310,10 +310,10 @@ const Login = () => {
                   fontSize: '14px'
                 }}
               >
-                <option value="admin">Admin</option>
-                <option value="procurement_manager">Procurement Manager</option>
-                <option value="procurement_officer">Procurement Officer</option>
                 <option value="user">User</option>
+                <option value="procurement_officer">Procurement Officer</option>
+                <option value="senior_manager">Approver</option>
+                <option value="procurement_manager">Procurement Manager</option>
               </select>
             </div>
           )}
