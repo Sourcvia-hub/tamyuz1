@@ -1792,8 +1792,21 @@ async def submit_invoice(invoice: Invoice, request: Request):
         # Auto-generate invoice number if not provided
         invoice.invoice_number = await generate_number("Invoice")
     
-    # Auto-approve
-    invoice.status = InvoiceStatus.APPROVED
+    # Initialize workflow and set to draft status
+    from models.workflow import WorkflowData, WorkflowAction
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    
+    workflow = WorkflowData()
+    workflow.add_history(
+        action=WorkflowAction.CREATED,
+        by=user.id,
+        by_name=user.name,
+        comment="Invoice created"
+    )
+    
+    # Start with DRAFT status instead of auto-approving
+    invoice.status = "draft"
     
     # vendor_id should be provided in the invoice object
     invoice_doc = invoice.model_dump()
