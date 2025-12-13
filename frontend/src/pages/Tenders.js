@@ -224,9 +224,7 @@ const Tenders = () => {
                       <p className="text-xs text-blue-600 font-medium mt-1">#{tender.tender_number}</p>
                     )}
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(tender.status)}`}>
-                    {tender.status.toUpperCase()}
-                  </span>
+                  <WorkflowStatusBadge status={tender.status} />
                 </div>
 
                 <p className="text-gray-700 text-sm mb-4 line-clamp-2">{tender.description}</p>
