@@ -271,7 +271,7 @@ const Vendors = () => {
         ) : (() => {
           const filteredVendors = vendors.filter(vendor => {
             // Apply filter
-            if (activeFilter === 'approved' && vendor.status !== 'approved') return false;
+            if (activeFilter === 'approved' && vendor.status !== 'approved' && vendor.status !== 'final_approved') return false;
             if (activeFilter === 'draft' && vendor.status !== 'draft') return false;
             if (activeFilter === 'pending' && vendor.status !== 'pending_review' && vendor.status !== 'reviewed') return false;
             if (activeFilter === 'high_risk' && vendor.risk_category !== 'high') return false;
