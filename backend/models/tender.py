@@ -20,9 +20,11 @@ class Tender(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     tender_number: Optional[str] = None  # Auto-generated (e.g., TND-2025-0001)
     title: str
-    description: str
-    project_reference: Optional[str] = None  # e.g., internal project number or JIRA ref
+    request_type: str = "technology"  # "technology" or "non-technology"
+    is_project_related: str = "no"  # "yes" or "no"
+    project_reference: Optional[str] = None  # Mandatory if is_project_related = "yes"
     project_name: str
+    description: str
     requirements: str
     budget: float
     deadline: datetime
