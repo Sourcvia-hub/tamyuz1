@@ -21,9 +21,11 @@ const Tenders = () => {
 
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    request_type: 'technology',
+    is_project_related: 'no',
     project_reference: '',
     project_name: '',
+    description: '',
     requirements: '',
     budget: '',
     deadline: '',
