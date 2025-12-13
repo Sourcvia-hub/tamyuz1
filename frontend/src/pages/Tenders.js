@@ -124,7 +124,7 @@ const Tenders = () => {
               data-testid="create-tender-btn"
               className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
-              Create Tender
+              Create Purchase Request
             </button>
           )}
         </div>
@@ -427,7 +427,7 @@ const Tenders = () => {
                   type="submit"
                   className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Create Tender
+                  Create Purchase Request
                 </button>
               </div>
             </form>
