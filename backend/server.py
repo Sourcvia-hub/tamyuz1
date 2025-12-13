@@ -1529,6 +1529,16 @@ async def create_contract(contract: Contract, request: Request):
         (requires_due_diligence and not vendor_dd_completed)
     )
     
+    # Initialize workflow
+    from models.workflow import WorkflowData, WorkflowAction
+    workflow = WorkflowData()
+    workflow.add_history(
+        action=WorkflowAction.CREATED,
+        by=user.id,
+        by_name=user.name,
+        comment="Contract created"
+    )
+    
     if vendor_dd_pending:
         # Set contract to pending_due_diligence status
         contract.status = ContractStatus.PENDING_DUE_DILIGENCE
@@ -1544,9 +1554,12 @@ async def create_contract(contract: Contract, request: Request):
                 }}
             )
     else:
-        # Auto-approve if no due diligence required or already completed
-        contract.status = ContractStatus.APPROVED
-        contract_doc["status"] = ContractStatus.APPROVED.value
+        # Start with DRAFT status instead of auto-approving
+        contract.status = "draft"
+        contract_doc["status"] = "draft"
+    
+    # Add workflow to contract
+    contract_doc["workflow"] = workflow.model_dump()
     
     contract_doc["start_date"] = contract_doc["start_date"].isoformat()
     contract_doc["end_date"] = contract_doc["end_date"].isoformat()
