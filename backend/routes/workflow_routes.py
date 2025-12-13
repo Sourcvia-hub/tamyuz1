@@ -5,16 +5,15 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timezone
-from utils.auth import get_current_user, require_permission
-from utils.workflow import WorkflowManager, WorkflowStatus
-from utils.permissions import Permission, Module
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from utils.auth import get_current_user
+from utils.workflow import WorkflowManager
+from models.workflow import WorkflowStatus
 import os
 
-# MongoDB setup
-from pymongo import MongoClient
+# MongoDB setup - using existing connection from server
+from motor.motor_asyncio import AsyncIOMotorClient
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017/procureflix")
-client = MongoClient(MONGO_URL)
+client = AsyncIOMotorClient(MONGO_URL)
 db_name = MONGO_URL.split("/")[-1].split("?")[0]
 db = client[db_name]
 
