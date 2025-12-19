@@ -201,16 +201,16 @@ const OverviewPanel = ({ summary, onModuleClick }) => {
       link: '/purchase-orders'
     },
     {
-      key: 'invoices',
-      title: 'Invoices',
-      icon: '💰',
+      key: 'deliverables',
+      title: 'Deliverables',
+      icon: '📦',
       color: 'yellow',
       items: [
-        { label: 'Pending Verification', count: summary?.invoices?.pending_verification || 0 },
-        { label: 'Pending Approval', count: summary?.invoices?.pending_approval || 0 },
+        { label: 'Pending Review', count: summary?.deliverables?.pending_review || 0 },
+        { label: 'Pending HoP', count: summary?.deliverables?.pending_hop || 0 },
       ],
-      total: summary?.invoices?.total_pending || 0,
-      link: '/invoices'
+      total: summary?.deliverables?.total_pending || 0,
+      link: '/deliverables'
     },
     {
       key: 'resources',
