@@ -181,6 +181,8 @@ import ContractApprovals from './pages/ContractApprovals';
 import ApprovalsHub from './pages/ApprovalsHub';
 import Deliverables from './pages/Deliverables';
 import MyApprovals from './pages/MyApprovals';
+import ReportsAnalytics from './pages/ReportsAnalytics';
+import BulkImport from './pages/BulkImport';
 // PaymentAuthorizations page removed - functionality merged into Deliverables
 
 // ProcureFlix components
