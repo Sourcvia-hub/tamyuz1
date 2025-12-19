@@ -30,6 +30,7 @@ const Layout = ({ children }) => {
   const specialLinks = [
     { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin'] },
     { name: 'Access Management', path: '/access-management', icon: '🚪', roles: ['procurement_manager', 'admin'] },
+    { name: 'Admin Settings', path: '/admin/settings', icon: '⚙️', roles: ['procurement_manager', 'system_admin'] },
   ];
 
   // Filter navigation based on user permissions
