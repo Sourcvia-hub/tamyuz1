@@ -113,26 +113,6 @@ const TenderDetail = () => {
     }
   };
 
-  // Submit evaluation (user/creator only)
-  const handleSubmitEvaluation = async () => {
-    if (!selectedProposalId) {
-      toast({ title: "⚠️ Select Proposal", description: "Please select a proposal to recommend", variant: "warning" });
-      return;
-    }
-    try {
-      await axios.post(`${API}/business-requests/${id}/submit-evaluation`, {
-        selected_proposal_id: selectedProposalId,
-        evaluation_notes: evaluationNotes
-      }, { withCredentials: true });
-      toast({ title: "✅ Evaluation Submitted", description: "Your evaluation has been submitted for review", variant: "success" });
-      setShowEvaluationModal(false);
-      fetchTender();
-      fetchWorkflowStatus();
-    } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to submit evaluation", variant: "destructive" });
-    }
-  };
-
   // Forward to additional approver
   const handleForwardToApprover = async () => {
     if (!selectedApproverId) {
