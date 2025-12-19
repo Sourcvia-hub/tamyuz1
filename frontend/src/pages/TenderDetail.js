@@ -302,13 +302,13 @@ const TenderDetail = () => {
               </button>
             )}
             
-            {/* User: Evaluate Proposals */}
+            {/* User: Evaluate Proposals - Link to full evaluation page */}
             {isCreator && ['published', 'pending_evaluation'].includes(tender.status) && proposals.length > 0 && (
               <button
-                onClick={() => setShowEvaluationModal(true)}
+                onClick={() => navigate(`/tenders/${id}/evaluate`)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
-                📋 Evaluate Proposals
+                📋 Evaluate All Proposals
               </button>
             )}
             
