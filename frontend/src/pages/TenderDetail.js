@@ -9,6 +9,14 @@ import SearchableSelect from '../components/SearchableSelect';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Helper to extract error message from API response
+const getErrorMessage = (error, defaultMsg = "An error occurred") => {
+  const detail = error.response?.data?.detail;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map(e => e.msg || e).join(', ');
+  return defaultMsg;
+};
+
 const TenderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
