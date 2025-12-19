@@ -83,6 +83,18 @@ backend:
         agent: "testing"
         comment: "All master data endpoints working: asset-categories (10), osr-categories (11), buildings (2)."
 
+  - task: "Approvals Hub APIs"
+    implemented: true
+    working: true
+    file: "backend/routes/approvals_hub_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ APPROVALS HUB APIS FULLY WORKING! Comprehensive testing completed with 100% success rate (8/8 tests passed). All core APIs tested successfully: 1) GET /api/approvals-hub/summary returns proper structure with all 7 modules (vendors, business_requests, contracts, purchase_orders, invoices, resources, assets) and total_all count (19) ✓, 2) GET /api/approvals-hub/vendors returns 9 pending vendors ✓, 3) GET /api/approvals-hub/business-requests returns 11 business requests with proposal counts ✓, 4) GET /api/approvals-hub/contracts returns 12 pending contracts with vendor info ✓, 5) GET /api/approvals-hub/purchase-orders returns 0 pending POs with vendor info ✓, 6) GET /api/approvals-hub/invoices returns 0 pending invoices with vendor and contract info ✓, 7) GET /api/approvals-hub/resources returns 0 expiring resources ✓, 8) GET /api/approvals-hub/assets returns 0 assets needing attention ✓. All endpoints return proper enriched data with related info (vendor_info, contract_info, proposal_count) as expected. Authentication working correctly with procurement_officer role. System ready for production use."
+
 frontend:
   - task: "Contract Governance Features"
     implemented: true
