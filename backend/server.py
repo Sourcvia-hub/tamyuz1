@@ -429,7 +429,8 @@ async def login(login_data: LoginRequest, response: Response):
     user_dict = user.model_dump()
     user_dict.pop('password', None)
     
-    return {"user": user_dict}
+    # Return session token in response body for cross-origin token-based auth
+    return {"user": user_dict, "session_token": session_token}
 
 @api_router.post("/auth/auto-login")
 async def auto_login(response: Response):
