@@ -207,6 +207,7 @@ const AppRoutes = () => {
       <Route path="/access-management" element={<ProtectedRoute><AccessManagement /></ProtectedRoute>} />
       <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
       <Route path="/contract-approvals" element={<ProtectedRoute><ContractApprovals /></ProtectedRoute>} />
+      <Route path="/approvals-hub" element={<ProtectedRoute><ApprovalsHub /></ProtectedRoute>} />
 
       {/* ProcureFlix routes */}
       <Route
