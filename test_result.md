@@ -71,27 +71,33 @@ backend:
 frontend:
   - task: "Vendor DD Form Component"
     implemented: true
-    working: "pending"
+    working: false
     file: "frontend/src/components/VendorDDForm.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "pending"
         agent: "main"
         comment: "New AI-powered DD form component created with tabs for Overview, Extracted Data, Documents, Workflow, and Audit. Includes risk badges, confidence indicators, and workflow actions."
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: AI Due Diligence button not found on vendor detail page. Component exists but is not accessible through UI. Tested with procurement_officer role - button should be visible but missing. Only 2 buttons found on vendor detail page (Logout button). Authentication working, vendor creation working, but DD functionality not accessible."
 
   - task: "Admin Settings Page"
     implemented: true
-    working: "pending"
+    working: true
     file: "frontend/src/pages/AdminSettings.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "pending"
         agent: "main"
         comment: "New admin settings page for configuring high-risk countries. Accessible via /admin/settings route."
+      - working: true
+        agent: "testing"
+        comment: "✅ Admin Settings working correctly. High-Risk Countries tab found and functional. Add/remove country functionality tested successfully. Proper role-based access control - procurement_officer denied access, procurement_manager granted access. Countries list displays properly with existing high-risk countries (Belarus, Central African Republic, Cuba, etc.)."
 
 metadata:
   created_by: "main_agent"
