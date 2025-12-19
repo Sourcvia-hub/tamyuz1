@@ -134,9 +134,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Vendor DD AI System"
-    - "Workflow Endpoints"
-  stuck_tasks: []
+    - "Contract Governance Features"
+  stuck_tasks: 
+    - "Vendor DD Form Component"
   test_all: false
   test_priority: "high_first"
 
