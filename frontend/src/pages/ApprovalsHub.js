@@ -56,7 +56,7 @@ const ApprovalsHub = () => {
     { key: 'business-requests', label: 'Business Requests', icon: '📝', color: 'purple' },
     { key: 'contracts', label: 'Contracts', icon: '📄', color: 'green' },
     { key: 'purchase-orders', label: 'Purchase Orders', icon: '🛒', color: 'orange' },
-    { key: 'invoices', label: 'Invoices', icon: '💰', color: 'yellow' },
+    { key: 'deliverables', label: 'Deliverables', icon: '📦', color: 'yellow' },
     { key: 'resources', label: 'Resources', icon: '👥', color: 'indigo' },
     { key: 'assets', label: 'Assets', icon: '🖥️', color: 'gray' },
   ];
