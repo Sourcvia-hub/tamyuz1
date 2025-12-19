@@ -249,15 +249,15 @@ const TenderDetail = () => {
             </div>
           </div>
 
-          {/* Description Section */}
+          {/* Business Need Section */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Business Need</h3>
             <p className="text-gray-700 whitespace-pre-wrap">{tender.description}</p>
           </div>
 
-          {/* Requirements Section */}
+          {/* Scope & Key Requirements Section */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Requirements</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Scope & Key Requirements</h3>
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
               <p className="text-gray-700 whitespace-pre-wrap">{tender.requirements}</p>
             </div>
