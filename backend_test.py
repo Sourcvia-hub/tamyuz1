@@ -2448,6 +2448,9 @@ class SourceviaBackendTester:
         self.test_health_check()
         self.test_authentication()
         
+        # NEW: Business Request Workflow Testing (as requested in review)
+        self.test_business_request_workflow()
+        
         # NEW: Test the updated Deliverables system with HoP approval workflow (PRIORITY TEST)
         self.test_deliverables_hop_workflow()
         
