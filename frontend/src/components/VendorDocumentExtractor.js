@@ -225,7 +225,7 @@ const VendorDocumentExtractor = ({ formData, setFormData }) => {
       </div>
 
       {/* Extract Button */}
-      {uploadedFile && !extractionStatus?.stage === 'complete' && (
+      {uploadedFile && extractionStatus?.stage !== 'complete' && (
         <button
           type="button"
           onClick={handleExtractAndFill}
