@@ -782,7 +782,7 @@ const ContractDetail = () => {
                 {!contract?.outsourcing_classification && !classificationResult && (
                   <div className="bg-gray-50 rounded-lg p-6 text-center">
                     <p className="text-gray-600 mb-3">
-                      This contract hasn't been classified yet. Run AI classification to determine governance requirements.
+                      This contract has not been classified yet. Run AI classification to determine governance requirements.
                     </p>
                     <button
                       onClick={runAIClassification}
