@@ -6,11 +6,13 @@ import OutsourcingQuestionnaire from '../components/OutsourcingQuestionnaire';
 import SearchableSelect from '../components/SearchableSelect';
 import AIContractClassifier from '../components/AIContractClassifier';
 import FileUpload from '../components/FileUpload';
+import { useToast } from '../hooks/use-toast';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Contracts = () => {
+  const { toast } = useToast();
   const [contracts, setContracts] = useState([]);
   const [filteredContracts, setFilteredContracts] = useState([]);
   const [loading, setLoading] = useState(true);
