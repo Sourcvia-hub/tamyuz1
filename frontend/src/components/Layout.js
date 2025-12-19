@@ -20,10 +20,8 @@ const Layout = ({ children }) => {
     { name: 'Business Requests', path: '/tenders', icon: '📋', module: Module.TENDERS },
     { name: 'Contracts', path: '/contracts', icon: '📄', module: Module.CONTRACTS },
     { name: 'Deliverables', path: '/deliverables', icon: '📦', module: Module.CONTRACTS },
-    { name: 'Payment Auth', path: '/payment-authorizations', icon: '💳', module: Module.INVOICES },
     { name: 'Purchase Orders', path: '/purchase-orders', icon: '📝', module: Module.PURCHASE_ORDERS },
     { name: 'Resources', path: '/resources', icon: '👤', module: Module.RESOURCES },
-    { name: 'Invoices', path: '/invoices', icon: '💰', module: Module.INVOICES },
     { name: 'Assets', path: '/assets', icon: '🏗️', module: Module.ASSETS },
     { name: 'Service Requests', path: '/osr', icon: '🔧', module: Module.SERVICE_REQUESTS },
   ];
