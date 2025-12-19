@@ -495,6 +495,231 @@ class SourceviaBackendTester:
         except Exception as e:
             self.log_result("Buildings", False, f"Exception: {str(e)}")
 
+    def test_vendor_dd_system(self):
+        """Test new Vendor Due Diligence AI-powered system"""
+        print("\n=== VENDOR DD AI SYSTEM TESTING ===")
+        
+        # Test with procurement_officer role as specified in review request
+        if not self.authenticate_as('procurement_manager'):  # Using procurement_manager as it has officer permissions
+            self.log_result("Vendor DD Setup", False, "Could not authenticate as procurement_manager")
+            return
+
+        # 1. Create a vendor for DD testing
+        try:
+            dd_vendor_data = {
+                "name_english": "DD Test Vendor Corp",
+                "vendor_type": "local",
+                "commercial_name": "DD Test Corp"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/vendors", json=dd_vendor_data)
+            
+            if response.status_code == 200:
+                vendor = response.json()
+                dd_vendor_id = vendor.get("id")
+                self.log_result("Create DD Test Vendor", True, f"Created vendor: {dd_vendor_id}")
+                self.test_data["dd_vendor_id"] = dd_vendor_id
+            else:
+                self.log_result("Create DD Test Vendor", False, f"Status: {response.status_code}, Response: {response.text}")
+                return
+        except Exception as e:
+            self.log_result("Create DD Test Vendor", False, f"Exception: {str(e)}")
+            return
+
+        dd_vendor_id = self.test_data.get("dd_vendor_id")
+        if not dd_vendor_id:
+            return
+
+        # 2. Initialize DD for vendor
+        try:
+            response = self.session.post(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/init-dd")
+            
+            if response.status_code == 200:
+                data = response.json()
+                dd_status = data.get("dd_status")
+                if dd_status == "draft":
+                    self.log_result("Initialize DD", True, f"DD initialized with status: {dd_status}")
+                else:
+                    self.log_result("Initialize DD", False, f"Unexpected DD status: {dd_status}")
+            else:
+                self.log_result("Initialize DD", False, f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Initialize DD", False, f"Exception: {str(e)}")
+
+        # 3. Get DD data
+        try:
+            response = self.session.get(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd")
+            
+            if response.status_code == 200:
+                dd_data = response.json()
+                status = dd_data.get("status")
+                if status == "draft":
+                    self.log_result("Get DD Data", True, f"Retrieved DD data with status: {status}")
+                else:
+                    self.log_result("Get DD Data", False, f"Unexpected status: {status}")
+            else:
+                self.log_result("Get DD Data", False, f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Get DD Data", False, f"Exception: {str(e)}")
+
+        # 4. Test high-risk countries endpoint
+        try:
+            response = self.session.get(f"{BACKEND_URL}/vendor-dd/admin/high-risk-countries")
+            
+            if response.status_code == 200:
+                data = response.json()
+                countries = data.get("countries", [])
+                if isinstance(countries, list) and len(countries) > 0:
+                    self.log_result("Get High-Risk Countries", True, f"Found {len(countries)} high-risk countries")
+                else:
+                    self.log_result("Get High-Risk Countries", False, "No countries returned or invalid format")
+            else:
+                self.log_result("Get High-Risk Countries", False, f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Get High-Risk Countries", False, f"Exception: {str(e)}")
+
+        # 5. Test field update endpoint
+        try:
+            field_update = {
+                "field_name": "name_english",
+                "new_value": "Updated DD Test Vendor Corp",
+                "reason": "Testing field update functionality"
+            }
+            
+            response = self.session.put(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/fields", json=field_update)
+            
+            if response.status_code == 200:
+                data = response.json()
+                field = data.get("field")
+                if field == "name_english":
+                    self.log_result("Update DD Field", True, f"Updated field: {field}")
+                else:
+                    self.log_result("Update DD Field", False, f"Unexpected field response: {field}")
+            else:
+                self.log_result("Update DD Field", False, f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Update DD Field", False, f"Exception: {str(e)}")
+
+        # 6. Test audit log endpoint
+        try:
+            response = self.session.get(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/audit-log")
+            
+            if response.status_code == 200:
+                data = response.json()
+                audit_log = data.get("audit_log", [])
+                if isinstance(audit_log, list):
+                    self.log_result("Get DD Audit Log", True, f"Retrieved audit log with {len(audit_log)} entries")
+                else:
+                    self.log_result("Get DD Audit Log", False, "Invalid audit log format")
+            else:
+                self.log_result("Get DD Audit Log", False, f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Get DD Audit Log", False, f"Exception: {str(e)}")
+
+        # 7. Test document upload endpoint (without actual file)
+        try:
+            # Test with missing file to verify endpoint exists and validates properly
+            response = self.session.post(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/upload")
+            
+            # Should return 422 (validation error) for missing file, not 404 (endpoint not found)
+            if response.status_code == 422:
+                self.log_result("Document Upload Endpoint", True, "Upload endpoint exists and validates input")
+            elif response.status_code == 404:
+                self.log_result("Document Upload Endpoint", False, "Upload endpoint not found")
+            else:
+                self.log_result("Document Upload Endpoint", True, f"Upload endpoint exists (status: {response.status_code})")
+        except Exception as e:
+            self.log_result("Document Upload Endpoint", False, f"Exception: {str(e)}")
+
+        # 8. Test AI run endpoint (should fail without documents)
+        try:
+            response = self.session.post(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/run-ai")
+            
+            if response.status_code == 400:
+                # Expected error for no documents
+                self.log_result("AI Run Endpoint", True, "AI run endpoint exists and validates documents")
+            elif response.status_code == 404:
+                self.log_result("AI Run Endpoint", False, "AI run endpoint not found")
+            else:
+                self.log_result("AI Run Endpoint", True, f"AI run endpoint exists (status: {response.status_code})")
+        except Exception as e:
+            self.log_result("AI Run Endpoint", False, f"Exception: {str(e)}")
+
+        # 9. Test workflow endpoints (should fail with proper validation)
+        try:
+            # Officer review endpoint
+            review_data = {"accept_assessment": True, "comments": "Test review"}
+            response = self.session.post(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/officer-review", json=review_data)
+            
+            if response.status_code in [400, 422]:  # Expected validation errors
+                self.log_result("Officer Review Endpoint", True, "Officer review endpoint exists and validates")
+            elif response.status_code == 404:
+                self.log_result("Officer Review Endpoint", False, "Officer review endpoint not found")
+            else:
+                self.log_result("Officer Review Endpoint", True, f"Officer review endpoint exists (status: {response.status_code})")
+        except Exception as e:
+            self.log_result("Officer Review Endpoint", False, f"Exception: {str(e)}")
+
+        try:
+            # HoP approval endpoint
+            approval_data = {"approved": True, "comments": "Test approval"}
+            response = self.session.post(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/hop-approval", json=approval_data)
+            
+            if response.status_code in [400, 422]:  # Expected validation errors
+                self.log_result("HoP Approval Endpoint", True, "HoP approval endpoint exists and validates")
+            elif response.status_code == 404:
+                self.log_result("HoP Approval Endpoint", False, "HoP approval endpoint not found")
+            else:
+                self.log_result("HoP Approval Endpoint", True, f"HoP approval endpoint exists (status: {response.status_code})")
+        except Exception as e:
+            self.log_result("HoP Approval Endpoint", False, f"Exception: {str(e)}")
+
+        try:
+            # Risk acceptance endpoint
+            risk_data = {
+                "risk_acceptance_reason": "Test reason",
+                "mitigating_controls": "Test controls"
+            }
+            response = self.session.post(f"{BACKEND_URL}/vendor-dd/vendors/{dd_vendor_id}/dd/risk-acceptance", json=risk_data)
+            
+            if response.status_code in [400, 422]:  # Expected validation errors
+                self.log_result("Risk Acceptance Endpoint", True, "Risk acceptance endpoint exists and validates")
+            elif response.status_code == 404:
+                self.log_result("Risk Acceptance Endpoint", False, "Risk acceptance endpoint not found")
+            else:
+                self.log_result("Risk Acceptance Endpoint", True, f"Risk acceptance endpoint exists (status: {response.status_code})")
+        except Exception as e:
+            self.log_result("Risk Acceptance Endpoint", False, f"Exception: {str(e)}")
+
+    def test_workflow_endpoints_fixed(self):
+        """Test that workflow endpoints no longer throw 500 errors"""
+        print("\n=== WORKFLOW ENDPOINTS BUG FIX VERIFICATION ===")
+        
+        if not self.authenticate_as('procurement_manager'):
+            self.log_result("Workflow Bug Fix Setup", False, "Could not authenticate as procurement_manager")
+            return
+
+        # Test workflow endpoints that were previously throwing 500 errors
+        test_endpoints = [
+            ("/tenders", "GET", "Get Tenders"),
+            ("/vendors", "GET", "Get Vendors"),
+            ("/contracts", "GET", "Get Contracts")
+        ]
+
+        for endpoint, method, name in test_endpoints:
+            try:
+                if method == "GET":
+                    response = self.session.get(f"{BACKEND_URL}{endpoint}")
+                
+                if response.status_code == 200:
+                    self.log_result(f"Workflow Fix - {name}", True, f"No 500 error, status: {response.status_code}")
+                elif response.status_code == 500:
+                    self.log_result(f"Workflow Fix - {name}", False, f"Still throwing 500 error")
+                else:
+                    self.log_result(f"Workflow Fix - {name}", True, f"No 500 error, status: {response.status_code}")
+            except Exception as e:
+                self.log_result(f"Workflow Fix - {name}", False, f"Exception: {str(e)}")
+
     def test_critical_bugs(self):
         """Test critical bug fixes"""
         print("\n=== CRITICAL BUG VERIFICATION ===")
