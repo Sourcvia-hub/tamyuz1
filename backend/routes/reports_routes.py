@@ -343,7 +343,7 @@ async def get_approval_metrics(request: Request):
     # Pending approvals by module
     pending_vendors = await db.vendors.count_documents({"status": "pending"})
     pending_contracts = await db.contracts.count_documents({"status": "pending_approval"})
-    pending_invoices = await db.invoices.count_documents({"status": {"$in": ["pending", "verified"]}})
+    pending_deliverables = await db.deliverables.count_documents({"status": {"$in": ["submitted", "validated", "pending_hop_approval"]}})
     pending_brs = await db.tenders.count_documents({"status": {"$in": ["published", "closed"]}})
     
     # Approval workflow status
@@ -356,9 +356,9 @@ async def get_approval_metrics(request: Request):
         "pending_approvals": {
             "vendors": pending_vendors,
             "contracts": pending_contracts,
-            "invoices": pending_invoices,
+            "deliverables": pending_deliverables,
             "business_requests": pending_brs,
-            "total": pending_vendors + pending_contracts + pending_invoices + pending_brs
+            "total": pending_vendors + pending_contracts + pending_deliverables + pending_brs
         },
         "vendor_workflow_states": {w["_id"] or "unknown": w["count"] for w in vendor_workflow}
     }
