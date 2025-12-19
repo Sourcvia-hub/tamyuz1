@@ -10,6 +10,7 @@ const API = `${BACKEND_URL}/api`;
 
 const Deliverables = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [deliverables, setDeliverables] = useState([]);
   const [loading, setLoading] = useState(true);
