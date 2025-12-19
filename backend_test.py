@@ -1068,6 +1068,7 @@ class SourceviaBackendTester:
         self.test_contract_workflow()
         self.test_workflow_endpoints()
         self.test_vendor_dd_system()
+        self.test_contract_governance_system()  # New Contract Governance AI System testing
         self.test_workflow_endpoints_fixed()
         self.test_master_data()
         self.test_critical_bugs()
