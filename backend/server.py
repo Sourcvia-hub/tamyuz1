@@ -2734,6 +2734,111 @@ async def ai_match_invoice_milestone(data: dict):
             "reasoning": "AI analysis unavailable"
         }
 
+@api_router.post("/ai/analyze-contract-document")
+async def ai_analyze_contract_document(file: UploadFile = File(...)):
+    """AI analyzes uploaded contract document and extracts fields with advisory"""
+    from services.contract_ai_service import ContractAIService
+    import tempfile
+    import os as os_module
+    
+    contract_ai = ContractAIService()
+    
+    # Save uploaded file temporarily
+    temp_dir = tempfile.mkdtemp()
+    file_ext = os_module.path.splitext(file.filename)[1].lower()
+    temp_path = os_module.path.join(temp_dir, f"contract{file_ext}")
+    
+    try:
+        # Write file
+        content = await file.read()
+        with open(temp_path, "wb") as f:
+            f.write(content)
+        
+        # Extract text based on file type
+        if file_ext == ".pdf":
+            document_text = await contract_ai._extract_pdf_text(temp_path)
+        elif file_ext in [".docx", ".doc"]:
+            document_text = await contract_ai._extract_docx_text(temp_path)
+        else:
+            # Try reading as plain text
+            document_text = content.decode('utf-8', errors='ignore')
+        
+        if not document_text or len(document_text.strip()) < 50:
+            return {
+                "success": False,
+                "error": "Could not extract text from document. Please ensure it's a valid PDF or Word document.",
+                "extracted_fields": None,
+                "advisory": None
+            }
+        
+        # Extract contract fields using AI
+        extraction_result = await contract_ai.extract_contract_fields(document_text)
+        
+        # Generate advisory based on extracted data
+        advisory = None
+        try:
+            advisory_result = await contract_ai.generate_drafting_advisory({
+                "title": extraction_result.sow_summary or "Contract",
+                "sow": extraction_result.sow_details or "",
+                "sla": extraction_result.sla_summary or "",
+                "value": extraction_result.extracted_value,
+                "start_date": extraction_result.extracted_start_date,
+                "end_date": extraction_result.extracted_end_date,
+            })
+            if advisory_result:
+                advisory = {
+                    "hints": [{"category": h.category, "hint": h.hint, "priority": h.priority} for h in (advisory_result.hints or [])],
+                    "missing_clauses": [{"clause": c.clause, "importance": c.importance, "suggested_text": c.suggested_text} for c in (advisory_result.missing_clauses or [])],
+                    "consistency_warnings": [{"field": w.field, "issue": w.issue, "suggestion": w.suggestion} for w in (advisory_result.consistency_warnings or [])],
+                    "overall_score": advisory_result.overall_score,
+                    "recommendations": advisory_result.recommendations or []
+                }
+        except Exception as adv_error:
+            logger.warning(f"Advisory generation failed: {adv_error}")
+        
+        # Prepare response with extracted fields
+        extracted_fields = {
+            "title": extraction_result.supplier_name or extraction_result.sow_summary or "",
+            "sow_summary": extraction_result.sow_summary or "",
+            "sow_details": extraction_result.sow_details or "",
+            "sla_summary": extraction_result.sla_summary or "",
+            "sla_details": extraction_result.sla_details or [],
+            "value": extraction_result.extracted_value,
+            "currency": extraction_result.extracted_currency or "SAR",
+            "start_date": extraction_result.extracted_start_date,
+            "end_date": extraction_result.extracted_end_date,
+            "duration_months": extraction_result.extracted_duration_months,
+            "milestones": extraction_result.extracted_milestones or [],
+            "supplier_name": extraction_result.supplier_name,
+            "supplier_country": extraction_result.supplier_country,
+            "exhibits": extraction_result.exhibits_identified or [],
+            "extraction_confidence": extraction_result.extraction_confidence,
+            "extraction_notes": extraction_result.extraction_notes
+        }
+        
+        return {
+            "success": True,
+            "extracted_fields": extracted_fields,
+            "advisory": advisory,
+            "document_preview": document_text[:1000] + "..." if len(document_text) > 1000 else document_text
+        }
+        
+    except Exception as e:
+        logger.error(f"Contract analysis failed: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "extracted_fields": None,
+            "advisory": None
+        }
+    finally:
+        # Cleanup temp files
+        try:
+            os_module.remove(temp_path)
+            os_module.rmdir(temp_dir)
+        except:
+            pass
+
 # ==================== BASIC ENDPOINTS ====================
 # ==================== EXPORT ENDPOINTS ====================
 
