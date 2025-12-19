@@ -2263,6 +2263,10 @@ class SourceviaBackendTester:
         # Run tests in order
         self.test_health_check()
         self.test_authentication()
+        
+        # NEW: Test the updated Deliverables system with HoP approval workflow (PRIORITY TEST)
+        self.test_deliverables_hop_workflow()
+        
         self.test_vendor_workflow()
         self.test_purchase_request_workflow()
         self.test_contract_workflow()
