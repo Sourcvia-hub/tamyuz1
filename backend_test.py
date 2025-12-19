@@ -222,7 +222,11 @@ class SourceviaBackendTester:
             except Exception as e:
                 self.log_result("Direct Approve Vendor", False, f"Exception: {str(e)}")
 
-        # 3. Test vendor usage rules
+        # 3. Test vendor usage rules (re-authenticate to ensure session is valid)
+        if not self.authenticate_as('procurement_manager'):
+            self.log_result("Vendor Usage Rules Setup", False, "Could not re-authenticate")
+            return
+            
         try:
             # Test usable-in-pr (should include draft + approved)
             response = self.session.get(f"{BACKEND_URL}/vendors/usable-in-pr")
@@ -232,7 +236,7 @@ class SourceviaBackendTester:
                 count = data.get("count", 0)
                 self.log_result("Vendors Usable in PR", True, f"Found {count} vendors")
             else:
-                self.log_result("Vendors Usable in PR", False, f"Status: {response.status_code}")
+                self.log_result("Vendors Usable in PR", False, f"Status: {response.status_code}, Response: {response.text}")
 
             # Test usable-in-contracts (should include only approved)
             response = self.session.get(f"{BACKEND_URL}/vendors/usable-in-contracts")
@@ -242,7 +246,7 @@ class SourceviaBackendTester:
                 count = data.get("count", 0)
                 self.log_result("Vendors Usable in Contracts", True, f"Found {count} approved vendors")
             else:
-                self.log_result("Vendors Usable in Contracts", False, f"Status: {response.status_code}")
+                self.log_result("Vendors Usable in Contracts", False, f"Status: {response.status_code}, Response: {response.text}")
                 
         except Exception as e:
             self.log_result("Vendor Usage Rules", False, f"Exception: {str(e)}")
