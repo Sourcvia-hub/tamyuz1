@@ -34,14 +34,15 @@ async def direct_approve_vendor(
     vendor_id: str,
     approval_req: DirectApprovalRequest,
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Direct approval of vendor by Procurement Officer
     Vendors don't need multi-level approval workflow
     """
-    # Check permissions - only procurement officers and managers
-    if current_user["role"] not in ["procurement_officer", "procurement_manager"]:
+    # Check permissions - get role as string
+    user_role = current_user.role.value if hasattr(current_user.role, 'value') else str(current_user.role)
+    if user_role not in ["procurement_officer", "procurement_manager"]:
         raise HTTPException(
             status_code=403, 
             detail="Only procurement officers can approve vendors"
@@ -68,14 +69,14 @@ async def direct_approve_vendor(
     
     workflow["history"].append({
         "action": WorkflowAction.FINAL_APPROVED,
-        "by": current_user["id"],
-        "by_name": current_user["name"],
+        "by": current_user.id,
+        "by_name": current_user.name,
         "at": datetime.now(timezone.utc).isoformat(),
         "comment": approval_req.comment or "Direct approval by procurement officer"
     })
     
-    workflow["final_approved_by"] = current_user["id"]
-    workflow["final_approved_by_name"] = current_user["name"]
+    workflow["final_approved_by"] = current_user.id
+    workflow["final_approved_by_name"] = current_user.name
     workflow["final_approved_at"] = datetime.now(timezone.utc).isoformat()
     
     # Update vendor status to approved
@@ -100,7 +101,7 @@ async def direct_approve_vendor(
 @router.get("/usable-in-pr")
 async def get_vendors_usable_in_pr(
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Get vendors that can be used in Purchase Requests
@@ -120,7 +121,7 @@ async def get_vendors_usable_in_pr(
 @router.get("/usable-in-contracts")
 async def get_vendors_usable_in_contracts(
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Get vendors that can be used in Contracts
@@ -140,7 +141,7 @@ async def get_vendors_usable_in_contracts(
 @router.get("/usable-in-po")
 async def get_vendors_usable_in_po(
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Get vendors that can be used in Purchase Orders
@@ -162,14 +163,15 @@ async def edit_draft_vendor(
     vendor_id: str,
     vendor_update: dict,
     request: Request,
-    current_user: dict = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Edit draft vendor (Procurement Officer only)
     Users cannot edit vendors after creation
     """
-    # Check permissions - only procurement officers and managers
-    if current_user["role"] not in ["procurement_officer", "procurement_manager"]:
+    # Check permissions - get role as string
+    user_role = current_user.role.value if hasattr(current_user.role, 'value') else str(current_user.role)
+    if user_role not in ["procurement_officer", "procurement_manager"]:
         raise HTTPException(
             status_code=403, 
             detail="Only procurement officers can edit draft vendors"
@@ -197,8 +199,8 @@ async def edit_draft_vendor(
     
     workflow["history"].append({
         "action": "edited",
-        "by": current_user["id"],
-        "by_name": current_user["name"],
+        "by": current_user.id,
+        "by_name": current_user.name,
         "at": datetime.now(timezone.utc).isoformat(),
         "comment": "Draft vendor edited by procurement officer"
     })
