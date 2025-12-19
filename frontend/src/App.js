@@ -152,6 +152,7 @@ import AdminSettings from './pages/AdminSettings';
 import ContractApprovals from './pages/ContractApprovals';
 import ApprovalsHub from './pages/ApprovalsHub';
 import Deliverables from './pages/Deliverables';
+import MyApprovals from './pages/MyApprovals';
 // PaymentAuthorizations page removed - functionality merged into Deliverables
 
 // ProcureFlix components
