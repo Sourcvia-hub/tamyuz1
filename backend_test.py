@@ -32,7 +32,7 @@ TEST_USERS = {
     },
     "user": {
         "email": "testuser@test.com",
-        "password": "test123", 
+        "password": "Password123!", 
         "expected_role": "user"
     }
 }
