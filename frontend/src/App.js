@@ -212,6 +212,7 @@ const AppRoutes = () => {
       <Route path="/approvals-hub" element={<ProtectedRoute><ApprovalsHub /></ProtectedRoute>} />
       <Route path="/deliverables" element={<ProtectedRoute><Deliverables /></ProtectedRoute>} />
       <Route path="/deliverables/:id" element={<ProtectedRoute><Deliverables /></ProtectedRoute>} />
+      <Route path="/my-approvals" element={<ProtectedRoute><MyApprovals /></ProtectedRoute>} />
       {/* Payment authorizations route removed - functionality merged into Deliverables */}
 
       {/* ProcureFlix routes */}
