@@ -218,11 +218,12 @@ const TenderDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">Budget</label>
+                <label className="text-sm font-medium text-gray-600">Estimated Budget (Indicative)</label>
                 <p className="text-lg font-semibold text-gray-900">${tender.budget?.toLocaleString()}</p>
+                <p className="text-xs text-gray-500">This is an estimate for planning purposes and does not represent the final contract value.</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">Deadline</label>
+                <label className="text-sm font-medium text-gray-600">Expected Delivery Date</label>
                 <p className="text-lg font-semibold text-gray-900">
                   {new Date(tender.deadline).toLocaleDateString('en-US', { 
                     year: 'numeric', 
