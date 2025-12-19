@@ -550,54 +550,83 @@ const Contracts = () => {
                     Please complete the evaluation process first.
                   </p>
                 </div>
-              ) : null}}
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              ) : null}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Statement of Work (SOW) *</label>
-                <textarea
-                  value={formData.sow}
-                  onChange={(e) => setFormData({ ...formData, sow: e.target.value })}
-                  required
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              {/* Upload Contract Mode */}
+              {contractCreationMode === 'upload' && (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <input
+                    type="file"
+                    id="contract-upload"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => setUploadedContractFile(e.target.files[0])}
+                    className="hidden"
+                  />
+                  <label htmlFor="contract-upload" className="cursor-pointer">
+                    <span className="text-4xl block mb-2">📄</span>
+                    {uploadedContractFile ? (
+                      <div>
+                        <p className="font-semibold text-green-600">{uploadedContractFile.name}</p>
+                        <p className="text-sm text-gray-500">{(uploadedContractFile.size / 1024).toFixed(1)} KB</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="font-medium">Click to upload contract document</p>
+                        <p className="text-sm text-gray-500">PDF, DOC, DOCX files accepted</p>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Service Level Agreement (SLA) *</label>
-                <textarea
-                  value={formData.sla}
-                  onChange={(e) => setFormData({ ...formData, sla: e.target.value })}
-                  required
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              {/* Fill Fields Mode */}
+              {contractCreationMode === 'fill' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
 
-              {/* AI Contract Classifier */}
-              <AIContractClassifier 
-                formData={{ title: formData.title, scope: formData.sow }}
-                setFormData={(updates) => setFormData({ ...formData, ...updates })}
-              />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Statement of Work (SOW) *</label>
+                    <textarea
+                      value={formData.sow}
+                      onChange={(e) => setFormData({ ...formData, sow: e.target.value })}
+                      required
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
 
-              {/* Milestones Section */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="block text-sm font-medium text-gray-700">Milestones</label>
-                  <button
-                    type="button"
-                    onClick={() => {
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Service Level Agreement (SLA)</label>
+                    <textarea
+                      value={formData.sla}
+                      onChange={(e) => setFormData({ ...formData, sla: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* AI Contract Classifier */}
+                  <AIContractClassifier 
+                    formData={{ title: formData.title, scope: formData.sow }}
+                    setFormData={(updates) => setFormData({ ...formData, ...updates })}
+                  />
+
+                  {/* Milestones Section */}
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="block text-sm font-medium text-gray-700">Milestones</label>
+                      <button
+                        type="button"
+                        onClick={() => {
                       setFormData({
                         ...formData,
                         milestones: [
