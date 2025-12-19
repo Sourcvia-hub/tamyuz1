@@ -287,7 +287,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Cross-Origin Token-Based Authentication Fix Testing Complete"
+    - "Reports & Analytics and Bulk Import Frontend Testing Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
