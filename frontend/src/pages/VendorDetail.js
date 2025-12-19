@@ -226,14 +226,24 @@ const VendorDetail = () => {
             )}
           </div>
           <div className="flex gap-3">
-            {/* Due Diligence Button - Only show if required and not completed */}
+            {/* New AI-Powered Due Diligence Button */}
+            {['procurement_officer', 'procurement_manager'].includes(user?.role) && (
+              <button
+                onClick={() => setShowNewDDModal(true)}
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+              >
+                <span>🤖</span>
+                AI Due Diligence
+              </button>
+            )}
+            {/* Legacy Due Diligence Button - Only show if required and not completed */}
             {vendor.dd_required && !vendor.dd_completed && canEdit(user?.role, Module.VENDOR_DD) && (
               <button
                 onClick={() => setShowDueDiligenceModal(true)}
                 className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
               >
                 <span>📋</span>
-                Complete Due Diligence
+                Legacy DD
               </button>
             )}
             <button
