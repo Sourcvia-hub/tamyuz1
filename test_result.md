@@ -263,7 +263,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Business Request Evaluation Workflow Testing Complete"
+    - "Cross-Origin Token-Based Authentication Fix Testing Complete"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
