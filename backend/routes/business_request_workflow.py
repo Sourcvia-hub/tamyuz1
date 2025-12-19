@@ -511,9 +511,14 @@ async def hop_final_decision(tender_id: str, data: HoPDecisionRequest, request: 
 
 @router.get("/my-pending-approvals")
 async def get_my_pending_approvals(request: Request):
-    """Get all pending approval requests for the current user"""
+    """Get all pending approval requests for the current user (HoP sees contracts, deliverables, assets)"""
     user = await require_auth(request)
+    user_role = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
+    is_hop = user_role in ["procurement_manager", "admin", "hop"]
     
+    all_items = []
+    
+    # 1. Get standard approval notifications
     notifications = await db.approval_notifications.find(
         {"user_id": user.id, "status": "pending"},
         {"_id": 0}
@@ -527,10 +532,97 @@ async def get_my_pending_approvals(request: Request):
                 {"_id": 0, "title": 1, "tender_number": 1, "budget": 1, "status": 1, "selected_proposal_id": 1}
             )
             notif["item_details"] = tender
+        all_items.append(notif)
+    
+    # 2. If user is HoP, include pending contracts, deliverables, and assets
+    if is_hop:
+        # Get contracts pending HoP approval
+        pending_contracts = await db.contracts.find(
+            {"status": "pending_hop_approval"},
+            {"_id": 0}
+        ).to_list(50)
+        
+        for contract in pending_contracts:
+            vendor = await db.vendors.find_one(
+                {"id": contract.get("vendor_id")},
+                {"_id": 0, "name_english": 1, "commercial_name": 1}
+            )
+            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            
+            all_items.append({
+                "id": f"contract_{contract['id']}",
+                "item_type": "contract",
+                "item_id": contract["id"],
+                "item_number": contract.get("contract_number"),
+                "item_title": contract.get("title"),
+                "status": "pending",
+                "message": f"Contract {contract.get('contract_number')} requires HoP approval",
+                "requested_by_name": "Officer",
+                "requested_at": contract.get("hop_submitted_at") or contract.get("created_at"),
+                "vendor_name": vendor_name,
+                "amount": contract.get("value", 0)
+            })
+        
+        # Get deliverables pending HoP approval
+        pending_deliverables = await db.deliverables.find(
+            {"status": "pending_hop_approval"},
+            {"_id": 0}
+        ).to_list(50)
+        
+        for deliverable in pending_deliverables:
+            vendor = await db.vendors.find_one(
+                {"id": deliverable.get("vendor_id")},
+                {"_id": 0, "name_english": 1, "commercial_name": 1}
+            )
+            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            
+            all_items.append({
+                "id": f"deliverable_{deliverable['id']}",
+                "item_type": "deliverable",
+                "item_id": deliverable["id"],
+                "item_number": deliverable.get("deliverable_number"),
+                "item_title": deliverable.get("title"),
+                "status": "pending",
+                "message": f"Deliverable {deliverable.get('deliverable_number')} requires HoP approval for payment",
+                "requested_by_name": "Officer",
+                "requested_at": deliverable.get("submitted_to_hop_at") or deliverable.get("created_at"),
+                "vendor_name": vendor_name,
+                "amount": deliverable.get("amount", 0)
+            })
+        
+        # Get assets pending HoP approval
+        pending_assets = await db.assets.find(
+            {"approval_status": "pending_hop_approval"},
+            {"_id": 0}
+        ).to_list(50)
+        
+        for asset in pending_assets:
+            vendor = await db.vendors.find_one(
+                {"id": asset.get("vendor_id")},
+                {"_id": 0, "name_english": 1, "commercial_name": 1}
+            )
+            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            
+            all_items.append({
+                "id": f"asset_{asset['id']}",
+                "item_type": "asset",
+                "item_id": asset["id"],
+                "item_number": asset.get("asset_number"),
+                "item_title": asset.get("name"),
+                "status": "pending",
+                "message": f"Asset {asset.get('asset_number')} registration requires HoP approval",
+                "requested_by_name": "Officer",
+                "requested_at": asset.get("submitted_for_approval_at") or asset.get("created_at"),
+                "vendor_name": vendor_name,
+                "amount": asset.get("cost", 0)
+            })
+    
+    # Sort all items by requested_at
+    all_items.sort(key=lambda x: x.get("requested_at", ""), reverse=True)
     
     return {
-        "notifications": notifications,
-        "count": len(notifications)
+        "notifications": all_items,
+        "count": len(all_items)
     }
 
 
