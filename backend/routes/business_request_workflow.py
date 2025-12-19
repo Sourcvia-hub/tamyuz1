@@ -158,6 +158,7 @@ async def submit_evaluation(tender_id: str, data: SubmitEvaluationRequest, reque
     """
     User submits their evaluation of proposals
     Selects the recommended proposal
+    Can be submitted by the creator OR procurement officers
     """
     user = await require_auth(request)
     
@@ -165,9 +166,14 @@ async def submit_evaluation(tender_id: str, data: SubmitEvaluationRequest, reque
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Only the creator can submit evaluation
-    if tender.get("created_by") != user.id:
-        raise HTTPException(status_code=403, detail="Only the requester can submit evaluation")
+    # Allow evaluation submission by:
+    # 1. The creator of the business request
+    # 2. Procurement officers, managers, or admins
+    is_creator = tender.get("created_by") == user.id
+    is_officer = user.role in ["procurement_officer", "procurement_manager", "admin"]
+    
+    if not is_creator and not is_officer:
+        raise HTTPException(status_code=403, detail="Only the requester or procurement officers can submit evaluation")
     
     # Check status - must be published or pending_evaluation
     if tender.get("status") not in ["published", "pending_evaluation"]:
