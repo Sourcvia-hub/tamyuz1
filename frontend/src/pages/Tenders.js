@@ -425,6 +425,146 @@ const Tenders = () => {
                 </select>
                 <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple vendors</p>
               </div>
+
+              {/* Contract Context Questionnaire */}
+              <div className="border-t pt-6 mt-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xl">📋</span>
+                  <h3 className="text-lg font-semibold text-gray-900">Contract Context Questionnaire</h3>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  These questions help determine governance requirements for the future contract. Your answers will be reviewed by the Procurement Officer.
+                </p>
+
+                <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+                  {/* Q1: System/Data Access */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      1. Does the service require access to company systems or data?
+                    </label>
+                    <div className="flex gap-4">
+                      {['yes', 'no', 'unknown'].map((val) => (
+                        <label key={val} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="ctx_requires_system_data_access"
+                            value={val}
+                            checked={formData.ctx_requires_system_data_access === val}
+                            onChange={(e) => setFormData({ ...formData, ctx_requires_system_data_access: e.target.value })}
+                            className="mr-2"
+                          />
+                          <span className="capitalize">{val}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Q2: Cloud-based */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      2. Is the service cloud-based?
+                    </label>
+                    <div className="flex gap-4">
+                      {['yes', 'no', 'unknown'].map((val) => (
+                        <label key={val} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="ctx_is_cloud_based"
+                            value={val}
+                            checked={formData.ctx_is_cloud_based === val}
+                            onChange={(e) => setFormData({ ...formData, ctx_is_cloud_based: e.target.value })}
+                            className="mr-2"
+                          />
+                          <span className="capitalize">{val}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Q3: Outsourcing Indicator */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      3. Will the vendor be operating a service on behalf of the company? <span className="text-xs text-gray-500">(Outsourcing indicator)</span>
+                    </label>
+                    <div className="flex gap-4">
+                      {['yes', 'no', 'unknown'].map((val) => (
+                        <label key={val} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="ctx_is_outsourcing_service"
+                            value={val}
+                            checked={formData.ctx_is_outsourcing_service === val}
+                            onChange={(e) => setFormData({ ...formData, ctx_is_outsourcing_service: e.target.value })}
+                            className="mr-2"
+                          />
+                          <span className="capitalize">{val}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Q4: Data Location */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      4. Where do you expect data to be located/processed?
+                    </label>
+                    <select
+                      value={formData.ctx_expected_data_location}
+                      onChange={(e) => setFormData({ ...formData, ctx_expected_data_location: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select...</option>
+                      <option value="inside_ksa">Inside KSA</option>
+                      <option value="outside_ksa">Outside KSA</option>
+                      <option value="unknown">Unknown</option>
+                    </select>
+                  </div>
+
+                  {/* Q5: Onsite Presence */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      5. Is onsite presence required for service delivery?
+                    </label>
+                    <div className="flex gap-4">
+                      {['yes', 'no'].map((val) => (
+                        <label key={val} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="ctx_requires_onsite_presence"
+                            value={val}
+                            checked={formData.ctx_requires_onsite_presence === val}
+                            onChange={(e) => setFormData({ ...formData, ctx_requires_onsite_presence: e.target.value })}
+                            className="mr-2"
+                          />
+                          <span className="capitalize">{val}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Q6: Expected Duration */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      6. Expected contract duration
+                    </label>
+                    <select
+                      value={formData.ctx_expected_duration}
+                      onChange={(e) => setFormData({ ...formData, ctx_expected_duration: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select...</option>
+                      <option value="less_than_6_months">Less than 6 months</option>
+                      <option value="6_to_12_months">6 to 12 months</option>
+                      <option value="more_than_12_months">More than 12 months</option>
+                    </select>
+                  </div>
+                </div>
+
+                <p className="text-xs text-amber-600 mt-3 flex items-center gap-1">
+                  <span>⚠️</span>
+                  Your inputs may be incomplete and will be validated by the Procurement Officer during contract creation.
+                </p>
+              </div>
               <div className="flex space-x-4 pt-4">
                 <button
                   type="button"
