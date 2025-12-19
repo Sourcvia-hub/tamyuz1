@@ -191,8 +191,7 @@ const AppRoutes = () => {
       <Route path="/tenders/:id/evaluate" element={<ProtectedRoute><TenderEvaluation /></ProtectedRoute>} />
       <Route path="/contracts" element={<ProtectedRoute><Contracts /></ProtectedRoute>} />
       <Route path="/contracts/:id" element={<ProtectedRoute><ContractDetail /></ProtectedRoute>} />
-      <Route path="/invoices" element={<ProtectedRoute><Invoices /></ProtectedRoute>} />
-      <Route path="/invoices/:id" element={<ProtectedRoute><InvoiceDetail /></ProtectedRoute>} />
+      {/* Invoice routes removed - functionality merged into Deliverables */}
       <Route path="/purchase-orders" element={<ProtectedRoute><PurchaseOrders /></ProtectedRoute>} />
       <Route path="/purchase-orders/:id" element={<ProtectedRoute><PurchaseOrderDetail /></ProtectedRoute>} />
       <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
@@ -212,7 +211,7 @@ const AppRoutes = () => {
       <Route path="/approvals-hub" element={<ProtectedRoute><ApprovalsHub /></ProtectedRoute>} />
       <Route path="/deliverables" element={<ProtectedRoute><Deliverables /></ProtectedRoute>} />
       <Route path="/deliverables/:id" element={<ProtectedRoute><Deliverables /></ProtectedRoute>} />
-      <Route path="/payment-authorizations" element={<ProtectedRoute><PaymentAuthorizations /></ProtectedRoute>} />
+      {/* Payment authorizations route removed - functionality merged into Deliverables */}
 
       {/* ProcureFlix routes */}
       <Route
