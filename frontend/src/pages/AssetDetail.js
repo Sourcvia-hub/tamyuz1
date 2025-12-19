@@ -3,6 +3,8 @@ import axios from 'axios';
 import Layout from '../components/Layout';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import FileUpload from '../components/FileUpload';
+import { useAuth } from '../App';
+import { useToast } from '../hooks/use-toast';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -10,9 +12,15 @@ const API = `${BACKEND_URL}/api`;
 const AssetDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [asset, setAsset] = useState(null);
   const [relatedOSRs, setRelatedOSRs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const isOfficer = ['procurement_officer', 'procurement_manager', 'admin'].includes(user?.role);
+  const isHoP = ['procurement_manager', 'admin', 'hop'].includes(user?.role);
 
   useEffect(() => {
     fetchAsset();
@@ -55,6 +63,51 @@ const AssetDetail = () => {
     }
   };
 
+  // Approval workflow actions
+  const handleSubmitForApproval = async () => {
+    setActionLoading(true);
+    try {
+      await axios.post(`${API}/assets/${id}/submit-for-approval`, {}, { withCredentials: true });
+      toast({ title: "✅ Submitted", description: "Asset submitted for approval", variant: "success" });
+      fetchAsset();
+    } catch (error) {
+      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to submit", variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleOfficerReview = async (decision) => {
+    setActionLoading(true);
+    try {
+      await axios.post(`${API}/assets/${id}/officer-review`, { decision, notes: '' }, { withCredentials: true });
+      toast({ title: decision === 'approved' ? "✅ Forwarded to HoP" : "❌ Rejected", description: `Asset ${decision}`, variant: "success" });
+      fetchAsset();
+    } catch (error) {
+      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleHoPDecision = async (decision) => {
+    setActionLoading(true);
+    try {
+      await axios.post(`${API}/assets/${id}/hop-decision`, { decision, notes: '' }, { withCredentials: true });
+      const messages = {
+        approved: "Asset registration approved",
+        returned: "Asset returned for corrections",
+        rejected: "Asset registration rejected"
+      };
+      toast({ title: decision === 'approved' ? "✅ Approved" : decision === 'returned' ? "↩️ Returned" : "❌ Rejected", description: messages[decision], variant: decision === 'approved' ? "success" : "warning" });
+      fetchAsset();
+    } catch (error) {
+      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     const colors = {
       active: 'bg-green-100 text-green-800',
@@ -64,6 +117,30 @@ const AssetDetail = () => {
       decommissioned: 'bg-gray-100 text-gray-600'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getApprovalStatusColor = (status) => {
+    const colors = {
+      draft: 'bg-gray-100 text-gray-800',
+      pending_officer_review: 'bg-blue-100 text-blue-800',
+      pending_hop_approval: 'bg-purple-100 text-purple-800',
+      approved: 'bg-green-100 text-green-800',
+      rejected: 'bg-red-100 text-red-800',
+      returned: 'bg-orange-100 text-orange-800',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getApprovalStatusLabel = (status) => {
+    const labels = {
+      draft: 'Draft',
+      pending_officer_review: 'Pending Officer Review',
+      pending_hop_approval: 'Pending HoP Approval',
+      approved: 'Approved',
+      rejected: 'Rejected',
+      returned: 'Returned',
+    };
+    return labels[status] || status || 'Not Submitted';
   };
 
   const getConditionColor = (condition) => {
@@ -103,6 +180,109 @@ const AssetDetail = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Approval Status Banner */}
+        {asset.approval_status && (
+          <div className={`p-4 rounded-lg ${
+            asset.approval_status === 'approved' ? 'bg-green-50 border border-green-200' :
+            asset.approval_status === 'rejected' ? 'bg-red-50 border border-red-200' :
+            asset.approval_status === 'returned' ? 'bg-orange-50 border border-orange-200' :
+            'bg-blue-50 border border-blue-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getApprovalStatusColor(asset.approval_status)}`}>
+                  {getApprovalStatusLabel(asset.approval_status)}
+                </span>
+                <span className="text-sm text-gray-600">
+                  {asset.approval_status === 'pending_officer_review' && 'Waiting for officer review'}
+                  {asset.approval_status === 'pending_hop_approval' && 'Waiting for Head of Procurement approval'}
+                  {asset.approval_status === 'approved' && `Approved by HoP${asset.hop_decision_at ? ` on ${new Date(asset.hop_decision_at).toLocaleDateString()}` : ''}`}
+                  {asset.approval_status === 'rejected' && `Rejected${asset.hop_decision_notes ? `: ${asset.hop_decision_notes}` : ''}`}
+                  {asset.approval_status === 'returned' && `Returned for corrections${asset.hop_decision_notes ? `: ${asset.hop_decision_notes}` : ''}`}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                {/* Show actions based on status and role */}
+                {(!asset.approval_status || asset.approval_status === 'draft' || asset.approval_status === 'returned') && (
+                  <button
+                    onClick={handleSubmitForApproval}
+                    disabled={actionLoading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {actionLoading ? '...' : '📤 Submit for Approval'}
+                  </button>
+                )}
+                {asset.approval_status === 'pending_officer_review' && isOfficer && (
+                  <>
+                    <button
+                      onClick={() => handleOfficerReview('approved')}
+                      disabled={actionLoading}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
+                      ✓ Forward to HoP
+                    </button>
+                    <button
+                      onClick={() => handleOfficerReview('rejected')}
+                      disabled={actionLoading}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                    >
+                      ✗ Reject
+                    </button>
+                  </>
+                )}
+                {asset.approval_status === 'pending_hop_approval' && isHoP && (
+                  <>
+                    <button
+                      onClick={() => handleHoPDecision('approved')}
+                      disabled={actionLoading}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    >
+                      ✓ Approve
+                    </button>
+                    <button
+                      onClick={() => handleHoPDecision('returned')}
+                      disabled={actionLoading}
+                      className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50"
+                    >
+                      ↩ Return
+                    </button>
+                    <button
+                      onClick={() => handleHoPDecision('rejected')}
+                      disabled={actionLoading}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                    >
+                      ✗ Reject
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Show submit button if no approval status */}
+        {!asset.approval_status && (
+          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                  ⚠️ Not Submitted
+                </span>
+                <span className="text-sm text-gray-600">
+                  This asset registration requires HoP approval
+                </span>
+              </div>
+              <button
+                onClick={handleSubmitForApproval}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {actionLoading ? '...' : '📤 Submit for Approval'}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
@@ -238,7 +418,7 @@ const AssetDetail = () => {
             <div>
               <p className="text-sm text-gray-500">Cost</p>
               <p className="text-gray-900 font-medium">
-                {asset.cost ? `$${asset.cost.toLocaleString()}` : '-'}
+                {asset.cost ? `${asset.cost.toLocaleString()} SAR` : '-'}
               </p>
             </div>
             <div>
