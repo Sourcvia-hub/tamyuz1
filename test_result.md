@@ -173,6 +173,18 @@ backend:
         agent: "testing"
         comment: "✅ TOAST NOTIFICATIONS BACKEND SUPPORT FULLY WORKING! Testing completed with 100% success rate (3/3 tests passed). Backend APIs return proper success/error responses that can trigger frontend toast notifications: 1) Success Response Structure: APIs return structured success responses with proper status fields ✓, 2) Error Response Structure: APIs return structured error responses with detail fields ✓, 3) Validation Error Structure: APIs return structured validation errors for invalid input ✓. All API responses follow consistent JSON structure that frontend can use to display appropriate toast messages. Authentication working correctly. Backend ready to support toast notification system."
 
+  - task: "Cross-Origin Token-Based Authentication Fix"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "🎉 TOKEN-BASED AUTHENTICATION FIX VERIFIED - PERFECT RESULTS! Comprehensive testing of the cross-origin token-based authentication fix completed successfully with 100% success rate (7/7 tests passed). ✅ TOKEN-BASED AUTH FLOW: Login as testuser@test.com returns session_token in response body ✓, Authorization Bearer header works correctly with all API calls ✓, GET /api/tenders returns exactly 12 tenders for regular user (expected count) ✓. ✅ PROPOSALS VISIBILITY FOR BUSINESS REQUEST CREATOR: Login as testuser@test.com (role: user) successful ✓, GET /api/business-requests/1a8e54a2-b1a3-4790-b508-9d36eaa7164a/proposals-for-user returns is_creator: true, can_evaluate: true ✓, Proposals array contains exactly 1 proposal with 50,000 SAR financial amount from procurement officer ✓. ✅ ROLE-BASED DATA FILTERING: Regular users can only see their own tenders (all 12 tenders belong to user) ✓, Procurement officers can see all tenders (17 total, ≥ 12 for regular user) ✓. Authentication working perfectly with test credentials testuser@test.com / Password123! and test_officer@sourcevia.com / Password123!. Cross-origin token-based authentication fix is production-ready and fully functional!"
+
 frontend:
   - task: "Business Request Evaluation Workflow"
     implemented: true
