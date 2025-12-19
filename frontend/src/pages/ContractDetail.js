@@ -750,9 +750,19 @@ const ContractDetail = () => {
                 {/* Contract DD Status */}
                 {contract?.contract_dd_status && contract.contract_dd_status !== 'not_required' && (
                   <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                      <span>📋</span> Contract Due Diligence
-                    </h4>
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold text-blue-800 flex items-center gap-2">
+                        <span>📋</span> Contract Due Diligence
+                      </h4>
+                      {contract.contract_dd_status === 'pending' && (
+                        <button
+                          onClick={() => setShowDDQuestionnaire(true)}
+                          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Start DD Questionnaire →
+                        </button>
+                      )}
+                    </div>
                     <div className="flex items-center gap-3">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         contract.contract_dd_status === 'completed' ? 'bg-green-100 text-green-800' :
@@ -777,6 +787,32 @@ const ContractDetail = () => {
                         </ul>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* DD Questionnaire Modal */}
+                {showDDQuestionnaire && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                      <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+                        <h2 className="text-xl font-bold">Contract Due Diligence</h2>
+                        <button
+                          onClick={() => setShowDDQuestionnaire(false)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div className="p-4">
+                        <ContractDDQuestionnaire
+                          contractId={id}
+                          onComplete={() => {
+                            setShowDDQuestionnaire(false);
+                            fetchContract();
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
 
