@@ -6,6 +6,7 @@ import { useAuth } from '../App';
 import { canCreate, Module } from '../utils/permissions';
 import WorkflowStatusBadge from '../components/workflow/WorkflowStatusBadge';
 import { useToast } from '../hooks/use-toast';
+import MultiSelect from '../components/MultiSelect';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
