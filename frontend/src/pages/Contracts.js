@@ -127,11 +127,19 @@ const Contracts = () => {
         { reason: 'Manual termination by user' },
         { withCredentials: true }
       );
-      alert('Contract terminated successfully');
+      toast({
+        title: "✅ Contract Terminated",
+        description: "The contract has been terminated successfully",
+        variant: "success"
+      });
       fetchContracts();
     } catch (error) {
       console.error('Error terminating contract:', error);
-      alert('Failed to terminate contract');
+      toast({
+        title: "❌ Termination Failed",
+        description: "Failed to terminate the contract",
+        variant: "destructive"
+      });
     }
   };
 
