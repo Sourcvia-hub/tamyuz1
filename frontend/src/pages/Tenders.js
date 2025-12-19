@@ -5,12 +5,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { canCreate, Module } from '../utils/permissions';
 import WorkflowStatusBadge from '../components/workflow/WorkflowStatusBadge';
+import { useToast } from '../hooks/use-toast';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Tenders = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [tenders, setTenders] = useState([]);
   const [loading, setLoading] = useState(true);

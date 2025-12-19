@@ -7,12 +7,14 @@ import SearchableSelect from '../components/SearchableSelect';
 import AIInvoiceMatcher from '../components/AIInvoiceMatcher';
 import FileUpload from '../components/FileUpload';
 import { canCreate, canVerify, canApprove, Module } from '../utils/permissions';
+import { useToast } from '../hooks/use-toast';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const Invoices = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
