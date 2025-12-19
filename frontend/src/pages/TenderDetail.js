@@ -120,21 +120,27 @@ const TenderDetail = () => {
 
   // Forward to additional approver
   const handleForwardToApprover = async () => {
-    if (!selectedApproverId) {
+    if (!selectedApproverId || !selectedApproverId.value) {
       toast({ title: "⚠️ Select Approver", description: "Please select an approver", variant: "warning" });
       return;
     }
     try {
       await axios.post(`${API}/business-requests/${id}/forward-to-approver`, {
         approver_user_id: selectedApproverId.value,
-        notes: forwardNotes
+        notes: forwardNotes || ''
       }, { withCredentials: true });
       toast({ title: "✅ Forwarded", description: "Request forwarded to approver", variant: "success" });
       setShowForwardModal(false);
       fetchTender();
       fetchWorkflowStatus();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to forward", variant: "destructive" });
+      const errorDetail = error.response?.data?.detail;
+      const errorMessage = typeof errorDetail === 'string' 
+        ? errorDetail 
+        : Array.isArray(errorDetail) 
+          ? errorDetail.map(e => e.msg).join(', ')
+          : "Failed to forward";
+      toast({ title: "❌ Error", description: errorMessage, variant: "destructive" });
     }
   };
 
