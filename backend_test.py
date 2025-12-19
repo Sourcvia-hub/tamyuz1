@@ -1013,10 +1013,16 @@ class SourceviaBackendTester:
                         self.log_result("Submit for Approval", True, "Contract submitted for approval")
                     else:
                         # Check if it's a validation error (expected)
-                        data = response.json()
-                        if "errors" in data:
-                            self.log_result("Submit for Approval", True, f"Validation working: {data['errors']}")
-                        else:
+                        try:
+                            data = response.json()
+                            detail = data.get("detail", {})
+                            if isinstance(detail, dict) and "errors" in detail:
+                                self.log_result("Submit for Approval", True, f"Validation working: {detail['errors']}")
+                            elif isinstance(detail, str) and ("Due Diligence" in detail or "NOC" in detail):
+                                self.log_result("Submit for Approval", True, f"Validation working: {detail}")
+                            else:
+                                self.log_result("Submit for Approval", False, f"Unexpected 400: {response.text}")
+                        except:
                             self.log_result("Submit for Approval", False, f"Unexpected 400: {response.text}")
                 else:
                     self.log_result("Submit for Approval", False, f"Status: {response.status_code}, Response: {response.text}")
