@@ -85,6 +85,14 @@ try:
 except Exception as exc:
     print(f"[Approvals Hub] Failed to mount router: {exc}")
 
+# Include Deliverables & Payment Authorization Routes
+try:
+    from routes.deliverable_routes import router as deliverable_router
+    api_router.include_router(deliverable_router)
+    print("[Deliverables] Router mounted at /api/deliverables")
+except Exception as exc:
+    print(f"[Deliverables] Failed to mount router: {exc}")
+
 
 # ==================== HELPER FUNCTIONS ====================
 def calculate_vendor_registration_score(vendor_data: dict) -> dict:
