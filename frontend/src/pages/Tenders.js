@@ -115,8 +115,8 @@ const Tenders = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Purchase Requests (PR)</h1>
-            <p className="text-gray-600 mt-1">Create and manage purchase request workflows</p>
+            <h1 className="text-3xl font-bold text-gray-900">Business Requests (PR)</h1>
+            <p className="text-gray-600 mt-1">Create and manage business request workflows</p>
           </div>
           {canCreate(user?.role, Module.TENDERS) && (
             <button
