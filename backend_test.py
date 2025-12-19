@@ -2950,6 +2950,9 @@ class SourceviaBackendTester:
         # NEW: Test the updated Deliverables system with HoP approval workflow (PRIORITY TEST)
         self.test_deliverables_hop_workflow()
         
+        # NEW: Test HoP Approval Workflow Features (PRIORITY TEST from review request)
+        self.test_hop_approval_workflow()
+        
         self.test_vendor_workflow()
         self.test_purchase_request_workflow()
         self.test_contract_workflow()
