@@ -150,14 +150,20 @@ async def get_approvals_summary(request: Request):
 
 
 @router.get("/vendors")
-async def get_pending_vendors(request: Request):
-    """Get vendors pending approval/review"""
+async def get_pending_vendors(request: Request, status: str = "pending"):
+    """Get vendors by status (pending or approved)"""
     user = await require_auth(request)
     
-    vendors = await db.vendors.find(
-        {"status": {"$in": ["draft", "pending", "pending_review", "pending_due_diligence", "reviewed"]}},
-        {"_id": 0}
-    ).sort("updated_at", -1).to_list(100)
+    if status == "approved":
+        vendors = await db.vendors.find(
+            {"status": "approved"},
+            {"_id": 0}
+        ).sort("updated_at", -1).to_list(50)
+    else:
+        vendors = await db.vendors.find(
+            {"status": {"$in": ["draft", "pending", "pending_review", "pending_due_diligence", "reviewed"]}},
+            {"_id": 0}
+        ).sort("updated_at", -1).to_list(50)
     
     return {"vendors": vendors, "count": len(vendors)}
 
