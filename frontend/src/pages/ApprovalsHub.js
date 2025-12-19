@@ -13,6 +13,7 @@ const ApprovalsHub = () => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [statusFilter, setStatusFilter] = useState('pending'); // 'pending' or 'approved'
   const [moduleData, setModuleData] = useState({});
   const [moduleLoading, setModuleLoading] = useState(false);
 
@@ -31,11 +32,11 @@ const ApprovalsHub = () => {
     }
   };
 
-  const fetchModuleData = async (module) => {
+  const fetchModuleData = async (module, status = 'pending') => {
     setModuleLoading(true);
     try {
-      const response = await axios.get(`${API}/approvals-hub/${module}`, { withCredentials: true });
-      setModuleData(prev => ({ ...prev, [module]: response.data }));
+      const response = await axios.get(`${API}/approvals-hub/${module}?status=${status}`, { withCredentials: true });
+      setModuleData(prev => ({ ...prev, [`${module}_${status}`]: response.data }));
     } catch (error) {
       console.error(`Error fetching ${module}:`, error);
     } finally {
@@ -45,8 +46,21 @@ const ApprovalsHub = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    if (tab !== 'overview' && !moduleData[tab]) {
-      fetchModuleData(tab);
+    if (tab !== 'overview') {
+      const cacheKey = `${tab}_${statusFilter}`;
+      if (!moduleData[cacheKey]) {
+        fetchModuleData(tab, statusFilter);
+      }
+    }
+  };
+
+  const handleStatusFilterChange = (status) => {
+    setStatusFilter(status);
+    if (activeTab !== 'overview') {
+      const cacheKey = `${activeTab}_${status}`;
+      if (!moduleData[cacheKey]) {
+        fetchModuleData(activeTab, status);
+      }
     }
   };
 
@@ -57,8 +71,6 @@ const ApprovalsHub = () => {
     { key: 'contracts', label: 'Contracts', icon: '📄', color: 'green' },
     { key: 'purchase-orders', label: 'Purchase Orders', icon: '🛒', color: 'orange' },
     { key: 'deliverables', label: 'Deliverables', icon: '📦', color: 'yellow' },
-    { key: 'resources', label: 'Resources', icon: '👥', color: 'indigo' },
-    { key: 'assets', label: 'Assets', icon: '🖥️', color: 'gray' },
   ];
 
   const getStatusBadge = (status) => {
@@ -70,9 +82,14 @@ const ApprovalsHub = () => {
       pending_approval: 'bg-orange-100 text-orange-800',
       pending_hop_approval: 'bg-red-100 text-red-800',
       verified: 'bg-green-100 text-green-800',
+      validated: 'bg-green-100 text-green-800',
+      approved: 'bg-green-100 text-green-800',
+      active: 'bg-green-100 text-green-800',
       published: 'bg-blue-100 text-blue-800',
       closed: 'bg-orange-100 text-orange-800',
-      active: 'bg-green-100 text-green-800',
+      awarded: 'bg-green-100 text-green-800',
+      issued: 'bg-green-100 text-green-800',
+      paid: 'bg-green-100 text-green-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -96,12 +113,36 @@ const ApprovalsHub = () => {
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <span>📋</span> Approvals Hub
             </h1>
-            <p className="text-gray-600 mt-1">Unified dashboard for all pending approvals and actions</p>
+            <p className="text-gray-600 mt-1">View pending items and approved actions</p>
           </div>
           <div className="bg-blue-50 px-4 py-2 rounded-lg">
             <span className="text-sm text-blue-600">Total Pending: </span>
             <span className="text-xl font-bold text-blue-700">{summary?.total_all || 0}</span>
           </div>
+        </div>
+
+        {/* Status Filter Tabs */}
+        <div className="flex gap-2 bg-gray-100 p-1 rounded-lg w-fit">
+          <button
+            onClick={() => handleStatusFilterChange('pending')}
+            className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              statusFilter === 'pending'
+                ? 'bg-white text-orange-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🔔 Pending
+          </button>
+          <button
+            onClick={() => handleStatusFilterChange('approved')}
+            className={`px-6 py-2 rounded-md font-medium transition-colors ${
+              statusFilter === 'approved'
+                ? 'bg-white text-green-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            ✅ Approved
+          </button>
         </div>
 
         {/* Module Tabs */}
@@ -118,7 +159,7 @@ const ApprovalsHub = () => {
             >
               <span>{module.icon}</span>
               {module.label}
-              {module.key !== 'overview' && summary?.[module.key.replace('-', '_')]?.total_pending > 0 && (
+              {module.key !== 'overview' && summary?.[module.key.replace('-', '_')]?.total_pending > 0 && statusFilter === 'pending' && (
                 <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
                   activeTab === module.key ? 'bg-white text-blue-600' : 'bg-red-100 text-red-700'
                 }`}>
@@ -131,14 +172,15 @@ const ApprovalsHub = () => {
 
         {/* Content Area */}
         {activeTab === 'overview' ? (
-          <OverviewPanel summary={summary} onModuleClick={handleTabChange} />
+          <OverviewPanel summary={summary} onModuleClick={handleTabChange} statusFilter={statusFilter} />
         ) : (
           <ModulePanel
             module={activeTab}
-            data={moduleData[activeTab]}
+            data={moduleData[`${activeTab}_${statusFilter}`]}
             loading={moduleLoading}
             getStatusBadge={getStatusBadge}
             navigate={navigate}
+            statusFilter={statusFilter}
           />
         )}
       </div>
@@ -147,8 +189,8 @@ const ApprovalsHub = () => {
 };
 
 // Overview Panel Component
-const OverviewPanel = ({ summary, onModuleClick }) => {
-  const cards = [
+const OverviewPanel = ({ summary, onModuleClick, statusFilter }) => {
+  const pendingCards = [
     {
       key: 'vendors',
       title: 'Vendors',
@@ -212,30 +254,6 @@ const OverviewPanel = ({ summary, onModuleClick }) => {
       total: summary?.deliverables?.total_pending || 0,
       link: '/deliverables'
     },
-    {
-      key: 'resources',
-      title: 'Resources',
-      icon: '👥',
-      color: 'indigo',
-      items: [
-        { label: 'Pending Approval', count: summary?.resources?.pending_approval || 0 },
-        { label: 'Expiring Soon', count: summary?.resources?.expiring_soon || 0 },
-      ],
-      total: summary?.resources?.total_pending || 0,
-      link: '/resources'
-    },
-    {
-      key: 'assets',
-      title: 'Assets',
-      icon: '🖥️',
-      color: 'gray',
-      items: [
-        { label: 'Under Maintenance', count: summary?.assets?.pending_maintenance || 0 },
-        { label: 'Warranty Expiring', count: summary?.assets?.warranty_expiring || 0 },
-      ],
-      total: summary?.assets?.total_pending || 0,
-      link: '/assets'
-    },
   ];
 
   const colorClasses = {
@@ -244,13 +262,47 @@ const OverviewPanel = ({ summary, onModuleClick }) => {
     green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', badge: 'bg-green-100 text-green-800' },
     orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-800' },
     yellow: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', badge: 'bg-yellow-100 text-yellow-800' },
-    indigo: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', badge: 'bg-indigo-100 text-indigo-800' },
-    gray: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800' },
   };
 
+  // Filter cards based on status filter - show only those with items
+  const filteredCards = statusFilter === 'pending' 
+    ? pendingCards.filter(card => card.total > 0)
+    : pendingCards; // For approved, show all modules
+
+  if (statusFilter === 'approved') {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <span className="text-6xl mb-4 block">✅</span>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">Approved Items</h3>
+        <p className="text-gray-600 mb-4">Select a module tab above to view approved items in that category.</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {pendingCards.map(card => (
+            <button
+              key={card.key}
+              onClick={() => onModuleClick(card.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${colorClasses[card.color].bg} ${colorClasses[card.color].text} hover:shadow-md transition-shadow`}
+            >
+              {card.icon} {card.title}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (filteredCards.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow p-12 text-center">
+        <span className="text-6xl mb-4 block">🎉</span>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">All Clear!</h3>
+        <p className="text-gray-600">No pending approvals at this time.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {cards.map(card => {
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {filteredCards.map(card => {
         const colors = colorClasses[card.color];
         return (
           <div
@@ -267,7 +319,7 @@ const OverviewPanel = ({ summary, onModuleClick }) => {
             </div>
             
             <div className="space-y-2">
-              {card.items.map((item, idx) => (
+              {card.items.filter(item => item.count > 0).map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">{item.label}</span>
                   <span className={`px-2 py-0.5 rounded ${colors.badge}`}>{item.count}</span>
@@ -290,7 +342,7 @@ const OverviewPanel = ({ summary, onModuleClick }) => {
 };
 
 // Module Panel Component
-const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
+const ModulePanel = ({ module, data, loading, getStatusBadge, navigate, statusFilter }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -306,8 +358,6 @@ const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
       case 'contracts': return data?.contracts || [];
       case 'purchase-orders': return data?.purchase_orders || [];
       case 'deliverables': return data?.deliverables || [];
-      case 'resources': return data?.resources || [];
-      case 'assets': return data?.assets || [];
       default: return [];
     }
   };
@@ -317,9 +367,15 @@ const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-12 text-center">
-        <span className="text-6xl mb-4 block">✅</span>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">All Clear!</h3>
-        <p className="text-gray-600">No pending items in this category.</p>
+        <span className="text-6xl mb-4 block">{statusFilter === 'pending' ? '✅' : '📭'}</span>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          {statusFilter === 'pending' ? 'All Clear!' : 'No Approved Items'}
+        </h3>
+        <p className="text-gray-600">
+          {statusFilter === 'pending' 
+            ? 'No pending items in this category.' 
+            : 'No recently approved items in this category.'}
+        </p>
       </div>
     );
   }
@@ -327,33 +383,15 @@ const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
   const renderItem = (item) => {
     switch (module) {
       case 'vendors':
-        return (
-          <VendorItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
+        return <VendorItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />;
       case 'business-requests':
-        return (
-          <BusinessRequestItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
+        return <BusinessRequestItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />;
       case 'contracts':
-        return (
-          <ContractItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
+        return <ContractItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />;
       case 'purchase-orders':
-        return (
-          <POItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
+        return <POItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />;
       case 'deliverables':
-        return (
-          <DeliverableItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
-      case 'resources':
-        return (
-          <ResourceItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
-      case 'assets':
-        return (
-          <AssetItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
-        );
+        return <DeliverableItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />;
       default:
         return null;
     }
@@ -361,6 +399,9 @@ const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
 
   return (
     <div className="space-y-4">
+      <div className="text-sm text-gray-500 mb-2">
+        Showing {items.length} {statusFilter} item{items.length !== 1 ? 's' : ''}
+      </div>
       {items.map(renderItem)}
     </div>
   );
@@ -392,7 +433,7 @@ const VendorItem = ({ item, getStatusBadge, navigate }) => (
         onClick={() => navigate(`/vendors/${item.id}`)}
         className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
       >
-        Review
+        View
       </button>
     </div>
   </div>
@@ -420,7 +461,7 @@ const BusinessRequestItem = ({ item, getStatusBadge, navigate }) => (
         onClick={() => navigate(`/tenders/${item.id}`)}
         className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700"
       >
-        Review
+        View
       </button>
     </div>
   </div>
@@ -455,7 +496,7 @@ const ContractItem = ({ item, getStatusBadge, navigate }) => (
         onClick={() => navigate(`/contracts/${item.id}`)}
         className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
       >
-        Review
+        View
       </button>
     </div>
   </div>
@@ -485,7 +526,7 @@ const POItem = ({ item, getStatusBadge, navigate }) => (
         onClick={() => navigate(`/purchase-orders/${item.id}`)}
         className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
       >
-        Review
+        View
       </button>
     </div>
   </div>
@@ -512,76 +553,6 @@ const DeliverableItem = ({ item, getStatusBadge, navigate }) => (
       <button
         onClick={() => navigate(`/deliverables`)}
         className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700"
-      >
-        {item.status === 'submitted' ? 'Review' : item.status === 'pending_hop_approval' ? 'Approve' : 'View'}
-      </button>
-    </div>
-  </div>
-);
-
-const ResourceItem = ({ item, getStatusBadge, navigate }) => {
-  const daysUntilExpiry = item.end_date
-    ? Math.ceil((new Date(item.end_date) - new Date()) / (1000 * 60 * 60 * 24))
-    : null;
-
-  return (
-    <div className="bg-white rounded-lg shadow p-4 border border-gray-200 hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-semibold text-gray-900">{item.name}</h4>
-          <p className="text-sm text-gray-500">
-            {item.resource_number} • {item.vendor_info?.name_english || 'N/A'}
-          </p>
-          <div className="flex gap-2 mt-2">
-            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(item.status)}`}>
-              {(item.status || '').toUpperCase()}
-            </span>
-            {daysUntilExpiry !== null && daysUntilExpiry <= 30 && (
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                daysUntilExpiry <= 7 ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'
-              }`}>
-                {daysUntilExpiry <= 0 ? 'EXPIRED' : `${daysUntilExpiry} DAYS LEFT`}
-              </span>
-            )}
-          </div>
-        </div>
-        <button
-          onClick={() => navigate(`/resources/${item.id}`)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"
-        >
-          View
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const AssetItem = ({ item, getStatusBadge, navigate }) => (
-  <div className="bg-white rounded-lg shadow p-4 border border-gray-200 hover:shadow-md transition-shadow">
-    <div className="flex justify-between items-start">
-      <div>
-        <h4 className="font-semibold text-gray-900">{item.name}</h4>
-        <p className="text-sm text-gray-500">
-          {item.asset_number} • {item.building_name} {item.floor_name ? `/ ${item.floor_name}` : ''}
-        </p>
-        <div className="flex gap-2 mt-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(item.status)}`}>
-            {(item.status || '').replace(/_/g, ' ').toUpperCase()}
-          </span>
-          {item.condition && (
-            <span className={`px-2 py-1 rounded text-xs font-medium ${
-              item.condition === 'good' ? 'bg-green-100 text-green-800' :
-              item.condition === 'fair' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
-            }`}>
-              {item.condition.toUpperCase()}
-            </span>
-          )}
-        </div>
-      </div>
-      <button
-        onClick={() => navigate(`/assets/${item.id}`)}
-        className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm hover:bg-gray-700"
       >
         View
       </button>
