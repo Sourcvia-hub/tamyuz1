@@ -1,8 +1,8 @@
 """
-Tender and Proposal models
+Tender and Proposal models - Business Request (PR)
 """
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
 from enum import Enum
 import uuid
@@ -15,6 +15,10 @@ class TenderStatus(str, Enum):
 
 
 class Tender(BaseModel):
+    """
+    Business Request (PR) model - renamed from Tender
+    Includes Contract Context Questionnaire for governance workflow
+    """
     model_config = ConfigDict(extra="ignore")
     
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -25,8 +29,8 @@ class Tender(BaseModel):
     project_reference: Optional[str] = None  # Mandatory if is_project_related = "yes"
     project_name: str
     description: str
-    requirements: str
-    budget: float
+    requirements: str  # Business Need
+    budget: float  # Estimated Budget (Indicative)
     deadline: datetime
     invited_vendors: List[str] = []  # vendor IDs
     status: TenderStatus = TenderStatus.DRAFT
@@ -34,6 +38,34 @@ class Tender(BaseModel):
     awarded_to: Optional[str] = None  # vendor ID
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # ==================== CONTRACT CONTEXT QUESTIONNAIRE ====================
+    # These fields are filled by Business User during PR creation
+    # Used to determine outsourcing/cloud indicators early in the process
+    
+    # Q1: Does the service require access to company systems or data?
+    ctx_requires_system_data_access: Optional[str] = None  # "yes", "no", "unknown"
+    
+    # Q2: Is the service cloud-based?
+    ctx_is_cloud_based: Optional[str] = None  # "yes", "no", "unknown"
+    
+    # Q3: Is the vendor operating a service on behalf of the company? (Outsourcing indicator)
+    ctx_is_outsourcing_service: Optional[str] = None  # "yes", "no", "unknown"
+    
+    # Q4: Expected data location
+    ctx_expected_data_location: Optional[str] = None  # "inside_ksa", "outside_ksa", "unknown"
+    
+    # Q5: Is onsite presence required?
+    ctx_requires_onsite_presence: Optional[str] = None  # "yes", "no"
+    
+    # Q6: Expected contract duration
+    ctx_expected_duration: Optional[str] = None  # "less_than_6_months", "6_to_12_months", "more_than_12_months"
+    
+    # Procurement Officer validation
+    ctx_validated_by_procurement: bool = False
+    ctx_validated_by: Optional[str] = None
+    ctx_validated_at: Optional[datetime] = None
+    ctx_procurement_notes: Optional[str] = None
 
 class EvaluationCriteria(BaseModel):
     model_config = ConfigDict(extra="ignore")
