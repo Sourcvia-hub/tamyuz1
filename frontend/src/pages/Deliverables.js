@@ -308,7 +308,7 @@ const DeliverableCard = ({ deliverable, getStatusBadge, getPAFStatusBadge, navig
 };
 
 // Create Deliverable Modal
-const CreateDeliverableModal = ({ contracts, vendors, onClose, onCreated }) => {
+const CreateDeliverableModal = ({ contracts, vendors, onClose, onCreated, toast }) => {
   const [formData, setFormData] = useState({
     contract_id: '',
     vendor_id: '',
@@ -325,7 +325,11 @@ const CreateDeliverableModal = ({ contracts, vendors, onClose, onCreated }) => {
     e.preventDefault();
     
     if (!formData.vendor_id || !formData.title) {
-      alert('Please fill in required fields');
+      toast({
+        title: "⚠️ Validation Error",
+        description: "Please fill in all required fields",
+        variant: "warning"
+      });
       return;
     }
 
@@ -338,7 +342,11 @@ const CreateDeliverableModal = ({ contracts, vendors, onClose, onCreated }) => {
       onCreated();
     } catch (error) {
       console.error('Error creating deliverable:', error);
-      alert('Failed to create deliverable: ' + (error.response?.data?.detail || error.message));
+      toast({
+        title: "❌ Creation Failed",
+        description: error.response?.data?.detail || error.message,
+        variant: "destructive"
+      });
     } finally {
       setSubmitting(false);
     }
