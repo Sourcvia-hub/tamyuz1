@@ -456,6 +456,106 @@ const TenderDetail = () => {
           </div>
         </div>
 
+        {/* Evaluation Summary Section - Visible to officers and approvers */}
+        {canViewEvaluation && evaluationData && evaluationData.proposals?.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                📊 Evaluation Summary
+                <span className="text-sm font-normal text-gray-500">
+                  ({evaluationData.proposals.filter(p => p.evaluated).length}/{evaluationData.proposals.length} evaluated)
+                </span>
+              </h2>
+              {canAmendEvaluation && (
+                <span className="text-sm text-blue-600">Click a proposal to amend evaluation</span>
+              )}
+            </div>
+
+            {/* Evaluation Weights */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-sm text-gray-600 mb-2">Evaluation Criteria Weights</h3>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">Vendor Reliability: 20%</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">Delivery & Warranty: 20%</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">Technical Experience: 10%</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">Cost Score: 10%</span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded">Meets Requirements: 40%</span>
+              </div>
+            </div>
+
+            {/* Proposals Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="text-left p-3 border">Vendor</th>
+                    <th className="text-right p-3 border">Financial</th>
+                    <th className="text-center p-3 border">Vendor Rel.</th>
+                    <th className="text-center p-3 border">Delivery</th>
+                    <th className="text-center p-3 border">Tech Exp.</th>
+                    <th className="text-center p-3 border">Cost</th>
+                    <th className="text-center p-3 border">Meets Req.</th>
+                    <th className="text-center p-3 border">Total Score</th>
+                    <th className="text-center p-3 border">Status</th>
+                    {canAmendEvaluation && <th className="text-center p-3 border">Action</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {evaluationData.proposals.map((proposal, idx) => {
+                    const isRecommended = tender.selected_proposal_id === proposal.proposal_id;
+                    return (
+                      <tr key={proposal.proposal_id} className={`${isRecommended ? 'bg-green-50' : ''} hover:bg-gray-50`}>
+                        <td className="p-3 border">
+                          <div className="flex items-center gap-2">
+                            {isRecommended && <span className="text-green-600">★</span>}
+                            <span className="font-medium">{proposal.vendor_name || `Vendor ${idx + 1}`}</span>
+                          </div>
+                        </td>
+                        <td className="text-right p-3 border font-medium">{proposal.financial_proposal?.toLocaleString()} SAR</td>
+                        <td className="text-center p-3 border">{proposal.evaluation?.vendor_reliability_stability || '-'}</td>
+                        <td className="text-center p-3 border">{proposal.evaluation?.delivery_warranty_backup || '-'}</td>
+                        <td className="text-center p-3 border">{proposal.evaluation?.technical_experience || '-'}</td>
+                        <td className="text-center p-3 border">{proposal.evaluation?.cost_score?.toFixed(1) || proposal.suggested_cost_score?.toFixed(1) || '-'}</td>
+                        <td className="text-center p-3 border">{proposal.evaluation?.meets_requirements || '-'}</td>
+                        <td className="text-center p-3 border">
+                          <span className={`font-bold ${proposal.total_score > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                            {proposal.total_score > 0 ? proposal.total_score.toFixed(2) : '-'}
+                          </span>
+                        </td>
+                        <td className="text-center p-3 border">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            proposal.evaluated ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {proposal.evaluated ? 'Evaluated' : 'Pending'}
+                          </span>
+                        </td>
+                        {canAmendEvaluation && (
+                          <td className="text-center p-3 border">
+                            <button
+                              onClick={() => handleEditEvaluation(proposal)}
+                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                            >
+                              {proposal.evaluated ? 'Edit' : 'Evaluate'}
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* AI Recommendation if available */}
+            {evaluationData.ai_recommendation && (
+              <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <h3 className="font-semibold text-purple-800 mb-2">🤖 AI Recommendation</h3>
+                <p className="text-purple-700">{evaluationData.ai_recommendation}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Proposals Section */}
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold mb-4">
