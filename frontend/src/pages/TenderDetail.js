@@ -516,65 +516,6 @@ const TenderDetail = () => {
           </div>
         )}
 
-        {/* Evaluation Modal */}
-        {showEvaluationModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold mb-4">Evaluate Proposals</h2>
-              <p className="text-gray-600 mb-4">Select the proposal you recommend for this Business Request.</p>
-              
-              <div className="space-y-3 mb-4">
-                {proposals.map((proposal) => {
-                  const vendor = proposal.vendor_info || vendors.find(v => v.id === proposal.vendor_id);
-                  return (
-                    <div
-                      key={proposal.id}
-                      onClick={() => setSelectedProposalId(proposal.id)}
-                      className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                        selectedProposalId === proposal.id
-                          ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
-                          : 'hover:border-blue-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          checked={selectedProposalId === proposal.id}
-                          onChange={() => setSelectedProposalId(proposal.id)}
-                          className="w-5 h-5 text-blue-600"
-                        />
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{vendor?.name_english || vendor?.commercial_name || 'Unknown'}</h3>
-                          <p className="text-sm text-gray-600">{proposal.technical_proposal?.substring(0, 100)}...</p>
-                          <p className="text-lg font-bold text-blue-600">{proposal.financial_proposal?.toLocaleString()} SAR</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Evaluation Notes (Optional)</label>
-                <textarea
-                  value={evaluationNotes}
-                  onChange={(e) => setEvaluationNotes(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg"
-                  rows={3}
-                  placeholder="Add any notes about your evaluation..."
-                />
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <button onClick={() => setShowEvaluationModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
-                <button onClick={handleSubmitEvaluation} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                  Submit Evaluation
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Forward to Approver Modal */}
         {showForwardModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
