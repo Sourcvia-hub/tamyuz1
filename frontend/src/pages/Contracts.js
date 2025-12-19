@@ -444,10 +444,44 @@ const Contracts = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Contract</h2>
+            
+            {/* Contract Creation Mode Toggle */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-3">How would you like to create the contract?</label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setContractCreationMode('fill')}
+                  className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                    contractCreationMode === 'fill' 
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <span className="text-2xl block mb-2">📝</span>
+                  <span className="font-medium">Fill Contract Fields</span>
+                  <p className="text-xs mt-1 text-gray-500">Enter contract details manually</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setContractCreationMode('upload')}
+                  className={`flex-1 p-4 rounded-lg border-2 transition-all ${
+                    contractCreationMode === 'upload' 
+                      ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <span className="text-2xl block mb-2">📤</span>
+                  <span className="font-medium">Upload Contract Document</span>
+                  <p className="text-xs mt-1 text-gray-500">Upload signed contract file</p>
+                </button>
+              </div>
+            </div>
+
             <form onSubmit={handleCreateContract} className="space-y-4">
               {/* Tender Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Select Approved Tender *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Select Business Request (PR) *</label>
                 <SearchableSelect
                   options={tenders.map(tender => ({
                     value: tender.id,
@@ -455,7 +489,7 @@ const Contracts = () => {
                   }))}
                   value={formData.tender_id}
                   onChange={(value) => handleTenderSelect(value)}
-                  placeholder="Search and select tender..."
+                  placeholder="Search and select business request..."
                   required={true}
                   isClearable={false}
                 />
@@ -464,24 +498,25 @@ const Contracts = () => {
               {/* Tender RFP Guidelines */}
               {selectedTender && (
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2">📋 Tender RFP Guidelines</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2">📋 Business Request Details</h3>
                   <div className="space-y-2 text-sm">
                     <div><strong>Project:</strong> {selectedTender.project_name}</div>
-                    <div><strong>Budget:</strong> ${selectedTender.budget?.toLocaleString()}</div>
+                    <div><strong>Budget:</strong> {selectedTender.budget?.toLocaleString()} SAR</div>
                     <div><strong>Requirements:</strong> {selectedTender.requirements}</div>
                   </div>
-                  <p className="text-xs text-blue-700 mt-2 italic">Contract should follow the same scope as outlined in the RFP</p>
                 </div>
               )}
 
-              {/* Winning Vendor (Auto-Selected from Tender) */}
+              {/* Awarded/Recommended Vendor (Auto-Selected from PR) */}
               {selectedVendor && formData.tender_id ? (
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border-2 border-green-300">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-2xl">🏆</span>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Winning Vendor (Rank #1)</h3>
-                      <p className="text-xs text-gray-600">Auto-selected from tender evaluation</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {selectedTender?.status === 'awarded' ? 'Awarded Vendor' : 'Recommended Vendor'}
+                      </h3>
+                      <p className="text-xs text-gray-600">Auto-selected from business request evaluation</p>
                     </div>
                   </div>
                   <div className="bg-white p-3 rounded-lg">
@@ -491,41 +526,31 @@ const Contracts = () => {
                         {selectedVendor.name_english || selectedVendor.commercial_name}
                       </strong>
                     </p>
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                      <p className="text-xs text-gray-600">
-                        <strong>Risk Assessment:</strong> {selectedVendor.risk_score}/100 - 
-                        <span className={`ml-1 font-semibold ${
-                          selectedVendor.risk_category === 'low' ? 'text-green-700' :
-                          selectedVendor.risk_category === 'medium' ? 'text-yellow-700' :
-                          'text-red-700'
-                        }`}>
-                          {selectedVendor.risk_category.toUpperCase()} RISK
-                        </span>
-                      </p>
-                    </div>
+                    {selectedVendor.risk_category && (
+                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        <p className="text-xs text-gray-600">
+                          <strong>Risk Assessment:</strong> {selectedVendor.risk_score}/100 - 
+                          <span className={`ml-1 font-semibold ${
+                            selectedVendor.risk_category === 'low' ? 'text-green-700' :
+                            selectedVendor.risk_category === 'medium' ? 'text-yellow-700' :
+                            'text-red-700'
+                          }`}>
+                            {selectedVendor.risk_category.toUpperCase()} RISK
+                          </span>
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <input type="hidden" value={formData.vendor_id} />
                 </div>
-              ) : (
-                /* Vendor Selection (only shown if no tender selected) */
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Vendor *</label>
-                  <select
-                    value={formData.vendor_id}
-                    onChange={(e) => handleVendorSelect(e.target.value)}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select a vendor</option>
-                    {vendors.map((vendor) => (
-                      <option key={vendor.id} value={vendor.id}>
-                        {vendor.vendor_number ? `${vendor.vendor_number} - ` : ''}{vendor.name_english || vendor.commercial_name || 'Unknown Vendor'}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-gray-500 mt-1">💡 Tip: Select a tender first to auto-select the winning vendor</p>
+              ) : formData.tender_id ? (
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-300">
+                  <p className="text-yellow-800 text-sm">
+                    ⚠️ No vendor has been awarded or recommended for this business request yet. 
+                    Please complete the evaluation process first.
+                  </p>
                 </div>
-              )}
+              ) : null}}
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
