@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
 import { API_URL } from './config/api';
+import { Toaster } from './components/ui/toaster';
 
 const API = API_URL;
 
