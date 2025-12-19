@@ -239,7 +239,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "All new features tested successfully"
+    - "Business Request Approval Workflow tested successfully"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
