@@ -738,29 +738,63 @@ const Contracts = () => {
                   />
                 </div>
               </div>
+                </>
+              )}
 
-              {/* Outsourcing Assessment Questionnaire */}
-              <div className="border-t pt-6 mt-6">
-                <OutsourcingQuestionnaire formData={formData} setFormData={setFormData} />
-              </div>
-
-              {/* File Attachments */}
-              <div className="mt-6 p-4 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="text-sm text-gray-600 mb-2">📎 Contract Documents</p>
-                <p className="text-xs text-gray-500">Save the contract first to enable file uploads</p>
-              </div>
+              {/* Common fields for both modes */}
+              {contractCreationMode === 'upload' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contract Value *</label>
+                    <input
+                      type="number"
+                      value={formData.value}
+                      onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                      required
+                      min="0"
+                      step="0.01"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+                    <input
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date *</label>
+                    <input
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="flex space-x-4 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setContractCreationMode('fill');
+                    setUploadedContractFile(null);
+                  }}
                   className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  disabled={!formData.vendor_id}
+                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Create Contract
                 </button>
