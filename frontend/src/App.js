@@ -253,6 +253,7 @@ const App = () => {
       <AuthProvider>
         <div className="App">
           <AppRoutes />
+          <Toaster />
         </div>
       </AuthProvider>
     </BrowserRouter>
