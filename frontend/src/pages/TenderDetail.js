@@ -156,7 +156,7 @@ const TenderDetail = () => {
       fetchTender();
       fetchWorkflowStatus();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to forward", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to forward"), variant: "destructive" });
     }
   };
 
@@ -171,7 +171,7 @@ const TenderDetail = () => {
       fetchTender();
       fetchWorkflowStatus();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to process"), variant: "destructive" });
     }
   };
 
@@ -186,7 +186,7 @@ const TenderDetail = () => {
       fetchTender();
       fetchWorkflowStatus();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to process"), variant: "destructive" });
     }
   };
 
