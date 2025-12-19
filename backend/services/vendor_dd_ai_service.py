@@ -1,11 +1,12 @@
 """
 Vendor Due Diligence AI Service - Document extraction and risk evaluation
-Uses OpenAI for OCR and AI analysis
+Uses Emergent LLM Integration for AI analysis
 """
 import os
 import json
 import re
 import logging
+import asyncio
 from typing import Optional, Dict, Any, Tuple
 from datetime import datetime, timezone
 from dotenv import load_dotenv
@@ -94,27 +95,6 @@ Apply these regardless of numeric score:
 • If sanctions exposure is mentioned or suspected, flag as a critical risk driver
 • If ownership transparency is weak, risk level cannot be lower than Medium
 
-🧠 ANALYSIS STEPS (MANDATORY)
-Step 1: Extract & Infer
-• Extract company name, country, ownership, financial indicators, declarations
-• Reasonably infer information where possible
-• Clearly mark inferred data
-
-Step 2: Calculate Vendor Risk Score
-• Produce a numeric score (0–100)
-• Be conservative and commercially realistic
-• Do NOT penalize immaturity alone
-
-Step 3: Assign Risk Level
-• Apply thresholds strictly
-
-Step 4: Identify Top Risk Drivers
-• List maximum 3 most influential factors
-
-Step 5: Confidence Indicator
-• Assess confidence: High / Medium / Low
-• Explain why
-
 🚫 RESTRICTIONS
 • Do NOT approve or reject vendors
 • Do NOT assume contract scope, outsourcing, or cloud usage
@@ -174,16 +154,7 @@ Return the data as a JSON object with the following structure:
     "years_in_business": {"value": "...", "status": "...", "confidence": ...},
     "number_of_customers": {"value": "...", "status": "...", "confidence": ...},
     "number_of_branches": {"value": "...", "status": "...", "confidence": ...},
-    "owners_managers": [{"name": "...", "nationality": "...", "id_number": "...", "ownership_percentage": "..."}],
-    "questionnaire_responses": {
-        "ownership_change": {"value": true/false/null, "status": "...", "confidence": ...},
-        "bc_has_policy": {"value": true/false/null, "status": "...", "confidence": ...},
-        "fraud_prevention": {"value": true/false/null, "status": "...", "confidence": ...},
-        "internal_audit": {"value": true/false/null, "status": "...", "confidence": ...},
-        "hr_background_checks": {"value": true/false/null, "status": "...", "confidence": ...},
-        "cyber_security_policy": {"value": true/false/null, "status": "...", "confidence": ...},
-        "safety_procedures": {"value": true/false/null, "status": "...", "confidence": ...}
-    }
+    "owners_managers": [{"name": "...", "nationality": "...", "id_number": "...", "ownership_percentage": "..."}]
 }
 
 Important:
@@ -195,20 +166,19 @@ Important:
 
 
 class VendorDDAIService:
-    """AI Service for Vendor Due Diligence"""
+    """AI Service for Vendor Due Diligence using Emergent LLM Integration"""
     
-    def __init__(self, api_key: Optional[str] = None):
-        """Initialize with OpenAI API key"""
-        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
-        if not self.api_key:
-            logger.warning("No OpenAI API key provided. AI features will be disabled.")
+    def __init__(self):
+        """Initialize with Emergent LLM key"""
+        self.emergent_key = os.environ.get("EMERGENT_LLM_KEY")
+        if not self.emergent_key:
+            logger.warning("No EMERGENT_LLM_KEY provided. AI features will be disabled.")
         
         # High-risk countries list (configurable)
         self.high_risk_countries = self._load_high_risk_countries()
     
     def _load_high_risk_countries(self) -> list:
         """Load high-risk countries from database or use defaults"""
-        # Default list - can be overridden from database
         return [
             "Russia", "North Korea", "Iran", "Syria", "Cuba", "Venezuela",
             "Myanmar", "Belarus", "Zimbabwe", "Sudan", "South Sudan",
@@ -217,7 +187,7 @@ class VendorDDAIService:
         ]
     
     async def extract_document_text(self, file_path: str, file_type: str) -> str:
-        """Extract text from uploaded document using OCR"""
+        """Extract text from uploaded document"""
         try:
             if file_type.lower() == "pdf":
                 return await self._extract_pdf_text(file_path)
@@ -230,7 +200,7 @@ class VendorDDAIService:
             raise
     
     async def _extract_pdf_text(self, file_path: str) -> str:
-        """Extract text from PDF using various methods"""
+        """Extract text from PDF using pdftotext"""
         import subprocess
         
         # Try pdftotext first (for text-based PDFs)
@@ -246,8 +216,8 @@ class VendorDDAIService:
         except Exception as e:
             logger.warning(f"pdftotext failed: {e}")
         
-        # For scanned PDFs, we'll use OpenAI Vision API
-        return await self._ocr_with_openai(file_path)
+        # If pdftotext fails, return a message that we need OCR
+        return "[PDF requires OCR - text extraction not available]"
     
     async def _extract_docx_text(self, file_path: str) -> str:
         """Extract text from Word document"""
@@ -264,143 +234,54 @@ class VendorDDAIService:
             return "\n".join(full_text)
         except Exception as e:
             logger.error(f"Error extracting DOCX: {e}")
-            # Fall back to OCR
-            return await self._ocr_with_openai(file_path)
-    
-    async def _ocr_with_openai(self, file_path: str) -> str:
-        """Use OpenAI Vision API for OCR on scanned documents"""
-        import base64
-        import httpx
-        
-        if not self.api_key:
-            raise ValueError("OpenAI API key required for OCR")
-        
-        # Convert PDF to images if needed
-        images = await self._convert_to_images(file_path)
-        
-        all_text = []
-        for img_data in images:
-            # Encode image to base64
-            base64_image = base64.b64encode(img_data).decode('utf-8')
-            
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                response = await client.post(
-                    "https://api.openai.com/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {self.api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": "gpt-4o",
-                        "messages": [
-                            {
-                                "role": "user",
-                                "content": [
-                                    {
-                                        "type": "text",
-                                        "text": "Extract all text from this document image. Preserve the structure including tables, forms, and fields. Include both Arabic and English text."
-                                    },
-                                    {
-                                        "type": "image_url",
-                                        "image_url": {
-                                            "url": f"data:image/png;base64,{base64_image}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
-                        "max_tokens": 4096
-                    }
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    text = result["choices"][0]["message"]["content"]
-                    all_text.append(text)
-                else:
-                    logger.error(f"OpenAI OCR failed: {response.text}")
-        
-        return "\n\n--- PAGE BREAK ---\n\n".join(all_text)
-    
-    async def _convert_to_images(self, file_path: str) -> list:
-        """Convert PDF pages to images for OCR"""
-        import subprocess
-        import tempfile
-        import os as os_module
-        
-        images = []
-        
-        # Check if it's a PDF
-        if file_path.lower().endswith('.pdf'):
-            with tempfile.TemporaryDirectory() as temp_dir:
-                # Convert PDF to images using pdftoppm
-                try:
-                    subprocess.run(
-                        ["pdftoppm", "-png", "-r", "200", file_path, f"{temp_dir}/page"],
-                        check=True,
-                        timeout=120
-                    )
-                    
-                    # Read all generated images
-                    for filename in sorted(os_module.listdir(temp_dir)):
-                        if filename.endswith('.png'):
-                            with open(os_module.path.join(temp_dir, filename), 'rb') as f:
-                                images.append(f.read())
-                except Exception as e:
-                    logger.error(f"PDF to image conversion failed: {e}")
-        else:
-            # For other file types, read directly
-            with open(file_path, 'rb') as f:
-                images.append(f.read())
-        
-        return images if images else [open(file_path, 'rb').read()]
+            return f"[Error extracting DOCX: {str(e)}]"
     
     async def extract_fields(self, document_text: str) -> Dict[str, Any]:
-        """Extract structured fields from document text using AI"""
-        import httpx
+        """Extract structured fields from document text using Emergent LLM"""
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        if not self.api_key:
-            raise ValueError("OpenAI API key required for field extraction")
+        if not self.emergent_key:
+            raise ValueError("EMERGENT_LLM_KEY required for field extraction")
         
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "gpt-4o",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": FIELD_EXTRACTION_PROMPT
-                        },
-                        {
-                            "role": "user",
-                            "content": f"Extract fields from this vendor registration document:\n\n{document_text}"
-                        }
-                    ],
-                    "temperature": 0.1,
-                    "max_tokens": 4096,
-                    "response_format": {"type": "json_object"}
-                }
+        try:
+            # Initialize chat with Emergent key
+            chat = LlmChat(
+                api_key=self.emergent_key,
+                session_id=f"vendor-dd-extract-{datetime.now().timestamp()}",
+                system_message=FIELD_EXTRACTION_PROMPT
+            ).with_model("openai", "gpt-4o")
+            
+            # Create message
+            user_message = UserMessage(
+                text=f"Extract fields from this vendor registration document:\n\n{document_text[:15000]}"
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                content = result["choices"][0]["message"]["content"]
-                return json.loads(content)
-            else:
-                logger.error(f"Field extraction failed: {response.text}")
-                raise Exception(f"Field extraction failed: {response.status_code}")
+            # Send message and get response
+            response = await chat.send_message(user_message)
+            
+            # Parse JSON response
+            try:
+                # Try to extract JSON from response
+                json_match = re.search(r'\{[\s\S]*\}', response)
+                if json_match:
+                    return json.loads(json_match.group())
+                else:
+                    logger.error(f"No JSON found in response: {response[:500]}")
+                    return {}
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error: {e}")
+                return {}
+                
+        except Exception as e:
+            logger.error(f"Field extraction failed: {str(e)}")
+            raise Exception(f"Field extraction failed: {str(e)}")
     
     async def run_risk_assessment(self, document_text: str, extracted_fields: Dict[str, Any]) -> Dict[str, Any]:
-        """Run AI risk assessment on vendor document"""
-        import httpx
+        """Run AI risk assessment on vendor document using Emergent LLM"""
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        if not self.api_key:
-            raise ValueError("OpenAI API key required for risk assessment")
+        if not self.emergent_key:
+            raise ValueError("EMERGENT_LLM_KEY required for risk assessment")
         
         # Prepare context for risk assessment
         context = f"""
@@ -408,26 +289,20 @@ EXTRACTED VENDOR INFORMATION:
 {json.dumps(extracted_fields, indent=2, default=str)}
 
 RAW DOCUMENT TEXT:
-{document_text[:10000]}  # Limit to avoid token limits
+{document_text[:10000]}
 """
         
-        async with httpx.AsyncClient(timeout=180.0) as client:
-            response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "gpt-4o",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": VENDOR_DD_SYSTEM_PROMPT
-                        },
-                        {
-                            "role": "user",
-                            "content": f"""Analyze this vendor due diligence information and provide a risk assessment.
+        try:
+            # Initialize chat with Emergent key
+            chat = LlmChat(
+                api_key=self.emergent_key,
+                session_id=f"vendor-dd-risk-{datetime.now().timestamp()}",
+                system_message=VENDOR_DD_SYSTEM_PROMPT
+            ).with_model("openai", "gpt-4o")
+            
+            # Create message
+            user_message = UserMessage(
+                text=f"""Analyze this vendor due diligence information and provide a risk assessment.
 
 {context}
 
@@ -443,70 +318,83 @@ Respond in the following JSON format:
     "ai_confidence_rationale": "...",
     "notes_for_human_review": "..."
 }}"""
-                        }
-                    ],
-                    "temperature": 0.2,
-                    "max_tokens": 2048,
-                    "response_format": {"type": "json_object"}
-                }
             )
             
-            if response.status_code == 200:
-                result = response.json()
-                content = result["choices"][0]["message"]["content"]
-                assessment = json.loads(content)
+            # Send message and get response
+            response = await chat.send_message(user_message)
+            
+            # Parse JSON response
+            try:
+                json_match = re.search(r'\{[\s\S]*\}', response)
+                if json_match:
+                    assessment = json.loads(json_match.group())
+                    # Apply override rules
+                    assessment = self._apply_risk_overrides(assessment, extracted_fields)
+                    return assessment
+                else:
+                    logger.error(f"No JSON found in risk response")
+                    return self._default_assessment()
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error in risk assessment: {e}")
+                return self._default_assessment()
                 
-                # Apply override rules
-                assessment = self._apply_risk_overrides(assessment, extracted_fields)
-                
-                return assessment
-            else:
-                logger.error(f"Risk assessment failed: {response.text}")
-                raise Exception(f"Risk assessment failed: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Risk assessment failed: {str(e)}")
+            raise Exception(f"Risk assessment failed: {str(e)}")
+    
+    def _default_assessment(self) -> Dict[str, Any]:
+        """Return a default assessment when AI fails"""
+        return {
+            "vendor_name": "Unknown",
+            "country_jurisdiction": "Unknown",
+            "vendor_risk_score": 50,
+            "vendor_risk_level": "Medium",
+            "top_risk_drivers": ["Unable to complete AI assessment"],
+            "assessment_summary": "AI assessment could not be completed. Manual review required.",
+            "ai_confidence_level": "Low",
+            "ai_confidence_rationale": "AI processing error",
+            "notes_for_human_review": "Please review all vendor information manually."
+        }
     
     def _apply_risk_overrides(self, assessment: Dict[str, Any], extracted_fields: Dict[str, Any]) -> Dict[str, Any]:
         """Apply mandatory risk override rules"""
         
         # Get country from assessment or extracted fields
-        country = assessment.get("country_jurisdiction") or extracted_fields.get("address_country", {}).get("value", "")
+        country = assessment.get("country_jurisdiction") or ""
+        if not country and extracted_fields.get("address_country"):
+            country = extracted_fields["address_country"].get("value", "") if isinstance(extracted_fields["address_country"], dict) else str(extracted_fields["address_country"])
         
         # Override 1: High-risk country = minimum High risk
         if country and any(hrc.lower() in country.lower() for hrc in self.high_risk_countries):
             if assessment.get("vendor_risk_level") != "High":
                 assessment["vendor_risk_level"] = "High"
-                if assessment["vendor_risk_score"] < 70:
+                if assessment.get("vendor_risk_score", 0) < 70:
                     assessment["vendor_risk_score"] = 70
-                if "High-risk jurisdiction override applied" not in assessment.get("notes_for_human_review", ""):
-                    assessment["notes_for_human_review"] = (
-                        assessment.get("notes_for_human_review", "") + 
-                        "\n\n⚠️ HIGH-RISK JURISDICTION OVERRIDE: Vendor is located in a high-risk country. Minimum risk level set to High."
-                    )
-                # Add to risk drivers if not already there
+                assessment["notes_for_human_review"] = (
+                    assessment.get("notes_for_human_review", "") + 
+                    "\n\n⚠️ HIGH-RISK JURISDICTION OVERRIDE: Vendor is located in a high-risk country. Minimum risk level set to High."
+                )
                 risk_drivers = assessment.get("top_risk_drivers", [])
-                if not any("jurisdiction" in d.lower() for d in risk_drivers):
+                if not any("jurisdiction" in str(d).lower() for d in risk_drivers):
                     risk_drivers.insert(0, f"High-risk jurisdiction: {country}")
                     assessment["top_risk_drivers"] = risk_drivers[:3]
         
         # Override 2: Check for sanctions mentions
-        notes = assessment.get("notes_for_human_review", "").lower()
-        summary = assessment.get("assessment_summary", "").lower()
+        notes = str(assessment.get("notes_for_human_review", "")).lower()
+        summary = str(assessment.get("assessment_summary", "")).lower()
         if "sanction" in notes or "sanction" in summary:
             risk_drivers = assessment.get("top_risk_drivers", [])
-            if not any("sanction" in d.lower() for d in risk_drivers):
+            if not any("sanction" in str(d).lower() for d in risk_drivers):
                 risk_drivers.insert(0, "Potential sanctions exposure - requires officer verification")
                 assessment["top_risk_drivers"] = risk_drivers[:3]
         
         # Override 3: Weak ownership transparency = minimum Medium
-        ownership_clear = True
         owners = extracted_fields.get("owners_managers", [])
         if not owners or len(owners) == 0:
-            ownership_clear = False
-        
-        if not ownership_clear and assessment.get("vendor_risk_level") == "Low":
-            assessment["vendor_risk_level"] = "Medium"
-            if assessment["vendor_risk_score"] < 40:
-                assessment["vendor_risk_score"] = 40
-            if "Ownership transparency" not in assessment.get("notes_for_human_review", ""):
+            if assessment.get("vendor_risk_level") == "Low":
+                assessment["vendor_risk_level"] = "Medium"
+                if assessment.get("vendor_risk_score", 0) < 40:
+                    assessment["vendor_risk_score"] = 40
                 assessment["notes_for_human_review"] = (
                     assessment.get("notes_for_human_review", "") + 
                     "\n\n⚠️ OWNERSHIP OVERRIDE: Limited ownership transparency. Risk level cannot be lower than Medium."
