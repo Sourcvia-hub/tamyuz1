@@ -80,9 +80,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Asset Approval Workflow APIs"
-  stuck_tasks:
-    - "Asset Approval Workflow APIs"
+    - "My Pending Approvals API (Enhanced for HoP)"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
