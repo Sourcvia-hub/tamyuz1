@@ -430,7 +430,7 @@ const Tenders = () => {
                   type="submit"
                   className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                 >
-                  Create Purchase Request
+                  Create Business Request
                 </button>
               </div>
             </form>
