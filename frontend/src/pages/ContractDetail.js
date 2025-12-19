@@ -635,10 +635,169 @@ const ContractDetail = () => {
           </div>
         )}
 
+        {/* Contract Governance Panel */}
+        {!isEditing && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🤖</span>
+                <h2 className="text-2xl font-bold text-gray-900">Contract Governance Intelligence</h2>
+              </div>
+              <button
+                onClick={() => setShowGovernancePanel(!showGovernancePanel)}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                {showGovernancePanel ? 'Hide' : 'Show'}
+              </button>
+            </div>
+
+            {showGovernancePanel && (
+              <div className="space-y-6">
+                {/* Quick Actions */}
+                <div className="flex flex-wrap gap-3 pb-6 border-b">
+                  <button
+                    onClick={runAIClassification}
+                    disabled={aiLoading}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {aiLoading ? '⏳' : '🏷️'} Classify Contract
+                  </button>
+                  <button
+                    onClick={generateAIAdvisory}
+                    disabled={aiLoading || !contract?.outsourcing_classification}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {aiLoading ? '⏳' : '💡'} Generate Advisory
+                  </button>
+                  <button
+                    onClick={assessContractRisk}
+                    disabled={aiLoading}
+                    className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {aiLoading ? '⏳' : '⚠️'} Assess Risk
+                  </button>
+                  {contract?.status !== 'pending_hop_approval' && contract?.status !== 'approved' && (
+                    <button
+                      onClick={submitForHOPApproval}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 flex items-center gap-2"
+                    >
+                      📤 Submit for Approval
+                    </button>
+                  )}
+                </div>
+
+                {/* Classification Result */}
+                {(contract?.outsourcing_classification || classificationResult) && (
+                  <ContractClassificationResult
+                    classification={{
+                      classification: contract?.outsourcing_classification || classificationResult?.classification,
+                      classification_reason: contract?.classification_reason || classificationResult?.classification_reason,
+                      confidence: classificationResult?.confidence,
+                      indicators_found: classificationResult?.indicators_found || [],
+                      requires_sama_noc: contract?.sama_noc_status !== 'not_required',
+                      requires_contract_dd: contract?.contract_dd_status !== 'not_required',
+                    }}
+                    onReClassify={runAIClassification}
+                  />
+                )}
+
+                {/* Risk Assessment */}
+                {contract?.risk_level && (
+                  <ContractRiskAssessment
+                    riskAssessment={{
+                      risk_score: contract.risk_score,
+                      risk_level: contract.risk_level,
+                      top_risk_drivers: contract.risk_drivers || [],
+                      requires_contract_dd: contract.contract_dd_status !== 'not_required',
+                      requires_sama_noc: contract.sama_noc_status !== 'not_required',
+                      requires_risk_acceptance: contract.requires_risk_acceptance,
+                    }}
+                  />
+                )}
+
+                {/* SAMA NOC Tracking */}
+                {contract?.sama_noc_status && contract.sama_noc_status !== 'not_required' && (
+                  <SAMANOCTracking
+                    samaNoc={contract}
+                    contractId={id}
+                    onUpdate={fetchContract}
+                  />
+                )}
+
+                {/* AI Advisory */}
+                {(contract?.ai_drafting_hints?.length > 0 || contract?.ai_clause_suggestions?.length > 0) && (
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <span>💡</span> AI Advisory
+                    </h3>
+                    <ContractAIAdvisory
+                      advisory={{
+                        drafting_hints: contract.ai_drafting_hints || [],
+                        clause_suggestions: contract.ai_clause_suggestions || [],
+                        consistency_warnings: contract.ai_consistency_warnings || [],
+                        ai_analysis_notes: contract.ai_advisory_notes,
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Contract DD Status */}
+                {contract?.contract_dd_status && contract.contract_dd_status !== 'not_required' && (
+                  <div className="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                    <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                      <span>📋</span> Contract Due Diligence
+                    </h4>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        contract.contract_dd_status === 'completed' ? 'bg-green-100 text-green-800' :
+                        contract.contract_dd_status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {(contract.contract_dd_status || '').replace(/_/g, ' ').toUpperCase()}
+                      </span>
+                      {contract.contract_dd_risk_level && (
+                        <span className="text-sm text-gray-600">
+                          DD Risk: <strong>{contract.contract_dd_risk_level.toUpperCase()}</strong>
+                        </span>
+                      )}
+                    </div>
+                    {contract.contract_dd_findings?.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs font-medium text-blue-700 mb-1">Key Findings:</p>
+                        <ul className="text-xs text-blue-800 space-y-1">
+                          {contract.contract_dd_findings.map((f, i) => (
+                            <li key={i}>• {f}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* No Classification Yet */}
+                {!contract?.outsourcing_classification && !classificationResult && (
+                  <div className="bg-gray-50 rounded-lg p-6 text-center">
+                    <p className="text-gray-600 mb-3">
+                      This contract hasn't been classified yet. Run AI classification to determine governance requirements.
+                    </p>
+                    <button
+                      onClick={runAIClassification}
+                      disabled={aiLoading}
+                      className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50"
+                    >
+                      {aiLoading ? 'Classifying...' : 'Start AI Classification'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Related Tender */}
         {tender && (
           <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Tender (RFP)</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Business Request (PR)</h2>
             <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
               <div className="flex justify-between items-start mb-4">
                 <div>
