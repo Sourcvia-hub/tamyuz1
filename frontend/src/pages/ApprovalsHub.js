@@ -305,7 +305,7 @@ const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
       case 'business-requests': return data?.business_requests || [];
       case 'contracts': return data?.contracts || [];
       case 'purchase-orders': return data?.purchase_orders || [];
-      case 'invoices': return data?.invoices || [];
+      case 'deliverables': return data?.deliverables || [];
       case 'resources': return data?.resources || [];
       case 'assets': return data?.assets || [];
       default: return [];
@@ -342,9 +342,9 @@ const ModulePanel = ({ module, data, loading, getStatusBadge, navigate }) => {
         return (
           <POItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
         );
-      case 'invoices':
+      case 'deliverables':
         return (
-          <InvoiceItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
+          <DeliverableItem key={item.id} item={item} getStatusBadge={getStatusBadge} navigate={navigate} />
         );
       case 'resources':
         return (
