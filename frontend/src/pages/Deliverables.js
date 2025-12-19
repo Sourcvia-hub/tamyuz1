@@ -207,7 +207,7 @@ const Deliverables = () => {
 };
 
 // Deliverable Card Component
-const DeliverableCard = ({ deliverable, getStatusBadge, getPAFStatusBadge, navigate, onRefresh }) => {
+const DeliverableCard = ({ deliverable, getStatusBadge, getPAFStatusBadge, navigate, onRefresh, toast }) => {
   const [generating, setGenerating] = useState(false);
 
   const handleGeneratePAF = async () => {
@@ -220,11 +220,19 @@ const DeliverableCard = ({ deliverable, getStatusBadge, getPAFStatusBadge, navig
         {},
         { withCredentials: true }
       );
-      alert(`Payment Authorization ${response.data.payment_authorization.paf_number} generated successfully!`);
+      toast({
+        title: "✅ PAF Generated",
+        description: `Payment Authorization ${response.data.payment_authorization.paf_number} generated successfully!`,
+        variant: "success"
+      });
       onRefresh();
     } catch (error) {
       console.error('Error generating PAF:', error);
-      alert('Failed to generate PAF: ' + (error.response?.data?.detail || error.message));
+      toast({
+        title: "❌ Generation Failed",
+        description: error.response?.data?.detail || error.message,
+        variant: "destructive"
+      });
     } finally {
       setGenerating(false);
     }
