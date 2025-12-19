@@ -3938,8 +3938,8 @@ service_requests_workflow_router = create_workflow_router("Service Request", "se
 resources_workflow_router = create_workflow_router("Resource", "resources", "resources")
 
 # Include workflow routers
+api_router.include_router(vendor_special_router)  # Special vendor workflow (must be first)
 api_router.include_router(vendors_workflow_router)
-api_router.include_router(vendor_special_router)  # Special vendor workflow
 api_router.include_router(tenders_workflow_router)
 api_router.include_router(contracts_workflow_router)
 api_router.include_router(pos_workflow_router)
