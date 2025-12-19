@@ -263,14 +263,20 @@ async def get_pending_purchase_orders(request: Request, status: str = "pending")
 
 
 @router.get("/deliverables")
-async def get_pending_deliverables(request: Request):
-    """Get deliverables pending review/HoP approval"""
+async def get_pending_deliverables(request: Request, status: str = "pending"):
+    """Get deliverables by status (pending or approved)"""
     user = await require_auth(request)
     
-    deliverables = await db.deliverables.find(
-        {"status": {"$in": ["submitted", "under_review", "validated", "pending_hop_approval"]}},
-        {"_id": 0}
-    ).sort("submitted_at", -1).to_list(100)
+    if status == "approved":
+        deliverables = await db.deliverables.find(
+            {"status": {"$in": ["approved", "paid", "exported"]}},
+            {"_id": 0}
+        ).sort("submitted_at", -1).to_list(50)
+    else:
+        deliverables = await db.deliverables.find(
+            {"status": {"$in": ["submitted", "under_review", "validated", "pending_hop_approval"]}},
+            {"_id": 0}
+        ).sort("submitted_at", -1).to_list(50)
     
     # Enrich with vendor and contract info
     enriched = []
