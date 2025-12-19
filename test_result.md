@@ -143,13 +143,13 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "2.0"
-  test_sequence: 2
+  version: "2.1"
+  test_sequence: 3
   run_ui: true
 
 test_plan:
   current_focus:
-    - "Contract Governance Features"
+    - "Approvals Hub APIs"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
