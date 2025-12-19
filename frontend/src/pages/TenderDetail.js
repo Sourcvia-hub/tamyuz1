@@ -28,15 +28,25 @@ const TenderDetail = () => {
   const [proposals, setProposals] = useState([]);
   const [workflowStatus, setWorkflowStatus] = useState(null);
   const [approvers, setApprovers] = useState([]);
+  const [evaluationData, setEvaluationData] = useState(null);
   
   // Modals
   const [showProposalModal, setShowProposalModal] = useState(false);
   const [showForwardModal, setShowForwardModal] = useState(false);
+  const [showEvaluationModal, setShowEvaluationModal] = useState(false);
+  const [selectedProposalForEdit, setSelectedProposalForEdit] = useState(null);
   
   // Form states
   const [proposalForm, setProposalForm] = useState({ vendor_id: '', technical_proposal: '', financial_proposal: '' });
   const [selectedApproverId, setSelectedApproverId] = useState(null);
   const [forwardNotes, setForwardNotes] = useState('');
+  const [evaluationForm, setEvaluationForm] = useState({
+    vendor_reliability_stability: 3,
+    delivery_warranty_backup: 3,
+    technical_experience: 3,
+    cost_score: 3,
+    meets_requirements: 3,
+  });
 
   useEffect(() => {
     fetchTender();
@@ -44,6 +54,22 @@ const TenderDetail = () => {
     fetchProposalsForUser();
     fetchWorkflowStatus();
   }, [id]);
+
+  // Fetch evaluation data for officers/approvers
+  useEffect(() => {
+    if (tender && (isOfficer || isAdditionalApprover) && ['evaluation_complete', 'pending_additional_approval', 'pending_hop_approval'].includes(tender.status)) {
+      fetchEvaluationData();
+    }
+  }, [tender?.status]);
+
+  const fetchEvaluationData = async () => {
+    try {
+      const res = await axios.post(`${API}/tenders/${id}/evaluate`, {}, { withCredentials: true });
+      setEvaluationData(res.data);
+    } catch (error) {
+      console.error('Error fetching evaluation data:', error);
+    }
+  };
 
   const fetchTender = async () => {
     try {
