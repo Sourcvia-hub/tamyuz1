@@ -23,6 +23,13 @@ from .contract_governance import (
     SERVICE_AGREEMENT_EXHIBITS,
     CONTRACT_DD_QUESTIONNAIRE_SECTIONS,
 )
+from .deliverable import (
+    Deliverable,
+    DeliverableStatus,
+    DeliverableType,
+    PaymentAuthorization,
+    PaymentAuthorizationStatus,
+)
 
 __all__ = [
     # User
