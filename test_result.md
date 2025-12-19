@@ -11,6 +11,18 @@ backend:
         agent: "testing"
         comment: "All authentication endpoints working correctly."
 
+  - task: "Contract Governance AI System"
+    implemented: true
+    working: pending
+    file: "backend/routes/contract_governance_routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: pending
+        agent: "main"
+        comment: "New Contract Governance system implemented with Phase 1-3: 1) Contract Context Questionnaire in Business Request form, 2) AI contract classification and extraction APIs, 3) Risk assessment, SAMA NOC tracking, and HoP approval workflow. APIs: /api/contract-governance/questionnaire-template (49 questions), /api/contract-governance/exhibits-template (14 exhibits), /api/contract-governance/classify, /api/contract-governance/generate-advisory, /api/contract-governance/assess-risk, /api/contract-governance/sama-noc, /api/contract-governance/contract-dd, /api/contract-governance/hop-decision, /api/contract-governance/pending-approvals, /api/contract-governance/submit-for-approval."
+
   - task: "Vendor DD AI System"
     implemented: true
     working: true
