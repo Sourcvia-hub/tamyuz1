@@ -201,6 +201,18 @@ frontend:
         agent: "testing"
         comment: "✅ Admin Settings working correctly. High-Risk Countries tab found and functional. Add/remove country functionality tested successfully. Proper role-based access control - procurement_officer denied access, procurement_manager granted access. Countries list displays properly with existing high-risk countries (Belarus, Central African Republic, Cuba, etc.)."
 
+  - task: "Multi-Select Dropdown for Invited Vendors"
+    implemented: true
+    working: true
+    file: "frontend/src/components/MultiSelect.js, frontend/src/pages/Tenders.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ MULTI-SELECT DROPDOWN FULLY WORKING! Comprehensive testing completed with 100% success rate. All specified requirements verified: 1) Business Request (PR) creation form accessible via 'Raise PR' button ✓, 2) 'Invited Vendors' field uses react-select component (not native HTML select) ✓, 3) Dropdown opens with searchable interface showing 24 vendor options ✓, 4) Each option has checkboxes for selection ✓, 5) Multiple vendor selection working - successfully selected 3 vendors (Unknown Vendor, Test Vendor Backend, Minimal Vendor Test) ✓, 6) Selected vendors appear as blue tags/badges ✓, 7) Count display shows '3 vendors selected' ✓, 8) Search functionality working - filters options by typing (e.g., 'Tech' shows 1 result, 'Corp' shows 0 results) ✓, 9) Clearing search restores all 24 options ✓. Authentication working with test_officer@sourcevia.com. Multi-select dropdown feature is production-ready and meets all user requirements."
+
 metadata:
   created_by: "main_agent"
   version: "2.3"
