@@ -1511,7 +1511,21 @@ class ProposalEvaluationRequest(BaseModel):
 @api_router.post("/tenders/{tender_id}/proposals/{proposal_id}/evaluate")
 async def evaluate_proposal(tender_id: str, proposal_id: str, evaluation: ProposalEvaluationRequest, request: Request):
     """Evaluate a single proposal with detailed criteria"""
-    user = await require_role(request, [UserRole.PROCUREMENT_OFFICER, UserRole.PROCUREMENT_MANAGER, UserRole.PROJECT_MANAGER, UserRole.SENIOR_MANAGER, UserRole.ADMIN])
+    user = await require_auth(request)
+    
+    # Get the tender to check if user is the creator
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    
+    # Allow evaluation if user is:
+    # 1. The creator of the tender
+    # 2. A procurement officer, manager, or admin
+    is_creator = tender.get("created_by") == user.id
+    is_officer = user.role in [UserRole.PROCUREMENT_OFFICER, UserRole.PROCUREMENT_MANAGER, UserRole.PROJECT_MANAGER, UserRole.SENIOR_MANAGER, UserRole.ADMIN]
+    
+    if not is_creator and not is_officer:
+        raise HTTPException(status_code=403, detail="Only the creator or procurement officers can evaluate proposals")
     
     # Find proposal
     proposal = await db.proposals.find_one({"id": proposal_id, "tender_id": tender_id})
