@@ -1,9 +1,9 @@
-import React from 'react';
-import AIDueDiligence from './AIDueDiligence';
-import FileUpload from './FileUpload';
+import React, { useState } from 'react';
 import VendorDocumentExtractor from './VendorDocumentExtractor';
 
 const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false, vendorId = null }) => {
+  const [pendingFiles, setPendingFiles] = useState([]);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -26,6 +26,26 @@ const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false,
         {statusInfo.icon}
       </span>
     );
+  };
+
+  // Handle file selection for pending upload
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setPendingFiles([...pendingFiles, ...files]);
+      // Store in formData for submission
+      setFormData({ 
+        ...formData, 
+        _pending_files: [...(formData._pending_files || []), ...files] 
+      });
+    }
+    e.target.value = ''; // Clear input
+  };
+
+  const removeFile = (index) => {
+    const newFiles = pendingFiles.filter((_, i) => i !== index);
+    setPendingFiles(newFiles);
+    setFormData({ ...formData, _pending_files: newFiles });
   };
 
   const entityTypes = ['Company', 'Individual', 'Partnership', 'LLC', 'Branch'];
@@ -342,30 +362,63 @@ const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false,
         </div>
       </div>
 
-      {/* AI Risk Assessment - Shows risk score before submit */}
-      {!isEdit && (
-        <div className="mt-6">
-          <AIDueDiligence 
-            formData={formData} 
-            setFormData={setFormData} 
-          />
-        </div>
-      )}
-
-      {/* File Attachments */}
+      {/* Supporting Documents */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4 sticky top-0 bg-white py-2">Supporting Documents</h3>
-        <FileUpload
-          entityId={vendorId}
-          module="vendors"
-          fileType="supporting_documents"
-          label="Attach Supporting Documents (PDF, DOCX, XLSX, Images)"
-          accept=".pdf,.doc,.docx,.xlsx,.xls,.png,.jpg,.jpeg"
-          multiple={true}
-          onUploadComplete={(files) => {
-            console.log('Files uploaded:', files);
-          }}
-        />
+        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4">
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📎 Attach Supporting Documents (PDF, DOCX, XLSX, Images)
+            </label>
+            
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors">
+                <span>📁</span>
+                <span>Choose Files</span>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.xlsx,.xls,.png,.jpg,.jpeg"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Show pending files */}
+          {pendingFiles.length > 0 && (
+            <div className="space-y-2 mt-4">
+              <p className="text-xs font-medium text-gray-600">Files to upload:</p>
+              {pendingFiles.map((file, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-white rounded border border-gray-200"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-blue-600">📄</span>
+                    <span className="text-sm text-gray-700 truncate">
+                      {file.name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({(file.size / 1024).toFixed(1)} KB)
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <p className="text-xs text-gray-500 mt-2">
+                Files will be uploaded when you create the vendor.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Form Actions */}
