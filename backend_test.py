@@ -11,7 +11,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 
 # Configuration
-BACKEND_URL = "https://vendor-portal-51.preview.emergentagent.com/api"
+BACKEND_URL = "https://contract-intel-1.preview.emergentagent.com/api"
 
 # Test Users from review request
 TEST_USERS = {
