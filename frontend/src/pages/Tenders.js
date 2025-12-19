@@ -30,6 +30,13 @@ const Tenders = () => {
     budget: '',
     deadline: '',
     invited_vendors: [],
+    // Contract Context Questionnaire
+    ctx_requires_system_data_access: '',
+    ctx_is_cloud_based: '',
+    ctx_is_outsourcing_service: '',
+    ctx_expected_data_location: '',
+    ctx_requires_onsite_presence: '',
+    ctx_expected_duration: '',
   });
 
   useEffect(() => {
