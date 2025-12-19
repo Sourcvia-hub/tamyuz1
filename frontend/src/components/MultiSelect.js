@@ -1,5 +1,33 @@
 import React from 'react';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
+
+// Custom Option component with checkbox - defined outside to avoid re-renders
+const CustomOption = (props) => {
+  const { label, isSelected, innerProps } = props;
+  return (
+    <div 
+      {...innerProps} 
+      style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        padding: '10px 12px', 
+        cursor: 'pointer', 
+        backgroundColor: isSelected ? '#DBEAFE' : 'white',
+        transition: 'background-color 0.15s ease'
+      }}
+      onMouseEnter={(e) => { if (!isSelected) e.target.style.backgroundColor = '#F3F4F6'; }}
+      onMouseLeave={(e) => { e.target.style.backgroundColor = isSelected ? '#DBEAFE' : 'white'; }}
+    >
+      <input
+        type="checkbox"
+        checked={isSelected}
+        readOnly
+        style={{ marginRight: '10px', width: '16px', height: '16px', accentColor: '#3B82F6' }}
+      />
+      <span style={{ color: '#111827' }}>{label}</span>
+    </div>
+  );
+};
 
 const MultiSelect = ({ 
   options, 
@@ -92,19 +120,6 @@ const MultiSelect = ({
   // Find the selected options
   const selectedOptions = options.filter(opt => value.includes(opt.value));
 
-  // Custom Option component with checkbox
-  const Option = ({ innerProps, label, isSelected }) => (
-    <div {...innerProps} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', cursor: 'pointer', backgroundColor: isSelected ? '#DBEAFE' : 'white' }}>
-      <input
-        type="checkbox"
-        checked={isSelected}
-        readOnly
-        style={{ marginRight: '10px', width: '16px', height: '16px', accentColor: '#3B82F6' }}
-      />
-      <span style={{ color: '#111827' }}>{label}</span>
-    </div>
-  );
-
   return (
     <div className={className}>
       <Select
@@ -124,7 +139,7 @@ const MultiSelect = ({
         hideSelectedOptions={false}
         isSearchable={true}
         styles={customStyles}
-        components={{ Option }}
+        components={{ Option: CustomOption }}
         noOptionsMessage={() => "No vendors found"}
         filterOption={(option, searchText) => {
           return option.label.toLowerCase().includes(searchText.toLowerCase());
