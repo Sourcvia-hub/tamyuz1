@@ -1501,7 +1501,6 @@ async def get_tender_proposals(tender_id: str, request: Request):
     return result
 
 class ProposalEvaluationRequest(BaseModel):
-    proposal_id: str
     vendor_reliability_stability: float = Field(ge=1, le=5)
     delivery_warranty_backup: float = Field(ge=1, le=5)
     technical_experience: float = Field(ge=1, le=5)
