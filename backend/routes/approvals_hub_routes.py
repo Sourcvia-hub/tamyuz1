@@ -197,18 +197,24 @@ async def get_pending_business_requests(request: Request, status: str = "pending
 
 
 @router.get("/contracts")
-async def get_pending_contracts(request: Request):
-    """Get contracts pending approval/DD/SAMA"""
+async def get_pending_contracts(request: Request, status: str = "pending"):
+    """Get contracts by status (pending or approved)"""
     user = await require_auth(request)
     
-    contracts = await db.contracts.find(
-        {"$or": [
-            {"status": {"$in": ["draft", "under_review", "pending_due_diligence", "pending_sama_noc", "pending_hop_approval"]}},
-            {"contract_dd_status": "pending"},
-            {"sama_noc_status": {"$in": ["pending", "submitted"]}}
-        ]},
-        {"_id": 0}
-    ).sort("updated_at", -1).to_list(100)
+    if status == "approved":
+        contracts = await db.contracts.find(
+            {"status": {"$in": ["active", "approved"]}},
+            {"_id": 0}
+        ).sort("updated_at", -1).to_list(50)
+    else:
+        contracts = await db.contracts.find(
+            {"$or": [
+                {"status": {"$in": ["draft", "under_review", "pending_due_diligence", "pending_sama_noc", "pending_hop_approval"]}},
+                {"contract_dd_status": "pending"},
+                {"sama_noc_status": {"$in": ["pending", "submitted"]}}
+            ]},
+            {"_id": 0}
+        ).sort("updated_at", -1).to_list(50)
     
     # Enrich with vendor info
     enriched = []
