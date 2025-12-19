@@ -122,7 +122,7 @@ const TenderDetail = () => {
       setProposalForm({ vendor_id: '', technical_proposal: '', financial_proposal: '' });
       fetchProposalsForUser();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to add proposal", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to add proposal"), variant: "destructive" });
     }
   };
 
