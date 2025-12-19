@@ -93,6 +93,14 @@ try:
 except Exception as exc:
     print(f"[Deliverables] Failed to mount router: {exc}")
 
+# Include Quick Create Routes (Simplified PO/Invoice)
+try:
+    from routes.quick_create_routes import router as quick_create_router
+    api_router.include_router(quick_create_router)
+    print("[Quick Create] Router mounted at /api/quick")
+except Exception as exc:
+    print(f"[Quick Create] Failed to mount router: {exc}")
+
 
 # ==================== HELPER FUNCTIONS ====================
 def calculate_vendor_registration_score(vendor_data: dict) -> dict:
