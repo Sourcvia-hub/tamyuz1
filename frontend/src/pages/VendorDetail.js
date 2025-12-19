@@ -5,6 +5,7 @@ import VendorForm from '../components/VendorForm';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../App';
 import DueDiligenceQuestionnaire from '../components/DueDiligenceQuestionnaire';
+import VendorDDForm from '../components/VendorDDForm';
 import { canEdit, Module } from '../utils/permissions';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
