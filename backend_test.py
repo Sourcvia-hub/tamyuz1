@@ -3849,6 +3849,9 @@ class SourceviaBackendTester:
         # PRIORITY: Controlled Access + HoP Role Control + Password Reset (PRIMARY FOCUS from review request)
         self.test_controlled_access_features()
         
+        # NEW: Audit Trail Feature Testing (PRIORITY TEST from review request)
+        self.test_audit_trail_feature()
+        
         self.test_authentication()
         
         # PRIORITY: User Data Filtering Testing (PRIMARY FOCUS from review request)
