@@ -389,8 +389,9 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.vendor_id || !formData.title || (!formData.contract_id && !formData.po_id)) {
-      toast({ title: "⚠️ Validation", description: "Please fill required fields and link to an approved Contract or PO", variant: "warning" });
+    // Only vendor and title are truly required
+    if (!formData.vendor_id || !formData.title) {
+      toast({ title: "⚠️ Validation", description: "Please fill required fields (Vendor and Title)", variant: "warning" });
       return;
     }
 
@@ -413,12 +414,12 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">New Deliverable</h2>
         <p className="text-sm text-gray-600 mb-4">
-          📋 Create deliverables based on approved contracts or purchase orders. The vendor will be auto-selected from the linked document.
+          📋 Create deliverables. Optionally link to a contract or purchase order to auto-select vendor.
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Approved Contract *</label>
+              <label className="block text-sm font-medium mb-1">Approved Contract <span className="text-gray-400">(Optional)</span></label>
               <SearchableSelect
                 options={contracts.map(c => ({ value: c.id, label: `${c.contract_number || ''} - ${c.title}` }))}
                 value={selectedContract}
