@@ -28,14 +28,15 @@ const Layout = ({ children }) => {
 
   // Special links for Procurement Manager and Admin only
   const specialLinks = [
-    { name: 'My Approvals', path: '/my-approvals', icon: '🔔', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'requester', 'user'] },
-    { name: 'Approvals Hub', path: '/approvals-hub', icon: '📋', roles: ['procurement_manager', 'admin', 'procurement_officer'] },
-    { name: 'Contract Approvals', path: '/contract-approvals', icon: '✅', roles: ['procurement_manager', 'admin', 'procurement_officer'] },
-    { name: 'Reports & Analytics', path: '/reports', icon: '📈', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer'] },
-    { name: 'Bulk Import', path: '/bulk-import', icon: '📤', roles: ['procurement_manager', 'admin', 'procurement_officer'] },
-    { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin'] },
-    { name: 'Access Management', path: '/access-management', icon: '🚪', roles: ['procurement_manager', 'admin'] },
-    { name: 'Admin Settings', path: '/admin/settings', icon: '⚙️', roles: ['procurement_manager', 'system_admin'] },
+    { name: 'My Approvals', path: '/my-approvals', icon: '🔔', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'requester', 'user', 'business_user', 'hop'] },
+    { name: 'Approvals Hub', path: '/approvals-hub', icon: '📋', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop'] },
+    { name: 'Contract Approvals', path: '/contract-approvals', icon: '✅', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop'] },
+    { name: 'Reports & Analytics', path: '/reports', icon: '📈', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'hop'] },
+    { name: 'Bulk Import', path: '/bulk-import', icon: '📤', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop'] },
+    { name: 'User Management', path: '/user-management', icon: '👥', roles: ['procurement_manager', 'admin', 'hop'] },
+    { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin', 'hop'] },
+    { name: 'Access Management', path: '/access-management', icon: '🚪', roles: ['procurement_manager', 'admin', 'hop'] },
+    { name: 'Admin Settings', path: '/admin/settings', icon: '⚙️', roles: ['procurement_manager', 'system_admin', 'admin', 'hop'] },
   ];
 
   // Filter navigation based on user permissions
