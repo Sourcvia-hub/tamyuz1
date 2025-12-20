@@ -164,22 +164,25 @@ const OSRForm = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Request Type *</label>
             <div className="grid grid-cols-2 gap-4">
-              <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                     style={{ borderColor: formData.request_type === 'asset_related' ? '#3B82F6' : '#D1D5DB' }}>
-                <input
-                  type="radio"
-                  name="request_type"
-                  value="asset_related"
-                  checked={formData.request_type === 'asset_related'}
-                  onChange={(e) => setFormData({ ...formData, request_type: e.target.value })}
-                  className="mr-3"
-                />
-                <div>
-                  <div className="font-medium">Asset Related</div>
-                  <div className="text-xs text-gray-500">Maintenance or repair of existing asset</div>
-                </div>
-              </label>
-              <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+              {/* Only show Asset Related option for officers/admins (not business users) */}
+              {!isBusinessUser && (
+                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                       style={{ borderColor: formData.request_type === 'asset_related' ? '#3B82F6' : '#D1D5DB' }}>
+                  <input
+                    type="radio"
+                    name="request_type"
+                    value="asset_related"
+                    checked={formData.request_type === 'asset_related'}
+                    onChange={(e) => setFormData({ ...formData, request_type: e.target.value })}
+                    className="mr-3"
+                  />
+                  <div>
+                    <div className="font-medium">Asset Related</div>
+                    <div className="text-xs text-gray-500">Maintenance or repair of existing asset</div>
+                  </div>
+                </label>
+              )}
+              <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${isBusinessUser ? 'col-span-2' : ''}`}
                      style={{ borderColor: formData.request_type === 'general_request' ? '#3B82F6' : '#D1D5DB' }}>
                 <input
                   type="radio"
