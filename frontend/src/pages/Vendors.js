@@ -305,6 +305,7 @@ const Vendors = () => {
             if (activeFilter === 'draft' && vendor.status !== 'draft') return false;
             if (activeFilter === 'pending' && vendor.status !== 'pending_review' && vendor.status !== 'reviewed') return false;
             if (activeFilter === 'high_risk' && vendor.risk_category !== 'high') return false;
+            if (activeFilter === 'pending_dd' && vendor.status !== 'pending_due_diligence') return false;
             if (activeFilter === 'blacklisted' && vendor.status !== 'blacklisted') return false;
             
             // Apply search
