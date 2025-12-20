@@ -107,6 +107,34 @@ const ROLE_PERMISSIONS = {
     [Module.INVOICES]: [Permission.CONTROLLER],
     [Module.ASSETS]: [Permission.CONTROLLER],
     [Module.SERVICE_REQUESTS]: [Permission.CONTROLLER]
+  },
+  hop: {
+    [Module.DASHBOARD]: [Permission.CONTROLLER],
+    [Module.VENDORS]: [Permission.CONTROLLER],
+    [Module.VENDOR_DD]: [Permission.CONTROLLER],
+    [Module.TENDERS]: [Permission.CONTROLLER],
+    [Module.TENDER_EVALUATION]: [Permission.CONTROLLER],
+    [Module.TENDER_PROPOSALS]: [Permission.CONTROLLER],
+    [Module.CONTRACTS]: [Permission.CONTROLLER],
+    [Module.PURCHASE_ORDERS]: [Permission.CONTROLLER],
+    [Module.RESOURCES]: [Permission.CONTROLLER],
+    [Module.INVOICES]: [Permission.CONTROLLER],
+    [Module.ASSETS]: [Permission.CONTROLLER],
+    [Module.SERVICE_REQUESTS]: [Permission.CONTROLLER]
+  },
+  business_user: {
+    [Module.DASHBOARD]: [Permission.VIEWER],
+    [Module.VENDORS]: [Permission.VIEWER],
+    [Module.VENDOR_DD]: [Permission.VIEWER],
+    [Module.TENDERS]: [Permission.REQUESTER],
+    [Module.TENDER_EVALUATION]: [Permission.REQUESTER],
+    [Module.TENDER_PROPOSALS]: [Permission.VIEWER],
+    [Module.CONTRACTS]: [Permission.REQUESTER],
+    [Module.PURCHASE_ORDERS]: [Permission.REQUESTER],
+    [Module.RESOURCES]: [Permission.REQUESTER],
+    [Module.INVOICES]: [Permission.VERIFIER],
+    [Module.ASSETS]: [Permission.NO_ACCESS],
+    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER]
   }
 };
 
