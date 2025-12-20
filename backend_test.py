@@ -3596,6 +3596,10 @@ class SourceviaBackendTester:
         
         # Run tests in order
         self.test_health_check()
+        
+        # PRIORITY: Controlled Access + HoP Role Control + Password Reset (PRIMARY FOCUS from review request)
+        self.test_controlled_access_features()
+        
         self.test_authentication()
         
         # PRIORITY: User Data Filtering Testing (PRIMARY FOCUS from review request)
