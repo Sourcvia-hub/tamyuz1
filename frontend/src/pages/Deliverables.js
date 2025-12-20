@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { useToast } from '../hooks/use-toast';
 import SearchableSelect from '../components/SearchableSelect';
+import AuditTrail from '../components/AuditTrail';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
