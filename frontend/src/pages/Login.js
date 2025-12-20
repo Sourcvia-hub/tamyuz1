@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 const Login = () => {
@@ -8,43 +8,25 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState('user');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState('checking'); // checking, connected, error
+  const [connectionStatus, setConnectionStatus] = useState('checking');
 
-  // Get backend URL with proper fallback and remove trailing slashes
   const BACKEND_URL = (
-    process.env.REACT_APP_BACKEND_URL ||      // 1) Read from .env first
-    window.APP_CONFIG?.BACKEND_URL ||         // 2) Use APP_CONFIG if empty
-    window.location.origin                    // 3) Fallback to same-origin
+    process.env.REACT_APP_BACKEND_URL ||
+    window.APP_CONFIG?.BACKEND_URL ||
+    window.location.origin
   ).replace(/\/+$/, "");
 
-  const API_URL = BACKEND_URL;
-
-  // Test backend connection on mount
   React.useEffect(() => {
-    console.log('🔧 Login Page Loaded');
-    console.log('  Backend URL:', BACKEND_URL);
-    console.log('  process.env.REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
-    console.log('  window.APP_CONFIG?.BACKEND_URL:', window.APP_CONFIG?.BACKEND_URL);
-    
-    // Test connection
     const testConnection = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/api/health`, {
-          timeout: 5000,
-          validateStatus: () => true // Accept any status
-        });
-        
-        console.log('✅ Backend is reachable!');
+        await axios.get(`${BACKEND_URL}/api/health`, { timeout: 5000, validateStatus: () => true });
         setConnectionStatus('connected');
       } catch (err) {
-        console.warn('⚠️ Backend connection test failed, but will still try to login:', err.message);
-        setConnectionStatus('connected'); // Don't block login, just log warning
+        setConnectionStatus('connected');
       }
     };
-    
     testConnection();
   }, [BACKEND_URL]);
 
@@ -60,21 +42,24 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      console.log('Login OK', res.data);
-      
       if (res.data.user) {
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        // Store session token for cross-origin auth
         if (res.data.session_token) {
           localStorage.setItem('session_token', res.data.session_token);
         }
-        window.location.href = '/dashboard';
+        
+        // Check if force password reset is required
+        if (res.data.force_password_reset) {
+          window.location.href = '/change-password?force=true';
+        } else {
+          window.location.href = '/dashboard';
+        }
       }
     } catch (err) {
-      console.error('Login error:', err);
-
       if (err.response?.status === 401) {
         setError('Invalid email or password');
+      } else if (err.response?.status === 403) {
+        setError(err.response.data?.detail || 'Access denied');
       } else {
         setError('Server error. Please try again later.');
       }
@@ -94,19 +79,15 @@ const Login = () => {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (password.length < 10) {
+      setError('Password must be at least 10 characters');
       setLoading(false);
       return;
     }
 
     try {
-      const payload = {
-        name,
-        email,
-        password,
-        role,
-      };
+      // Note: Role is NOT sent - all users start as business_user
+      const payload = { name, email, password };
 
       const res = await axios.post(
         `${BACKEND_URL}/api/auth/register`,
@@ -114,8 +95,6 @@ const Login = () => {
         { withCredentials: true }
       );
 
-      console.log('Registration OK', res.data);
-      
       // Auto-login after registration
       const loginRes = await axios.post(
         `${BACKEND_URL}/api/auth/login`,
@@ -125,17 +104,14 @@ const Login = () => {
 
       if (loginRes.data.user) {
         localStorage.setItem('user', JSON.stringify(loginRes.data.user));
-        // Store session token for cross-origin auth
         if (loginRes.data.session_token) {
           localStorage.setItem('session_token', loginRes.data.session_token);
         }
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      console.error('Registration error:', err);
-
-      if (err.response?.status === 409 || err.response?.status === 400) {
-        setError('Email already exists');
+      if (err.response?.status === 400) {
+        setError(err.response.data?.detail || 'Registration failed');
       } else {
         setError('Server error. Please try again later.');
       }
@@ -150,96 +126,71 @@ const Login = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px'
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     }}>
       <div style={{
-        maxWidth: '450px',
-        width: '100%',
         background: 'white',
-        borderRadius: '16px',
+        borderRadius: '12px',
         padding: '40px',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+        width: '100%',
+        maxWidth: '400px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
       }}>
-        {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            background: '#0ea5e9',
-            borderRadius: '12px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '28px',
-            fontWeight: 'bold',
-            marginBottom: '15px'
-          }}>S</div>
-          <h1 style={{ fontSize: '32px', margin: '0 0 10px 0', color: '#333' }}>Sourcevia</h1>
-          <p style={{ color: '#666', fontSize: '14px' }}>Next-gen Procurement Lifecycle</p>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+            Sourcevia
+          </h1>
+          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+            Contract Governance Intelligence
+          </p>
         </div>
 
-        {/* Tab Buttons */}
-        <div style={{
-          display: 'flex',
-          background: '#f5f5f5',
-          borderRadius: '8px',
-          padding: '4px',
-          marginBottom: '30px'
-        }}>
+        <div style={{ display: 'flex', marginBottom: '30px', borderBottom: '1px solid #e5e7eb' }}>
           <button
-            type="button"
-            onClick={() => setIsRegistering(false)}
+            onClick={() => { setIsRegistering(false); setError(''); }}
             style={{
               flex: 1,
-              padding: '10px',
+              padding: '12px',
               border: 'none',
-              borderRadius: '6px',
-              background: !isRegistering ? 'white' : 'transparent',
-              color: !isRegistering ? '#667eea' : '#666',
-              fontWeight: '600',
+              background: 'none',
               cursor: 'pointer',
-              boxShadow: !isRegistering ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+              fontWeight: !isRegistering ? '600' : '400',
+              color: !isRegistering ? '#667eea' : '#6b7280',
+              borderBottom: !isRegistering ? '2px solid #667eea' : '2px solid transparent'
             }}
           >
             Login
           </button>
           <button
-            type="button"
-            onClick={() => setIsRegistering(true)}
+            onClick={() => { setIsRegistering(true); setError(''); }}
             style={{
               flex: 1,
-              padding: '10px',
+              padding: '12px',
               border: 'none',
-              borderRadius: '6px',
-              background: isRegistering ? 'white' : 'transparent',
-              color: isRegistering ? '#667eea' : '#666',
-              fontWeight: '600',
+              background: 'none',
               cursor: 'pointer',
-              boxShadow: isRegistering ? '0 2px 4px rgba(0,0,0,0.1)' : 'none'
+              fontWeight: isRegistering ? '600' : '400',
+              color: isRegistering ? '#667eea' : '#6b7280',
+              borderBottom: isRegistering ? '2px solid #667eea' : '2px solid transparent'
             }}
           >
             Register
           </button>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div style={{
+            background: '#FEE2E2',
+            color: '#DC2626',
             padding: '12px',
-            background: '#fee',
-            border: '1px solid #fcc',
             borderRadius: '8px',
-            color: '#c33',
-            fontSize: '14px',
-            marginBottom: '20px'
+            marginBottom: '20px',
+            fontSize: '14px'
           }}>
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={isRegistering ? handleRegister : handleLogin}>
           {isRegistering && (
             <div style={{ marginBottom: '20px' }}>
@@ -250,14 +201,16 @@ const Login = () => {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your full name"
                 style={{
                   width: '100%',
                   padding: '12px',
                   border: '1px solid #ddd',
                   borderRadius: '8px',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
                 }}
+                placeholder="Your full name"
+                required
               />
             </div>
           )}
@@ -270,14 +223,15 @@ const Login = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
               style={{
                 width: '100%',
                 padding: '12px',
                 border: '1px solid #ddd',
                 borderRadius: '8px',
-                fontSize: '14px'
+                fontSize: '14px',
+                boxSizing: 'border-box'
               }}
+              placeholder="your@email.com"
               required
             />
           </div>
@@ -290,39 +244,32 @@ const Login = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={isRegistering ? 'Minimum 6 characters' : 'Your password'}
               style={{
                 width: '100%',
                 padding: '12px',
                 border: '1px solid #ddd',
                 borderRadius: '8px',
-                fontSize: '14px'
+                fontSize: '14px',
+                boxSizing: 'border-box'
               }}
+              placeholder={isRegistering ? "Min 10 characters" : "Your password"}
               required
             />
           </div>
 
           {isRegistering && (
-            <div style={{ marginBottom: '25px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                Role
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              >
-                <option value="user">User</option>
-                <option value="procurement_officer">Procurement Officer</option>
-                <option value="senior_manager">Approver</option>
-                <option value="procurement_manager">Procurement Manager</option>
-              </select>
+            <div style={{ 
+              marginBottom: '20px', 
+              padding: '12px', 
+              background: '#F3F4F6', 
+              borderRadius: '8px',
+              fontSize: '13px',
+              color: '#6b7280'
+            }}>
+              <p style={{ margin: 0 }}>
+                📋 All new accounts are created as <strong>Business User</strong>. 
+                Contact your administrator if you need elevated access.
+              </p>
             </div>
           )}
 
@@ -344,6 +291,17 @@ const Login = () => {
             {loading ? 'Please wait...' : (isRegistering ? 'Create Account' : 'Login')}
           </button>
         </form>
+
+        {!isRegistering && (
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <Link 
+              to="/forgot-password" 
+              style={{ color: '#667eea', fontSize: '14px', textDecoration: 'none' }}
+            >
+              Forgot password?
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
