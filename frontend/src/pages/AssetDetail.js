@@ -563,6 +563,13 @@ const AssetDetail = () => {
             </div>
           )}
         </div>
+
+        {/* Audit Trail */}
+        <AuditTrail 
+          auditTrail={auditTrail} 
+          entityType="asset" 
+          userRole={user?.role} 
+        />
       </div>
     </Layout>
   );
