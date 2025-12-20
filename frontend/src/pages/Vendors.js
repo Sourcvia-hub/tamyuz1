@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
 import VendorForm from '../components/VendorForm';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import WorkflowStatusBadge from '../components/workflow/WorkflowStatusBadge';
 import { useAuth } from '../App';
 import { useToast } from '../hooks/use-toast';
@@ -13,11 +13,12 @@ const API = `${BACKEND_URL}/api`;
 const Vendors = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState(searchParams.get('filter') || 'all');
   const [formData, setFormData] = useState({
     // Company Information
     vendor_type: 'local',
