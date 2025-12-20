@@ -391,6 +391,7 @@ const Dashboard = () => {
             />
           </div>
         </CollapsibleSection>
+        )}
 
         {/* Financial Section - Compact */}
         <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 p-5">
