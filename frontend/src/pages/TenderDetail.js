@@ -129,8 +129,8 @@ const TenderDetail = () => {
     }
   };
 
-  const isOfficer = user?.role && ['procurement_officer', 'procurement_manager', 'admin'].includes(user.role);
-  const isHoP = user?.role && ['procurement_manager', 'admin'].includes(user.role);
+  const isOfficer = user?.role && ['procurement_officer', 'procurement_manager', 'admin', 'hop'].includes(user.role);
+  const isHoP = user?.role && ['procurement_manager', 'admin', 'hop'].includes(user.role);
   const isCreator = tender?.created_by === user?.id;
   const isAdditionalApprover = tender?.additional_approver_id === user?.id;
   const canViewEvaluation = isOfficer || isAdditionalApprover || isHoP;
