@@ -60,10 +60,12 @@ const Layout = ({ children }) => {
   const getRoleLabel = (role) => {
     const labels = {
       user: 'User',
+      business_user: 'Business User',
       direct_manager: 'Direct Manager',
       procurement_officer: 'Procurement Officer',
       senior_manager: 'Senior Manager',
       procurement_manager: 'Procurement Manager',
+      hop: 'Head of Procurement',
       admin: 'Admin',
       // Legacy roles
       requester: 'Requester',
