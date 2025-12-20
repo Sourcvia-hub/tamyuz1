@@ -238,14 +238,14 @@ const Dashboard = () => {
             value={keyMetrics.highRiskVendors}
             trend={keyMetrics.highRiskVendors > 0 ? 'up' : 'neutral'}
             color="red"
-            link="/vendors"
+            link="/vendors?filter=high_risk"
           />
           <MetricCard
             label="DD Pending"
             value={keyMetrics.dueDiligencePending}
             trend="neutral"
             color="amber"
-            link="/vendors"
+            link="/vendors?filter=pending_dd"
           />
           <MetricCard
             label="Open Requests"
