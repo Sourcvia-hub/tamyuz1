@@ -441,47 +441,12 @@ const VendorDetail = () => {
           </div>
         </div>
 
-        {/* Audit Log */}
-        {auditLog.length > 0 && (
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Change History</h2>
-            <div className="space-y-3">
-              {auditLog.map((log) => (
-                <div key={log.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {log.action === 'created' ? '📝 Created' : '✏️ Updated'}
-                      </p>
-                      <p className="text-sm text-gray-600">by {log.user_name}</p>
-                      {log.changes && Object.keys(log.changes).length > 0 && (
-                        <div className="mt-2 text-sm">
-                          {Object.entries(log.changes).map(([field, change]) => (
-                            <div key={field} className="text-gray-700">
-                              <span className="font-medium">{field}:</span>{' '}
-                              {change.old ? (
-                                <>
-                                  <span className="text-red-600 line-through">{change.old}</span>
-                                  {' → '}
-                                  <span className="text-green-600">{change.new}</span>
-                                </>
-                              ) : (
-                                <span>{JSON.stringify(change)}</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-xs text-gray-500">
-                      {new Date(log.timestamp).toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Audit Trail */}
+        <AuditTrail 
+          auditTrail={auditLog} 
+          entityType="vendor" 
+          userRole={user?.role} 
+        />
 
         {/* Tenders Where Vendor Ranked #1 */}
         <div className="bg-white rounded-xl shadow-lg p-8">
