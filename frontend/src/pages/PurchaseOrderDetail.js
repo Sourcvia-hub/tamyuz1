@@ -501,12 +501,11 @@ const PurchaseOrderDetail = () => {
             )}
 
             {/* Audit Trail */}
-            {auditTrail.length > 0 && (
-              <div className="bg-white rounded-xl shadow-lg p-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Audit Trail</h3>
-                <AuditTrail auditTrail={auditTrail} />
-              </div>
-            )}
+            <AuditTrail 
+              auditTrail={auditTrail} 
+              entityType="purchase_order" 
+              userRole={user?.role} 
+            />
           </>
         )}
       </div>
