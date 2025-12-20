@@ -585,6 +585,21 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
 const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, onClose, onHoPDecision, user }) => {
   const isHoP = ['procurement_manager', 'admin', 'hop'].includes(user?.role);
   const [notes, setNotes] = useState('');
+  const [auditTrail, setAuditTrail] = useState([]);
+
+  useEffect(() => {
+    const fetchAuditTrail = async () => {
+      try {
+        const res = await axios.get(`${API}/deliverables/${deliverable.id}/audit-trail`, { withCredentials: true });
+        setAuditTrail(res.data);
+      } catch (error) {
+        console.log('Audit trail not available');
+      }
+    };
+    if (deliverable?.id) {
+      fetchAuditTrail();
+    }
+  }, [deliverable?.id]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
