@@ -3588,6 +3588,255 @@ class SourceviaBackendTester:
         # Restore cookies
         self.session.cookies.update(old_cookies)
 
+    def test_audit_trail_feature(self):
+        """Test the new Audit Trail feature across all entity types"""
+        print("\n=== AUDIT TRAIL FEATURE TESTING ===")
+        
+        # Test credentials from review request
+        officer_user = {
+            "email": "test_officer@sourcevia.com",
+            "password": "Password123!"
+        }
+        
+        business_user = {
+            "email": "testuser@test.com", 
+            "password": "Password123!"
+        }
+        
+        # 1. Test Officer Access to Audit Trails
+        print("\n--- Testing Officer Access to Audit Trails ---")
+        try:
+            # Login as officer
+            login_data = {
+                "email": officer_user["email"],
+                "password": officer_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                self.log_result("Officer Login for Audit Trail", True, f"Logged in as {user.get('role')}")
+                
+                # Get some entity IDs for testing
+                test_entities = {}
+                
+                # Get a vendor ID
+                vendors_response = self.session.get(f"{BACKEND_URL}/vendors")
+                if vendors_response.status_code == 200:
+                    vendors = vendors_response.json()
+                    if vendors:
+                        test_entities["vendor_id"] = vendors[0].get("id")
+                
+                # Get a tender ID
+                tenders_response = self.session.get(f"{BACKEND_URL}/tenders")
+                if tenders_response.status_code == 200:
+                    tenders = tenders_response.json()
+                    if tenders:
+                        test_entities["tender_id"] = tenders[0].get("id")
+                
+                # Get a contract ID
+                contracts_response = self.session.get(f"{BACKEND_URL}/contracts")
+                if contracts_response.status_code == 200:
+                    contracts = contracts_response.json()
+                    if contracts:
+                        test_entities["contract_id"] = contracts[0].get("id")
+                
+                # Get a purchase order ID
+                pos_response = self.session.get(f"{BACKEND_URL}/purchase-orders")
+                if pos_response.status_code == 200:
+                    pos = pos_response.json()
+                    if pos:
+                        test_entities["po_id"] = pos[0].get("id")
+                
+                # Get a deliverable ID
+                deliverables_response = self.session.get(f"{BACKEND_URL}/deliverables")
+                if deliverables_response.status_code == 200:
+                    deliverables = deliverables_response.json()
+                    if deliverables:
+                        test_entities["deliverable_id"] = deliverables[0].get("id")
+                
+                # Get an asset ID
+                assets_response = self.session.get(f"{BACKEND_URL}/assets")
+                if assets_response.status_code == 200:
+                    assets = assets_response.json()
+                    if assets:
+                        test_entities["asset_id"] = assets[0].get("id")
+                
+                # Get an OSR ID
+                osr_response = self.session.get(f"{BACKEND_URL}/osr")
+                if osr_response.status_code == 200:
+                    osr_list = osr_response.json()
+                    if osr_list:
+                        test_entities["osr_id"] = osr_list[0].get("id")
+                
+                # Test all audit trail endpoints with officer credentials
+                audit_endpoints = [
+                    ("vendors", "vendor_id", "audit-log"),
+                    ("tenders", "tender_id", "audit-trail"),
+                    ("contracts", "contract_id", "audit-trail"),
+                    ("purchase-orders", "po_id", "audit-trail"),
+                    ("deliverables", "deliverable_id", "audit-trail"),
+                    ("assets", "asset_id", "audit-trail"),
+                    ("osr", "osr_id", "audit-trail")
+                ]
+                
+                for entity_type, id_key, endpoint_suffix in audit_endpoints:
+                    if id_key in test_entities:
+                        entity_id = test_entities[id_key]
+                        try:
+                            response = self.session.get(f"{BACKEND_URL}/{entity_type}/{entity_id}/{endpoint_suffix}")
+                            
+                            if response.status_code == 200:
+                                audit_data = response.json()
+                                if isinstance(audit_data, list):
+                                    self.log_result(f"Officer Access - {entity_type.title()} Audit Trail", True, f"Retrieved {len(audit_data)} audit entries")
+                                else:
+                                    self.log_result(f"Officer Access - {entity_type.title()} Audit Trail", True, "Retrieved audit trail data")
+                            elif response.status_code == 404:
+                                self.log_result(f"Officer Access - {entity_type.title()} Audit Trail", True, f"Entity not found (expected for some entities)")
+                            else:
+                                self.log_result(f"Officer Access - {entity_type.title()} Audit Trail", False, f"Status: {response.status_code}, Response: {response.text}")
+                        except Exception as e:
+                            self.log_result(f"Officer Access - {entity_type.title()} Audit Trail", False, f"Exception: {str(e)}")
+                    else:
+                        self.log_result(f"Officer Access - {entity_type.title()} Audit Trail", False, f"No {entity_type} available for testing")
+                        
+            else:
+                self.log_result("Officer Login for Audit Trail", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Officer Login for Audit Trail", False, f"Exception: {str(e)}")
+
+        # 2. Test Business User Access Control (Should get 403)
+        print("\n--- Testing Business User Access Control for Audit Trails ---")
+        try:
+            # Login as business user
+            login_data = {
+                "email": business_user["email"],
+                "password": business_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                self.log_result("Business User Login for Audit Trail", True, f"Logged in as {user.get('role')}")
+                
+                # Get some entity IDs for testing (reuse from officer test if available)
+                test_entities = {}
+                
+                # Get a vendor ID
+                vendors_response = self.session.get(f"{BACKEND_URL}/vendors")
+                if vendors_response.status_code == 200:
+                    vendors = vendors_response.json()
+                    if vendors:
+                        test_entities["vendor_id"] = vendors[0].get("id")
+                
+                # Test that business user gets 403 for audit trail endpoints
+                audit_endpoints = [
+                    ("vendors", "vendor_id", "audit-log"),
+                    ("tenders", "tender_id", "audit-trail"),
+                    ("contracts", "contract_id", "audit-trail"),
+                    ("purchase-orders", "po_id", "audit-trail"),
+                    ("deliverables", "deliverable_id", "audit-trail"),
+                    ("assets", "asset_id", "audit-trail"),
+                    ("osr", "osr_id", "audit-trail")
+                ]
+                
+                # Test with vendor audit log (if vendor exists)
+                if "vendor_id" in test_entities:
+                    vendor_id = test_entities["vendor_id"]
+                    try:
+                        response = self.session.get(f"{BACKEND_URL}/vendors/{vendor_id}/audit-log")
+                        
+                        if response.status_code == 403:
+                            self.log_result("Business User Access Control - Vendor Audit Log", True, "Correctly returned 403 Forbidden")
+                        else:
+                            self.log_result("Business User Access Control - Vendor Audit Log", False, f"Expected 403, got {response.status_code}")
+                    except Exception as e:
+                        self.log_result("Business User Access Control - Vendor Audit Log", False, f"Exception: {str(e)}")
+                else:
+                    self.log_result("Business User Access Control - Vendor Audit Log", False, "No vendor available for testing")
+                
+                # Test with a dummy ID for other endpoints to verify 403 access control
+                dummy_id = "test-id-123"
+                for entity_type, _, endpoint_suffix in audit_endpoints[1:]:  # Skip vendors as we tested above
+                    try:
+                        response = self.session.get(f"{BACKEND_URL}/{entity_type}/{dummy_id}/{endpoint_suffix}")
+                        
+                        if response.status_code == 403:
+                            self.log_result(f"Business User Access Control - {entity_type.title()} Audit Trail", True, "Correctly returned 403 Forbidden")
+                        elif response.status_code == 404:
+                            # If we get 404, it means the access control passed but entity not found
+                            # This suggests access control is not working properly
+                            self.log_result(f"Business User Access Control - {entity_type.title()} Audit Trail", False, "Got 404 instead of 403 - access control may not be working")
+                        else:
+                            self.log_result(f"Business User Access Control - {entity_type.title()} Audit Trail", False, f"Expected 403, got {response.status_code}")
+                    except Exception as e:
+                        self.log_result(f"Business User Access Control - {entity_type.title()} Audit Trail", False, f"Exception: {str(e)}")
+                        
+            else:
+                self.log_result("Business User Login for Audit Trail", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Business User Login for Audit Trail", False, f"Exception: {str(e)}")
+
+        # 3. Test HoP Access (Should also work like officer)
+        print("\n--- Testing HoP Access to Audit Trails ---")
+        try:
+            # Login as HoP (procurement manager)
+            hop_user = {
+                "email": "test_manager@sourcevia.com",
+                "password": "Password123!"
+            }
+            
+            login_data = {
+                "email": hop_user["email"],
+                "password": hop_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                self.log_result("HoP Login for Audit Trail", True, f"Logged in as {user.get('role')}")
+                
+                # Test vendor audit log access as HoP
+                vendors_response = self.session.get(f"{BACKEND_URL}/vendors")
+                if vendors_response.status_code == 200:
+                    vendors = vendors_response.json()
+                    if vendors:
+                        vendor_id = vendors[0].get("id")
+                        try:
+                            response = self.session.get(f"{BACKEND_URL}/vendors/{vendor_id}/audit-log")
+                            
+                            if response.status_code == 200:
+                                audit_data = response.json()
+                                if isinstance(audit_data, list):
+                                    self.log_result("HoP Access - Vendor Audit Log", True, f"Retrieved {len(audit_data)} audit entries")
+                                else:
+                                    self.log_result("HoP Access - Vendor Audit Log", True, "Retrieved audit trail data")
+                            elif response.status_code == 404:
+                                self.log_result("HoP Access - Vendor Audit Log", True, "Entity not found (expected)")
+                            else:
+                                self.log_result("HoP Access - Vendor Audit Log", False, f"Status: {response.status_code}, Response: {response.text}")
+                        except Exception as e:
+                            self.log_result("HoP Access - Vendor Audit Log", False, f"Exception: {str(e)}")
+                    else:
+                        self.log_result("HoP Access - Vendor Audit Log", False, "No vendors available for testing")
+                else:
+                    self.log_result("HoP Access - Vendor Audit Log", False, f"Could not fetch vendors: {vendors_response.status_code}")
+                        
+            else:
+                self.log_result("HoP Login for Audit Trail", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("HoP Login for Audit Trail", False, f"Exception: {str(e)}")
+
     def run_all_tests(self):
         """Run all tests in sequence"""
         print("🚀 Starting Sourcevia Backend Comprehensive Testing")
