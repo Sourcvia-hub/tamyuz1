@@ -125,6 +125,22 @@ try:
 except Exception as exc:
     print(f"[BR Workflow] Failed to mount router: {exc}")
 
+# Include User Management Routes (HoP-only)
+try:
+    from routes.user_management_routes import router as user_mgmt_router
+    api_router.include_router(user_mgmt_router)
+    print("[User Management] Router mounted at /api/users")
+except Exception as exc:
+    print(f"[User Management] Failed to mount router: {exc}")
+
+# Include Password Management Routes
+try:
+    from routes.password_routes import router as password_router
+    api_router.include_router(password_router)
+    print("[Password] Router mounted at /api/auth")
+except Exception as exc:
+    print(f"[Password] Failed to mount router: {exc}")
+
 
 # ==================== HELPER FUNCTIONS ====================
 def calculate_vendor_registration_score(vendor_data: dict) -> dict:
