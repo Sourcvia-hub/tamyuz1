@@ -239,7 +239,8 @@ def should_filter_by_user(user_role: str, module: str) -> bool:
     # Normalize role string (handle both enum values and plain strings)
     role_normalized = user_role.lower().strip()
     
-    if role_normalized == "admin":
+    # Admin and HoP see all data
+    if role_normalized in ["admin", "hop"]:
         return False
     
     # Regular users should only see their own data
@@ -257,7 +258,7 @@ def should_filter_by_domain(user_role: str, module: str) -> bool:
     Returns True for roles that should see team/department data:
     - direct_manager: sees their team's data
     """
-    if user_role == "admin":
+    if user_role in ["admin", "hop"]:
         return False
     
     # Managers should see team data
