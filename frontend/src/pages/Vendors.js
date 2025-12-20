@@ -265,6 +265,14 @@ const Vendors = () => {
             High Risk ({vendors.filter(v => v.risk_category === 'high').length})
           </button>
           <button
+            onClick={() => setActiveFilter('pending_dd')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeFilter === 'pending_dd' ? 'bg-amber-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+            }`}
+          >
+            DD Pending ({vendors.filter(v => v.status === 'pending_due_diligence').length})
+          </button>
+          <button
             onClick={() => setActiveFilter('blacklisted')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeFilter === 'blacklisted' ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
