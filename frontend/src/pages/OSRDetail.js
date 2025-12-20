@@ -395,7 +395,7 @@ const OSRDetail = () => {
               {statusUpdate.status === 'completed' && osr.request_type === 'asset_related' && (
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    ℹ️ Completing this request will automatically update the asset's last maintenance date.
+                    ℹ️ Completing this request will automatically update the asset&apos;s last maintenance date.
                   </p>
                 </div>
               )}
