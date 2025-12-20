@@ -450,7 +450,7 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Or Purchase Order</label>
+              <label className="block text-sm font-medium mb-1">Purchase Order <span className="text-gray-400">(Optional)</span></label>
               <SearchableSelect
                 options={purchaseOrders.map(po => ({ value: po.id, label: `${po.po_number} - ${po.vendor_name || 'Unknown'}` }))}
                 value={selectedPO}
@@ -476,16 +476,27 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                 }}
                 placeholder="Select issued PO..."
               />
-              {purchaseOrders.length === 0 && (
-                <p className="text-xs text-orange-600 mt-1">No issued POs available</p>
-              )}
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Vendor * {vendorLocked && <span className="text-blue-600">(Auto-selected)</span>}</label>
+            <label className="block text-sm font-medium mb-1">Vendor * {vendorLocked && <span className="text-blue-600">(Auto-selected from Contract/PO)</span>}</label>
             {vendorLocked ? (
-              <div className="w-full px-3 py-2 border rounded-lg bg-gray-100 text-gray-700">
-                🏪 {selectedVendor?.label || 'Unknown Vendor'}
+              <div className="flex items-center gap-2">
+                <div className="flex-1 px-3 py-2 border rounded-lg bg-gray-100 text-gray-700">
+                  🏪 {selectedVendor?.label || 'Unknown Vendor'}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setVendorLocked(false);
+                    setSelectedContract(null);
+                    setSelectedPO(null);
+                    setFormData({ ...formData, contract_id: '', po_id: '' });
+                  }}
+                  className="px-3 py-2 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Change
+                </button>
               </div>
             ) : (
               <SearchableSelect
@@ -498,7 +509,6 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                 placeholder="Select vendor..."
               />
             )}
-            />
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Title *</label>
