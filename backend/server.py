@@ -1188,7 +1188,180 @@ async def get_vendor_audit_log(vendor_id: str, request: Request):
     
     return result
 
-# ==================== DUE DILIGENCE ENDPOINTS ====================
+# ==================== AUDIT TRAIL UTILITY ====================
+
+async def create_audit_log(
+    entity_type: str,
+    entity_id: str,
+    action: str,
+    user,
+    details: str = None,
+    notes: str = None,
+    old_status: str = None,
+    new_status: str = None
+):
+    """Helper function to create audit log entries"""
+    audit_log = AuditLog(
+        entity_type=entity_type,
+        entity_id=entity_id,
+        action=action,
+        user_id=user.id if user else "system",
+        user_name=user.name if user else "System",
+        user_role=user.role if user else None,
+        details=details,
+        notes=notes,
+        old_status=old_status,
+        new_status=new_status
+    )
+    audit_doc = audit_log.model_dump()
+    audit_doc["timestamp"] = audit_doc["timestamp"].isoformat()
+    await db.audit_logs.insert_one(audit_doc)
+    return audit_log
+
+async def get_entity_audit_trail(entity_type: str, entity_id: str, limit: int = 100):
+    """Get audit trail for any entity type"""
+    logs = await db.audit_logs.find(
+        {"entity_type": entity_type, "entity_id": entity_id}
+    ).sort("timestamp", -1).to_list(limit)
+    
+    result = []
+    for log in logs:
+        if '_id' in log:
+            del log['_id']
+        if isinstance(log.get('timestamp'), str):
+            log['timestamp'] = datetime.fromisoformat(log['timestamp'])
+        result.append(log)
+    
+    return result
+
+# ==================== AUDIT TRAIL ENDPOINTS ====================
+
+@api_router.get("/tenders/{tender_id}/audit-trail")
+async def get_tender_audit_trail(tender_id: str, request: Request):
+    """Get audit trail for a tender/business request - RBAC: officers and HoP only"""
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Check if user has permission (officer or HoP)
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    if user.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get tender to verify it exists
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    
+    # Get audit trail
+    audit_trail = await get_entity_audit_trail("tender", tender_id)
+    
+    # Also include the tender's built-in audit_trail if exists
+    if tender.get("audit_trail"):
+        for entry in tender["audit_trail"]:
+            # Convert to standard format
+            if entry.get("user_id"):
+                # Look up user name
+                entry_user = await db.users.find_one({"id": entry["user_id"]}, {"_id": 0, "name": 1, "role": 1})
+                entry["user_name"] = entry_user.get("name") if entry_user else "Unknown"
+                entry["user_role"] = entry_user.get("role") if entry_user else None
+            audit_trail.append(entry)
+    
+    # Sort by timestamp
+    audit_trail.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    
+    return audit_trail
+
+@api_router.get("/contracts/{contract_id}/audit-trail")
+async def get_contract_audit_trail(contract_id: str, request: Request):
+    """Get audit trail for a contract - RBAC: officers and HoP only"""
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    if user.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    contract = await db.contracts.find_one({"id": contract_id})
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    return await get_entity_audit_trail("contract", contract_id)
+
+@api_router.get("/purchase-orders/{po_id}/audit-trail")
+async def get_purchase_order_audit_trail(po_id: str, request: Request):
+    """Get audit trail for a purchase order - RBAC: officers and HoP only"""
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    if user.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    po = await db.purchase_orders.find_one({"id": po_id})
+    if not po:
+        raise HTTPException(status_code=404, detail="Purchase order not found")
+    
+    return await get_entity_audit_trail("purchase_order", po_id)
+
+@api_router.get("/deliverables/{deliverable_id}/audit-trail")
+async def get_deliverable_audit_trail(deliverable_id: str, request: Request):
+    """Get audit trail for a deliverable - RBAC: officers and HoP only"""
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    if user.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    deliverable = await db.deliverables.find_one({"id": deliverable_id})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    return await get_entity_audit_trail("deliverable", deliverable_id)
+
+@api_router.get("/assets/{asset_id}/audit-trail")
+async def get_asset_audit_trail(asset_id: str, request: Request):
+    """Get audit trail for an asset - RBAC: officers and HoP only"""
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    if user.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    asset = await db.assets.find_one({"id": asset_id})
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    
+    return await get_entity_audit_trail("asset", asset_id)
+
+@api_router.get("/osr/{osr_id}/audit-trail")
+async def get_osr_audit_trail(osr_id: str, request: Request):
+    """Get audit trail for a service request (OSR) - RBAC: officers and HoP only"""
+    from utils.auth import get_current_user
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    if user.role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    osr = await db.service_requests.find_one({"id": osr_id})
+    if not osr:
+        raise HTTPException(status_code=404, detail="Service request not found")
+    
+    return await get_entity_audit_trail("osr", osr_id)
 
 @api_router.put("/vendors/{vendor_id}/due-diligence")
 async def update_vendor_due_diligence(vendor_id: str, dd_data: dict, request: Request):
