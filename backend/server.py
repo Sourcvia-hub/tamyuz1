@@ -584,36 +584,43 @@ async def get_dashboard_stats(request: Request):
             if len(unevaluated) > 0:
                 waiting_evaluation_count += 1
     
-    approved_tenders = await db.tenders.count_documents({"status": TenderStatus.AWARDED.value})
+    approved_tenders = await db.tenders.count_documents({**tender_query, "status": TenderStatus.AWARDED.value})
     
-    # Contract Statistics
-    all_contracts = await db.contracts.count_documents({})
+    # Contract Statistics (filtered for regular users)
+    contract_query = user_query.copy()
+    all_contracts = await db.contracts.count_documents(contract_query)
     # Active contracts = approved + draft (not expired or pending)
     active_contracts = await db.contracts.count_documents({
+        **contract_query,
         "status": {"$in": [ContractStatus.APPROVED.value, ContractStatus.DRAFT.value]}
     })
     
     # Outsourcing, Cloud, and NOC contracts
-    outsourcing_contracts = await db.contracts.count_documents({"outsourcing_classification": "outsourcing"})
-    cloud_contracts = await db.contracts.count_documents({"outsourcing_classification": "cloud_computing"})
-    noc_contracts = await db.contracts.count_documents({"is_noc": True})
-    expired_contracts = await db.contracts.count_documents({"status": ContractStatus.EXPIRED.value})
+    outsourcing_contracts = await db.contracts.count_documents({**contract_query, "outsourcing_classification": "outsourcing"})
+    cloud_contracts = await db.contracts.count_documents({**contract_query, "outsourcing_classification": "cloud_computing"})
+    noc_contracts = await db.contracts.count_documents({**contract_query, "is_noc": True})
+    expired_contracts = await db.contracts.count_documents({**contract_query, "status": ContractStatus.EXPIRED.value})
     
-    # Invoice Statistics
-    all_invoices = await db.invoices.count_documents({})
+    # Invoice/Deliverable Statistics (filtered for regular users)
+    deliverable_query = user_query.copy()
+    all_invoices = await db.deliverables.count_documents(deliverable_query) if filter_by_user else await db.invoices.count_documents({})
     
     # Due invoices - pending or verified status
-    due_invoices = await db.invoices.count_documents({
+    due_invoices = await db.deliverables.count_documents({
+        **deliverable_query,
+        "status": {"$in": ["pending", "submitted", "under_review"]}
+    }) if filter_by_user else await db.invoices.count_documents({
         "status": {"$in": [InvoiceStatus.PENDING.value, InvoiceStatus.VERIFIED.value, InvoiceStatus.APPROVED.value]}
     })
     
-    # Purchase Order Statistics
-    all_pos = await db.purchase_orders.count_documents({})
-    issued_pos = await db.purchase_orders.count_documents({"status": "issued"})
-    converted_pos = await db.purchase_orders.count_documents({"status": "converted_to_contract"})
+    # Purchase Order Statistics (filtered for regular users)
+    po_query = user_query.copy()
+    all_pos = await db.purchase_orders.count_documents(po_query)
+    issued_pos = await db.purchase_orders.count_documents({**po_query, "status": "issued"})
+    converted_pos = await db.purchase_orders.count_documents({**po_query, "status": "converted_to_contract"})
     
     # Calculate total PO value
-    pos = await db.purchase_orders.find({}).to_list(1000)
+    pos = await db.purchase_orders.find(po_query).to_list(1000)
     total_po_value = sum(po.get('total_amount', 0) for po in pos)
     
     # Asset Statistics
