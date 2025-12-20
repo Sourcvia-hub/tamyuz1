@@ -146,8 +146,8 @@ def has_permission(user_role: str, module: str, required_permission: str) -> boo
     Returns:
         bool: True if user has the permission, False otherwise
     """
-    # Admin has all permissions
-    if user_role == "admin":
+    # Admin and HoP have all permissions
+    if user_role in ["admin", "hop"]:
         return True
     
     # Get permissions for this role and module
