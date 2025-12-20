@@ -1002,6 +1002,313 @@ class SourceviaBackendTester:
         except Exception as e:
             self.log_result("Vendor Fields Optional", False, f"Exception: {str(e)}")
 
+    def test_controlled_access_features(self):
+        """Test Controlled Access + HoP Role Control + Password Reset features"""
+        print("\n=== CONTROLLED ACCESS + HOP ROLE CONTROL + PASSWORD RESET TESTING ===")
+        
+        # Test credentials from review request
+        hop_user = {
+            "email": "test_manager@sourcevia.com",
+            "password": "Password123!"
+        }
+        
+        officer_user = {
+            "email": "test_officer@sourcevia.com", 
+            "password": "Password123!"
+        }
+        
+        # 1. Test Registration (No Self-Role Selection)
+        print("\n--- Testing Registration ---")
+        try:
+            register_data = {
+                "email": "test_access@test.com",
+                "password": "TestPass1234!",
+                "name": "Test Access User",
+                "role": "hop"  # This should be ignored
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/register", json=register_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                actual_role = user.get("role")
+                
+                # Verify the role field from client is ignored
+                if actual_role == "user":  # Should be "user" not "hop"
+                    self.log_result("Registration - Role Ignored", True, f"Role correctly set to 'user' (ignored client 'hop')")
+                    self.test_data["new_user_id"] = user.get("id")
+                    self.test_data["new_user_email"] = user.get("email")
+                else:
+                    self.log_result("Registration - Role Ignored", False, f"Expected 'user', got '{actual_role}'")
+            else:
+                self.log_result("Registration - Role Ignored", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Registration - Role Ignored", False, f"Exception: {str(e)}")
+
+        # 2. Test User Management APIs (HoP Only)
+        print("\n--- Testing User Management APIs (HoP Only) ---")
+        try:
+            # Login as HoP
+            login_data = {
+                "email": hop_user["email"],
+                "password": hop_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                self.log_result("HoP Login", True, f"Logged in as {user.get('role')}")
+                
+                # Test GET /api/users - Should return list of users
+                response = self.session.get(f"{BACKEND_URL}/users")
+                if response.status_code == 200:
+                    data = response.json()
+                    users = data.get("users", [])
+                    count = data.get("count", 0)
+                    self.log_result("GET /api/users (HoP)", True, f"Retrieved {count} users")
+                else:
+                    self.log_result("GET /api/users (HoP)", False, f"Status: {response.status_code}")
+                
+                # Test GET /api/users?search=test - Search functionality
+                response = self.session.get(f"{BACKEND_URL}/users?search=test")
+                if response.status_code == 200:
+                    data = response.json()
+                    users = data.get("users", [])
+                    self.log_result("GET /api/users?search=test (HoP)", True, f"Search returned {len(users)} users")
+                else:
+                    self.log_result("GET /api/users?search=test (HoP)", False, f"Status: {response.status_code}")
+                
+                # Test GET /api/users?role_filter=business_user - Filter by role
+                response = self.session.get(f"{BACKEND_URL}/users?role_filter=user")
+                if response.status_code == 200:
+                    data = response.json()
+                    users = data.get("users", [])
+                    self.log_result("GET /api/users?role_filter=user (HoP)", True, f"Role filter returned {len(users)} users")
+                else:
+                    self.log_result("GET /api/users?role_filter=user (HoP)", False, f"Status: {response.status_code}")
+                
+                # Test PATCH /api/users/{id}/role - Change role
+                if "new_user_id" in self.test_data:
+                    user_id = self.test_data["new_user_id"]
+                    role_change_data = {
+                        "role": "approver",
+                        "reason": "Testing role change"
+                    }
+                    
+                    response = self.session.patch(f"{BACKEND_URL}/users/{user_id}/role", json=role_change_data)
+                    if response.status_code == 200:
+                        self.log_result("PATCH /api/users/{id}/role (HoP)", True, "Role changed successfully")
+                    else:
+                        self.log_result("PATCH /api/users/{id}/role (HoP)", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+                # Test PATCH /api/users/{id}/status - Disable user
+                if "new_user_id" in self.test_data:
+                    user_id = self.test_data["new_user_id"]
+                    status_change_data = {
+                        "status": "disabled"
+                    }
+                    
+                    response = self.session.patch(f"{BACKEND_URL}/users/{user_id}/status", json=status_change_data)
+                    if response.status_code == 200:
+                        self.log_result("PATCH /api/users/{id}/status (HoP)", True, "User disabled successfully")
+                        self.test_data["disabled_user_id"] = user_id
+                        self.test_data["disabled_user_email"] = self.test_data.get("new_user_email")
+                    else:
+                        self.log_result("PATCH /api/users/{id}/status (HoP)", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+                # Test GET /api/users/audit/logs - Should show audit entries
+                response = self.session.get(f"{BACKEND_URL}/users/audit/logs")
+                if response.status_code == 200:
+                    data = response.json()
+                    logs = data.get("logs", [])
+                    self.log_result("GET /api/users/audit/logs (HoP)", True, f"Retrieved {len(logs)} audit entries")
+                else:
+                    self.log_result("GET /api/users/audit/logs (HoP)", False, f"Status: {response.status_code}")
+                    
+            else:
+                self.log_result("HoP Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("User Management APIs (HoP)", False, f"Exception: {str(e)}")
+
+        # 3. Test User Management Access Control (Officer should get 403)
+        print("\n--- Testing User Management Access Control ---")
+        try:
+            # Login as Officer (not HoP)
+            login_data = {
+                "email": officer_user["email"],
+                "password": officer_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                # Test GET /api/users - Should return 403 Forbidden
+                response = self.session.get(f"{BACKEND_URL}/users")
+                if response.status_code == 403:
+                    self.log_result("GET /api/users (Officer) - Access Control", True, "Correctly returned 403 Forbidden")
+                else:
+                    self.log_result("GET /api/users (Officer) - Access Control", False, f"Expected 403, got {response.status_code}")
+                
+                # Test PATCH /api/users/{id}/role - Should return 403 Forbidden
+                if "new_user_id" in self.test_data:
+                    user_id = self.test_data["new_user_id"]
+                    role_change_data = {
+                        "role": "approver",
+                        "reason": "Testing access control"
+                    }
+                    
+                    response = self.session.patch(f"{BACKEND_URL}/users/{user_id}/role", json=role_change_data)
+                    if response.status_code == 403:
+                        self.log_result("PATCH /api/users/{id}/role (Officer) - Access Control", True, "Correctly returned 403 Forbidden")
+                    else:
+                        self.log_result("PATCH /api/users/{id}/role (Officer) - Access Control", False, f"Expected 403, got {response.status_code}")
+            else:
+                self.log_result("Officer Login for Access Control Test", False, f"Status: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("User Management Access Control", False, f"Exception: {str(e)}")
+
+        # 4. Test Disabled User Cannot Login
+        print("\n--- Testing Disabled User Cannot Login ---")
+        if "disabled_user_email" in self.test_data:
+            try:
+                login_data = {
+                    "email": self.test_data["disabled_user_email"],
+                    "password": "TestPass1234!"
+                }
+                
+                response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+                
+                if response.status_code == 403:
+                    data = response.json()
+                    detail = data.get("detail", "")
+                    if "disabled" in detail.lower():
+                        self.log_result("Disabled User Login", True, f"Correctly blocked with message: {detail}")
+                    else:
+                        self.log_result("Disabled User Login", False, f"Got 403 but wrong message: {detail}")
+                else:
+                    self.log_result("Disabled User Login", False, f"Expected 403, got {response.status_code}")
+                    
+            except Exception as e:
+                self.log_result("Disabled User Login", False, f"Exception: {str(e)}")
+
+        # 5. Test Password Reset APIs
+        print("\n--- Testing Password Reset APIs ---")
+        try:
+            # Test POST /api/auth/forgot-password
+            forgot_data = {
+                "email": "test_manager@sourcevia.com"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/forgot-password", json=forgot_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                message = data.get("message", "")
+                if "If the email exists" in message:
+                    self.log_result("POST /api/auth/forgot-password", True, f"Generic message returned: {message}")
+                else:
+                    self.log_result("POST /api/auth/forgot-password", False, f"Unexpected message: {message}")
+            else:
+                self.log_result("POST /api/auth/forgot-password", False, f"Status: {response.status_code}")
+            
+            # Test POST /api/auth/change-password (as logged in user)
+            # First login as HoP again
+            login_data = {
+                "email": hop_user["email"],
+                "password": hop_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                change_password_data = {
+                    "current_password": "Password123!",
+                    "new_password": "NewPassword123!",
+                    "confirm_password": "NewPassword123!"
+                }
+                
+                response = self.session.post(f"{BACKEND_URL}/auth/change-password", json=change_password_data)
+                
+                if response.status_code == 200:
+                    self.log_result("POST /api/auth/change-password", True, "Password changed successfully")
+                    
+                    # Change it back for other tests
+                    change_back_data = {
+                        "current_password": "NewPassword123!",
+                        "new_password": "Password123!",
+                        "confirm_password": "Password123!"
+                    }
+                    
+                    self.session.post(f"{BACKEND_URL}/auth/change-password", json=change_back_data)
+                    
+                else:
+                    self.log_result("POST /api/auth/change-password", False, f"Status: {response.status_code}, Response: {response.text}")
+            else:
+                self.log_result("Change Password Test Setup", False, "Could not login for change password test")
+                
+        except Exception as e:
+            self.log_result("Password Reset APIs", False, f"Exception: {str(e)}")
+
+        # 6. Test Force Password Reset
+        print("\n--- Testing Force Password Reset ---")
+        try:
+            # Login as HoP
+            login_data = {
+                "email": hop_user["email"],
+                "password": hop_user["password"]
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200 and "new_user_id" in self.test_data:
+                user_id = self.test_data["new_user_id"]
+                
+                # Test POST /api/users/{id}/force-password-reset (as HoP)
+                response = self.session.post(f"{BACKEND_URL}/users/{user_id}/force-password-reset")
+                
+                if response.status_code == 200:
+                    self.log_result("POST /api/users/{id}/force-password-reset (HoP)", True, "Force password reset set successfully")
+                    
+                    # Now test login as that user - response should have force_password_reset: true
+                    # First enable the user again
+                    status_change_data = {
+                        "status": "active"
+                    }
+                    self.session.patch(f"{BACKEND_URL}/users/{user_id}/status", json=status_change_data)
+                    
+                    # Try to login as the user
+                    user_login_data = {
+                        "email": self.test_data.get("new_user_email"),
+                        "password": "TestPass1234!"
+                    }
+                    
+                    response = self.session.post(f"{BACKEND_URL}/auth/login", json=user_login_data)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        force_reset = data.get("force_password_reset", False)
+                        
+                        if force_reset:
+                            self.log_result("Force Password Reset Login Check", True, "Login response has force_password_reset: true")
+                        else:
+                            self.log_result("Force Password Reset Login Check", False, f"force_password_reset: {force_reset}")
+                    else:
+                        self.log_result("Force Password Reset Login Check", False, f"Login failed: {response.status_code}")
+                        
+                else:
+                    self.log_result("POST /api/users/{id}/force-password-reset (HoP)", False, f"Status: {response.status_code}, Response: {response.text}")
+            else:
+                self.log_result("Force Password Reset Test Setup", False, "Could not setup test")
+                
+        except Exception as e:
+            self.log_result("Force Password Reset", False, f"Exception: {str(e)}")
+
     def test_hop_approval_workflow(self):
         """Test HoP Approval workflow features for Contract Governance Intelligence Assistant"""
         print("\n=== HOP APPROVAL WORKFLOW TESTING ===")
