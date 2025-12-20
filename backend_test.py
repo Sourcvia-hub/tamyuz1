@@ -15,9 +15,9 @@ BACKEND_URL = "https://contract-gov-ai.preview.emergentagent.com/api"
 
 # Test Users from review request
 TEST_USERS = {
-    "procurement_manager": {
-        "email": "admin@sourcevia.com",
-        "password": "admin123",
+    "hop": {
+        "email": "hop@sourcevia.com",
+        "password": "Password123!",
         "expected_role": "procurement_manager"
     },
     "procurement_officer": {
@@ -25,12 +25,7 @@ TEST_USERS = {
         "password": "Password123!",
         "expected_role": "procurement_officer"
     },
-    "senior_manager": {
-        "email": "approver@test.com", 
-        "password": "test123",
-        "expected_role": "senior_manager"
-    },
-    "user": {
+    "business_user": {
         "email": "testuser@test.com",
         "password": "Password123!", 
         "expected_role": "user"
