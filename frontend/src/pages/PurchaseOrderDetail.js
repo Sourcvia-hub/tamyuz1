@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
 import FileUpload from '../components/FileUpload';
+import { useAuth } from '../App';
+import AuditTrail from '../components/AuditTrail';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -10,10 +12,12 @@ const API = `${BACKEND_URL}/api`;
 const PurchaseOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [po, setPO] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [tender, setTender] = useState(null);
+  const [auditTrail, setAuditTrail] = useState([]);
   const [editFormData, setEditFormData] = useState({
     delivery_time: '',
     items: []
@@ -21,7 +25,17 @@ const PurchaseOrderDetail = () => {
 
   useEffect(() => {
     fetchPO();
+    fetchAuditTrail();
   }, [id]);
+
+  const fetchAuditTrail = async () => {
+    try {
+      const res = await axios.get(`${API}/purchase-orders/${id}/audit-trail`, { withCredentials: true });
+      setAuditTrail(res.data);
+    } catch (error) {
+      console.log('Audit trail not available or access denied');
+    }
+  };
 
   const fetchPO = async () => {
     try {
