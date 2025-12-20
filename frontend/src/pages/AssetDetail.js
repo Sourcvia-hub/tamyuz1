@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import FileUpload from '../components/FileUpload';
 import { useAuth } from '../App';
 import { useToast } from '../hooks/use-toast';
+import AuditTrail from '../components/AuditTrail';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -18,6 +19,7 @@ const AssetDetail = () => {
   const [relatedOSRs, setRelatedOSRs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [auditTrail, setAuditTrail] = useState([]);
 
   const isOfficer = ['procurement_officer', 'procurement_manager', 'admin', 'hop'].includes(user?.role);
   const isHoP = ['procurement_manager', 'admin', 'hop'].includes(user?.role);
@@ -25,7 +27,17 @@ const AssetDetail = () => {
   useEffect(() => {
     fetchAsset();
     fetchRelatedOSRs();
+    fetchAuditTrail();
   }, [id]);
+
+  const fetchAuditTrail = async () => {
+    try {
+      const res = await axios.get(`${API}/assets/${id}/audit-trail`, { withCredentials: true });
+      setAuditTrail(res.data);
+    } catch (error) {
+      console.log('Audit trail not available or access denied');
+    }
+  };
 
   const fetchAsset = async () => {
     try {
