@@ -963,6 +963,13 @@ const ContractDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Audit Trail */}
+        <AuditTrail 
+          auditTrail={auditTrail} 
+          entityType="contract" 
+          userRole={user?.role} 
+        />
       </div>
     </Layout>
   );
