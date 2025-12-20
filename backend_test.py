@@ -997,6 +997,420 @@ class SourceviaBackendTester:
         except Exception as e:
             self.log_result("Vendor Fields Optional", False, f"Exception: {str(e)}")
 
+    def test_hop_comprehensive_access(self):
+        """Test comprehensive HoP role access and functionality as per review request"""
+        print("\n=== COMPREHENSIVE HoP ACCESS TESTING ===")
+        
+        # 1. HoP Authentication & Access
+        print("\n--- Testing HoP Authentication ---")
+        try:
+            login_data = {
+                "email": "hop@sourcevia.com",
+                "password": "Password123!"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                actual_role = user.get("role")
+                
+                if actual_role in ["procurement_manager", "hop"]:
+                    self.log_result("HoP Login", True, f"Logged in as {actual_role}")
+                    self.test_data["hop_user_id"] = user.get("id")
+                else:
+                    self.log_result("HoP Login", False, f"Expected HoP role, got {actual_role}")
+                    return
+            else:
+                self.log_result("HoP Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                return
+                
+        except Exception as e:
+            self.log_result("HoP Login", False, f"Exception: {str(e)}")
+            return
+
+        # 2. HoP Data Access - Should see ALL records
+        print("\n--- Testing HoP Data Access (Should see ALL records) ---")
+        
+        # Test Vendors - Should return ALL vendors (85+)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/vendors")
+            if response.status_code == 200:
+                vendors = response.json()
+                vendor_count = len(vendors)
+                if vendor_count >= 85:
+                    self.log_result("HoP Vendors Access", True, f"Found {vendor_count} vendors (≥85 expected)")
+                else:
+                    self.log_result("HoP Vendors Access", False, f"Found {vendor_count} vendors (expected ≥85)")
+            else:
+                self.log_result("HoP Vendors Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Vendors Access", False, f"Exception: {str(e)}")
+
+        # Test Tenders - Should return ALL tenders (26+)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/tenders")
+            if response.status_code == 200:
+                tenders = response.json()
+                tender_count = len(tenders)
+                if tender_count >= 26:
+                    self.log_result("HoP Tenders Access", True, f"Found {tender_count} tenders (≥26 expected)")
+                else:
+                    self.log_result("HoP Tenders Access", False, f"Found {tender_count} tenders (expected ≥26)")
+            else:
+                self.log_result("HoP Tenders Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Tenders Access", False, f"Exception: {str(e)}")
+
+        # Test Contracts - Should return ALL contracts (39+)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/contracts")
+            if response.status_code == 200:
+                contracts = response.json()
+                contract_count = len(contracts)
+                if contract_count >= 39:
+                    self.log_result("HoP Contracts Access", True, f"Found {contract_count} contracts (≥39 expected)")
+                else:
+                    self.log_result("HoP Contracts Access", False, f"Found {contract_count} contracts (expected ≥39)")
+            else:
+                self.log_result("HoP Contracts Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Contracts Access", False, f"Exception: {str(e)}")
+
+        # Test Purchase Orders - Should return ALL POs (11+)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/purchase-orders")
+            if response.status_code == 200:
+                pos = response.json()
+                po_count = len(pos)
+                if po_count >= 11:
+                    self.log_result("HoP Purchase Orders Access", True, f"Found {po_count} POs (≥11 expected)")
+                else:
+                    self.log_result("HoP Purchase Orders Access", False, f"Found {po_count} POs (expected ≥11)")
+            else:
+                self.log_result("HoP Purchase Orders Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Purchase Orders Access", False, f"Exception: {str(e)}")
+
+        # Test Deliverables
+        try:
+            response = self.session.get(f"{BACKEND_URL}/deliverables")
+            if response.status_code == 200:
+                deliverables = response.json()
+                deliverable_count = len(deliverables)
+                self.log_result("HoP Deliverables Access", True, f"Found {deliverable_count} deliverables")
+            else:
+                self.log_result("HoP Deliverables Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Deliverables Access", False, f"Exception: {str(e)}")
+
+        # Test Assets
+        try:
+            response = self.session.get(f"{BACKEND_URL}/assets")
+            if response.status_code == 200:
+                assets = response.json()
+                asset_count = len(assets)
+                self.log_result("HoP Assets Access", True, f"Found {asset_count} assets")
+            else:
+                self.log_result("HoP Assets Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Assets Access", False, f"Exception: {str(e)}")
+
+        # Test OSR (Service Requests)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/osr")
+            if response.status_code == 200:
+                osrs = response.json()
+                osr_count = len(osrs)
+                self.log_result("HoP OSR Access", True, f"Found {osr_count} service requests")
+            else:
+                self.log_result("HoP OSR Access", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP OSR Access", False, f"Exception: {str(e)}")
+
+        # Test Dashboard Stats
+        try:
+            response = self.session.get(f"{BACKEND_URL}/dashboard")
+            if response.status_code == 200:
+                stats = response.json()
+                vendor_stats = stats.get("vendors", {})
+                tender_stats = stats.get("tenders", {})
+                contract_stats = stats.get("contracts", {})
+                
+                self.log_result("HoP Dashboard Stats", True, 
+                    f"Vendors: {vendor_stats.get('all', 0)}, "
+                    f"Tenders: {tender_stats.get('all', 0)}, "
+                    f"Contracts: {contract_stats.get('all', 0)}")
+            else:
+                self.log_result("HoP Dashboard Stats", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP Dashboard Stats", False, f"Exception: {str(e)}")
+
+        # 3. HoP CRUD Operations
+        print("\n--- Testing HoP CRUD Operations ---")
+        
+        # Create a new vendor as HoP
+        try:
+            vendor_data = {
+                "name_english": "HoP Test Vendor Corp",
+                "vendor_type": "local",
+                "commercial_name": "HoP Test Corp",
+                "vat_number": "123456789012345",
+                "cr_number": "1010123456"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/vendors", json=vendor_data)
+            
+            if response.status_code == 200:
+                vendor = response.json()
+                vendor_id = vendor.get("id")
+                self.log_result("HoP Create Vendor", True, f"Created vendor: {vendor_id}")
+                self.test_data["hop_vendor_id"] = vendor_id
+            else:
+                self.log_result("HoP Create Vendor", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("HoP Create Vendor", False, f"Exception: {str(e)}")
+
+        # Create a new tender/business request as HoP
+        try:
+            tender_data = {
+                "title": "HoP Test Business Request",
+                "request_type": "technology",
+                "is_project_related": "yes",
+                "project_reference": "HOP-PRJ-001",
+                "project_name": "HoP Test Project",
+                "description": "Test business request created by HoP",
+                "requirements": "Test requirements for HoP testing",
+                "budget": 25000,
+                "deadline": (datetime.now(timezone.utc) + timedelta(days=45)).isoformat()
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/tenders", json=tender_data)
+            
+            if response.status_code == 200:
+                tender = response.json()
+                tender_id = tender.get("id")
+                self.log_result("HoP Create Business Request", True, f"Created tender: {tender_id}")
+                self.test_data["hop_tender_id"] = tender_id
+            else:
+                self.log_result("HoP Create Business Request", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("HoP Create Business Request", False, f"Exception: {str(e)}")
+
+        # Update vendor status as HoP
+        if "hop_vendor_id" in self.test_data:
+            try:
+                vendor_id = self.test_data["hop_vendor_id"]
+                
+                # Test direct approve
+                response = self.session.post(f"{BACKEND_URL}/vendors/{vendor_id}/direct-approve")
+                
+                if response.status_code == 200:
+                    self.log_result("HoP Update Vendor Status", True, "Vendor approved successfully")
+                else:
+                    self.log_result("HoP Update Vendor Status", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("HoP Update Vendor Status", False, f"Exception: {str(e)}")
+
+        # 4. HoP Admin Functions (User Management)
+        print("\n--- Testing HoP Admin Functions ---")
+        
+        # GET /api/users - Should return all users
+        try:
+            response = self.session.get(f"{BACKEND_URL}/users")
+            if response.status_code == 200:
+                data = response.json()
+                users = data.get("users", [])
+                count = data.get("count", len(users))
+                self.log_result("HoP User Management - List Users", True, f"Retrieved {count} users")
+                
+                # Store a user ID for role/status testing
+                if users:
+                    test_user = next((u for u in users if u.get("role") == "user"), None)
+                    if test_user:
+                        self.test_data["test_user_id"] = test_user.get("id")
+                        
+            else:
+                self.log_result("HoP User Management - List Users", False, f"Status: {response.status_code}")
+        except Exception as e:
+            self.log_result("HoP User Management - List Users", False, f"Exception: {str(e)}")
+
+        # PUT /api/users/{id}/role - Should be able to change user roles
+        if "test_user_id" in self.test_data:
+            try:
+                user_id = self.test_data["test_user_id"]
+                role_data = {
+                    "role": "approver",
+                    "reason": "Testing HoP role change capability"
+                }
+                
+                response = self.session.patch(f"{BACKEND_URL}/users/{user_id}/role", json=role_data)
+                
+                if response.status_code == 200:
+                    self.log_result("HoP Change User Role", True, "User role changed successfully")
+                    
+                    # Change it back
+                    role_data["role"] = "user"
+                    self.session.patch(f"{BACKEND_URL}/users/{user_id}/role", json=role_data)
+                    
+                else:
+                    self.log_result("HoP Change User Role", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("HoP Change User Role", False, f"Exception: {str(e)}")
+
+        # PUT /api/users/{id}/status - Should be able to enable/disable users
+        if "test_user_id" in self.test_data:
+            try:
+                user_id = self.test_data["test_user_id"]
+                status_data = {
+                    "status": "disabled"
+                }
+                
+                response = self.session.patch(f"{BACKEND_URL}/users/{user_id}/status", json=status_data)
+                
+                if response.status_code == 200:
+                    self.log_result("HoP Change User Status", True, "User status changed successfully")
+                    
+                    # Enable it back
+                    status_data["status"] = "active"
+                    self.session.patch(f"{BACKEND_URL}/users/{user_id}/status", json=status_data)
+                    
+                else:
+                    self.log_result("HoP Change User Status", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("HoP Change User Status", False, f"Exception: {str(e)}")
+
+        # 5. Audit Trail Access (HoP should see all)
+        print("\n--- Testing HoP Audit Trail Access ---")
+        
+        # Test vendor audit trail
+        if "hop_vendor_id" in self.test_data:
+            try:
+                vendor_id = self.test_data["hop_vendor_id"]
+                response = self.session.get(f"{BACKEND_URL}/vendors/{vendor_id}/audit-log")
+                
+                if response.status_code == 200:
+                    audit_log = response.json()
+                    self.log_result("HoP Vendor Audit Trail", True, f"Retrieved audit log with {len(audit_log)} entries")
+                else:
+                    self.log_result("HoP Vendor Audit Trail", False, f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("HoP Vendor Audit Trail", False, f"Exception: {str(e)}")
+
+        # Test tender audit trail
+        if "hop_tender_id" in self.test_data:
+            try:
+                tender_id = self.test_data["hop_tender_id"]
+                response = self.session.get(f"{BACKEND_URL}/tenders/{tender_id}/audit-trail")
+                
+                if response.status_code == 200:
+                    audit_trail = response.json()
+                    self.log_result("HoP Tender Audit Trail", True, f"Retrieved audit trail with {len(audit_trail)} entries")
+                else:
+                    self.log_result("HoP Tender Audit Trail", False, f"Status: {response.status_code}")
+            except Exception as e:
+                self.log_result("HoP Tender Audit Trail", False, f"Exception: {str(e)}")
+
+        # Test contract audit trail (get first available contract)
+        try:
+            contracts_response = self.session.get(f"{BACKEND_URL}/contracts")
+            if contracts_response.status_code == 200:
+                contracts = contracts_response.json()
+                if contracts:
+                    contract_id = contracts[0].get("id")
+                    response = self.session.get(f"{BACKEND_URL}/contracts/{contract_id}/audit-trail")
+                    
+                    if response.status_code == 200:
+                        audit_trail = response.json()
+                        self.log_result("HoP Contract Audit Trail", True, f"Retrieved audit trail with {len(audit_trail)} entries")
+                    else:
+                        self.log_result("HoP Contract Audit Trail", False, f"Status: {response.status_code}")
+                else:
+                    self.log_result("HoP Contract Audit Trail", False, "No contracts available for audit trail test")
+        except Exception as e:
+            self.log_result("HoP Contract Audit Trail", False, f"Exception: {str(e)}")
+
+        # 6. Compare with Officer Access
+        print("\n--- Testing Officer Access Comparison ---")
+        
+        # Login as officer
+        try:
+            login_data = {
+                "email": "test_officer@sourcevia.com",
+                "password": "Password123!"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                self.log_result("Officer Login", True, f"Logged in as {user.get('role')}")
+                
+                # Test that officer can also see all data
+                response = self.session.get(f"{BACKEND_URL}/vendors")
+                if response.status_code == 200:
+                    vendors = response.json()
+                    self.log_result("Officer Vendors Access", True, f"Officer can see {len(vendors)} vendors")
+                else:
+                    self.log_result("Officer Vendors Access", False, f"Status: {response.status_code}")
+                
+                # Test that officer CANNOT access user management
+                response = self.session.get(f"{BACKEND_URL}/users")
+                if response.status_code == 403:
+                    self.log_result("Officer User Management Access", True, "Officer correctly denied user management access (403)")
+                else:
+                    self.log_result("Officer User Management Access", False, f"Expected 403, got {response.status_code}")
+                    
+            else:
+                self.log_result("Officer Login", False, f"Status: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Officer Access Comparison", False, f"Exception: {str(e)}")
+
+        # 7. Admin Settings Access
+        print("\n--- Testing HoP Admin Settings Access ---")
+        
+        # Re-login as HoP for admin settings test
+        try:
+            login_data = {
+                "email": "hop@sourcevia.com",
+                "password": "Password123!"
+            }
+            
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=login_data)
+            
+            if response.status_code == 200:
+                # Test admin settings endpoints
+                admin_endpoints = [
+                    "/admin/settings",
+                    "/users/audit/logs",
+                    "/asset-categories",
+                    "/osr-categories",
+                    "/buildings"
+                ]
+                
+                for endpoint in admin_endpoints:
+                    try:
+                        response = self.session.get(f"{BACKEND_URL}{endpoint}")
+                        if response.status_code == 200:
+                            self.log_result(f"HoP Admin Access - {endpoint}", True, "Access granted")
+                        elif response.status_code == 404:
+                            self.log_result(f"HoP Admin Access - {endpoint}", True, "Endpoint not found (expected for some)")
+                        else:
+                            self.log_result(f"HoP Admin Access - {endpoint}", False, f"Status: {response.status_code}")
+                    except Exception as e:
+                        self.log_result(f"HoP Admin Access - {endpoint}", False, f"Exception: {str(e)}")
+                        
+        except Exception as e:
+            self.log_result("HoP Admin Settings Access", False, f"Exception: {str(e)}")
+
     def test_controlled_access_features(self):
         """Test Controlled Access + HoP Role Control + Password Reset features"""
         print("\n=== CONTROLLED ACCESS + HOP ROLE CONTROL + PASSWORD RESET TESTING ===")
