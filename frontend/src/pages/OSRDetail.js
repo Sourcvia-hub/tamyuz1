@@ -348,6 +348,13 @@ const OSRDetail = () => {
                 )}
               </div>
             </div>
+
+            {/* Audit Trail */}
+            <AuditTrail 
+              auditTrail={auditTrail} 
+              entityType="osr" 
+              userRole={user?.role} 
+            />
           </div>
         </div>
       </div>
