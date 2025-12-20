@@ -345,29 +345,30 @@ const Dashboard = () => {
           </div>
         </CollapsibleSection>
 
-        {/* Operations & Assets */}
-        <CollapsibleSection
-          title="Operations & Facilities"
-          icon="🏗️"
-          expanded={expandedSections.operations}
-          onToggle={() => toggleSection('operations')}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Assets Summary */}
-            <SummaryCard
-              title="Assets"
-              icon="🏢"
-              link="/assets"
-              stats={[
-                { label: 'Total', value: stats?.assets?.total || 0 },
-                { label: 'Active', value: stats?.assets?.active || 0, color: 'text-green-600' },
-                { label: 'Maintenance', value: stats?.assets?.under_maintenance || 0, color: 'text-yellow-600' },
-              ]}
-            />
-            
-            {/* Service Requests Summary */}
-            <SummaryCard
-              title="Service Requests"
+        {/* Operations & Assets - Hidden for business users */}
+        {!isUser && (
+          <CollapsibleSection
+            title="Operations & Facilities"
+            icon="🏗️"
+            expanded={expandedSections.operations}
+            onToggle={() => toggleSection('operations')}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Assets Summary */}
+              <SummaryCard
+                title="Assets"
+                icon="🏢"
+                link="/assets"
+                stats={[
+                  { label: 'Total', value: stats?.assets?.total || 0 },
+                  { label: 'Active', value: stats?.assets?.active || 0, color: 'text-green-600' },
+                  { label: 'Maintenance', value: stats?.assets?.under_maintenance || 0, color: 'text-yellow-600' },
+                ]}
+              />
+              
+              {/* Service Requests Summary */}
+              <SummaryCard
+                title="Service Requests"
               icon="🔧"
               link="/osr"
               stats={[
