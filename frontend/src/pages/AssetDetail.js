@@ -19,7 +19,7 @@ const AssetDetail = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const isOfficer = ['procurement_officer', 'procurement_manager', 'admin'].includes(user?.role);
+  const isOfficer = ['procurement_officer', 'procurement_manager', 'admin', 'hop'].includes(user?.role);
   const isHoP = ['procurement_manager', 'admin', 'hop'].includes(user?.role);
 
   useEffect(() => {
