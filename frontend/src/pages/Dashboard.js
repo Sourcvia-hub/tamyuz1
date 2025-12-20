@@ -319,11 +319,18 @@ const Dashboard = () => {
               title="Vendors"
               icon="🏢"
               link="/vendors"
-              stats={[
-                { label: 'Total', value: stats?.vendors?.all || 0 },
-                { label: 'Active', value: stats?.vendors?.active || 0, color: 'text-green-600' },
-                { label: 'High Risk', value: stats?.vendors?.high_risk || 0, color: 'text-red-600' },
-              ]}
+              stats={
+                isUser 
+                  ? [
+                      { label: 'Total', value: stats?.vendors?.all || 0 },
+                      { label: 'Active', value: stats?.vendors?.active || 0, color: 'text-green-600' },
+                    ]
+                  : [
+                      { label: 'Total', value: stats?.vendors?.all || 0 },
+                      { label: 'Active', value: stats?.vendors?.active || 0, color: 'text-green-600' },
+                      { label: 'High Risk', value: stats?.vendors?.high_risk || 0, color: 'text-red-600' },
+                    ]
+              }
             />
             
             {/* Contracts Summary */}
