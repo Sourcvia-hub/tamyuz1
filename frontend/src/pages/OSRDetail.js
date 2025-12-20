@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { useAuth } from '../App';
+import AuditTrail from '../components/AuditTrail';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -9,9 +11,11 @@ const API = `${BACKEND_URL}/api`;
 const OSRDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [osr, setOsr] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [auditTrail, setAuditTrail] = useState([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusUpdate, setStatusUpdate] = useState({
     status: '',
@@ -20,7 +24,17 @@ const OSRDetail = () => {
 
   useEffect(() => {
     fetchOSR();
+    fetchAuditTrail();
   }, [id]);
+
+  const fetchAuditTrail = async () => {
+    try {
+      const res = await axios.get(`${API}/osr/${id}/audit-trail`, { withCredentials: true });
+      setAuditTrail(res.data);
+    } catch (error) {
+      console.log('Audit trail not available or access denied');
+    }
+  };
 
   const fetchOSR = async () => {
     try {
