@@ -582,7 +582,7 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
 
 // Detail Modal
 const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, onClose, onHoPDecision, user }) => {
-  const isHoP = ['procurement_manager', 'admin'].includes(user?.role);
+  const isHoP = ['procurement_manager', 'admin', 'hop'].includes(user?.role);
   const [notes, setNotes] = useState('');
 
   return (
