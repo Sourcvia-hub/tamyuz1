@@ -103,10 +103,17 @@ async def list_deliverables(
     vendor_id: Optional[str] = None,
     status: Optional[str] = None
 ):
-    """List deliverables with optional filters"""
+    """List deliverables with optional filters - RBAC: data filtering for regular users"""
+    from utils.permissions import should_filter_by_user
     user = await require_auth(request)
+    user_role_str = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
     
     query = {}
+    
+    # Apply row-level security: regular users see only their own deliverables
+    if should_filter_by_user(user_role_str, "invoices"):
+        query["created_by"] = user.id
+    
     if contract_id:
         query["contract_id"] = contract_id
     if po_id:
