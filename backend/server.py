@@ -1773,21 +1773,31 @@ async def create_contract(contract: Contract, request: Request):
 
 @api_router.get("/contracts")
 async def get_contracts(request: Request, status: Optional[ContractStatus] = None, search: Optional[str] = None):
-    """Get all contracts - RBAC: requires viewer permission"""
+    """Get all contracts - RBAC: requires viewer permission with data filtering"""
     from utils.auth import require_permission
-    from utils.permissions import Permission
-    await require_permission(request, "contracts", Permission.VIEWER)
+    from utils.permissions import Permission, should_filter_by_user
+    user = await require_permission(request, "contracts", Permission.VIEWER)
+    user_role_str = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
     
     query = {}
+    
+    # Apply row-level security: regular users see only their own contracts
+    if should_filter_by_user(user_role_str, "contracts"):
+        query["created_by"] = user.id
+    
     if status:
         query["status"] = status.value
     
     # Add search functionality
     if search:
-        query["$or"] = [
+        search_filter = [
             {"contract_number": {"$regex": search, "$options": "i"}},
             {"title": {"$regex": search, "$options": "i"}}
         ]
+        if query:
+            query = {"$and": [query, {"$or": search_filter}]}
+        else:
+            query["$or"] = search_filter
     
     contracts = await db.contracts.find(query).to_list(1000)
     
