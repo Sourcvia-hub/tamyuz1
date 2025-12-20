@@ -913,6 +913,8 @@ async def create_vendor(vendor: Vendor, request: Request):
         entity_id=vendor.id,
         action="created",
         user_id=user.id,
+        user_name=user.name,
+        user_role=user.role,
         details=f"Vendor created: {vendor.name_english} (Risk Score: {risk_score}, Status: {vendor.status})"
     )
     audit_doc = audit_log.model_dump()
