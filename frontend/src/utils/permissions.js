@@ -154,6 +154,11 @@ export const hasPermission = (userRole, module, requiredPermission) => {
 };
 
 export const canAccessModule = (userRole, module) => {
+  // Admin, HoP, and Senior Manager can access all modules
+  if (userRole === 'admin' || userRole === 'hop' || userRole === 'senior_manager') {
+    return true;
+  }
+  
   const rolePerms = ROLE_PERMISSIONS[userRole] || {};
   const modulePerms = rolePerms[module] || [Permission.NO_ACCESS];
   return !modulePerms.includes(Permission.NO_ACCESS);
