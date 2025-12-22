@@ -505,6 +505,15 @@ const TenderDetail = () => {
               <p className="text-blue-600 font-medium">#{tender.tender_number}</p>
               <p className="text-gray-600">{tender.project_name}</p>
             </div>
+            {/* Officer Edit Button - Partial Update */}
+            {canOfficerEdit && (
+              <button
+                onClick={openOfficerEditModal}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                ✏️ Edit Details
+              </button>
+            )}
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -516,6 +525,22 @@ const TenderDetail = () => {
               <label className="text-sm text-gray-500">Deadline</label>
               <p className="text-lg font-semibold">{new Date(tender.deadline).toLocaleDateString()}</p>
             </div>
+          </div>
+          
+          {/* Additional Details Row */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {tender.request_type && (
+              <div>
+                <label className="text-sm text-gray-500">Request Type</label>
+                <p className="text-lg font-semibold capitalize">{tender.request_type}</p>
+              </div>
+            )}
+            {tender.jira_ticket_number && (
+              <div>
+                <label className="text-sm text-gray-500">Jira Ticket</label>
+                <p className="text-lg font-semibold">{tender.jira_ticket_number}</p>
+              </div>
+            )}
           </div>
           
           <div className="border-t pt-4">
