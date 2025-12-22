@@ -28,9 +28,9 @@ const Layout = ({ children }) => {
 
   // Special links for Procurement Manager and Admin only
   const specialLinks = [
-    { name: 'My Approvals', path: '/my-approvals', icon: '🔔', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'requester', 'user', 'business_user', 'hop'] },
-    { name: 'Approvals Hub', path: '/approvals-hub', icon: '📋', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop'] },
-    { name: 'Reports & Analytics', path: '/reports', icon: '📈', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'hop'] },
+    { name: 'My Approvals', path: '/my-approvals', icon: '🔔', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'requester', 'user', 'business_user', 'hop', 'senior_manager'] },
+    { name: 'Approvals Hub', path: '/approvals-hub', icon: '📋', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop', 'senior_manager'] },
+    { name: 'Reports & Analytics', path: '/reports', icon: '📈', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'hop', 'senior_manager'] },
     { name: 'Bulk Import', path: '/bulk-import', icon: '📤', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop'] },
     { name: 'User Management', path: '/user-management', icon: '👥', roles: ['procurement_manager', 'admin', 'hop'] },
     { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin', 'hop'] },
