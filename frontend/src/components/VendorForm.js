@@ -54,13 +54,12 @@ const VendorForm = ({ formData, setFormData, onSubmit, onCancel, isEdit = false,
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto px-2">
-      {/* AI Document Extractor - At the top for easy form filling */}
-      {!isEdit && (
-        <VendorDocumentExtractor 
-          formData={formData} 
-          setFormData={setFormData} 
-        />
-      )}
+      {/* AI Document Extractor - Available for both new and edit modes */}
+      <VendorDocumentExtractor 
+        formData={formData} 
+        setFormData={setFormData}
+        isEdit={isEdit}
+      />
 
       {/* Company Information */}
       <div>
