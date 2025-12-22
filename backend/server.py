@@ -1717,6 +1717,90 @@ async def update_tender(tender_id: str, tender: Tender, request: Request):
     
     return {"message": "Tender updated successfully"}
 
+# ==================== OFFICER PARTIAL UPDATE - NO WORKFLOW RESET ====================
+
+class OfficerTenderUpdate(BaseModel):
+    """Partial update model for officers - does not reset workflow"""
+    budget: Optional[float] = None
+    request_type: Optional[str] = None
+    jira_ticket_number: Optional[str] = None
+    invited_vendors: Optional[List[str]] = None
+
+@api_router.patch("/tenders/{tender_id}/officer-update")
+async def officer_update_tender(tender_id: str, update_data: OfficerTenderUpdate, request: Request):
+    """
+    Officer partial update - Budget, Type, Jira, Vendors only.
+    
+    IMPORTANT:
+    - Does NOT reset workflow status
+    - Does NOT re-trigger approvals
+    - Does NOT change approval state
+    - Only updates specified fields
+    
+    Allowed fields: budget, request_type, jira_ticket_number, invited_vendors
+    """
+    from utils.auth import get_current_user
+    
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Only officers, hop, and admin can use this endpoint
+    allowed_roles = ['procurement_officer', 'procurement_manager', 'admin', 'hop']
+    user_role = user.role.value if hasattr(user.role, 'value') else str(user.role)
+    if user_role not in allowed_roles:
+        raise HTTPException(status_code=403, detail="Only officers can perform partial updates")
+    
+    # Check if tender exists
+    existing_tender = await db.tenders.find_one({"id": tender_id})
+    if not existing_tender:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    
+    # Build update dict with only provided fields (preserving workflow state)
+    update_dict = {}
+    
+    if update_data.budget is not None:
+        update_dict["budget"] = update_data.budget
+    
+    if update_data.request_type is not None:
+        update_dict["request_type"] = update_data.request_type
+    
+    if update_data.jira_ticket_number is not None:
+        update_dict["jira_ticket_number"] = update_data.jira_ticket_number
+    
+    if update_data.invited_vendors is not None:
+        update_dict["invited_vendors"] = update_data.invited_vendors
+    
+    if not update_dict:
+        return {"message": "No fields to update"}
+    
+    # Add update timestamp (does not affect workflow)
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    # Update tender without changing status or approval state
+    result = await db.tenders.update_one(
+        {"id": tender_id},
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    
+    # Log the partial update for audit trail
+    await create_audit_log(
+        entity_type="tender",
+        entity_id=tender_id,
+        action="officer_partial_update",
+        user=user,
+        details=f"Officer partial update: {list(update_dict.keys())}",
+        notes="No workflow reset - partial update only"
+    )
+    
+    return {
+        "message": "Tender updated successfully (no workflow reset)",
+        "updated_fields": list(update_dict.keys())
+    }
+
 @api_router.put("/tenders/{tender_id}/publish")
 async def publish_tender(tender_id: str, request: Request):
     """Publish tender - RBAC: requires verify permission"""
