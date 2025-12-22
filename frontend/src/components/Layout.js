@@ -55,6 +55,7 @@ const Layout = ({ children }) => {
       project_manager: 'bg-green-100 text-green-800',
       system_admin: 'bg-purple-100 text-purple-800',
       business_user: 'bg-teal-100 text-teal-800',
+      senior_manager: 'bg-indigo-100 text-indigo-800',
     };
     return colors[role] || 'bg-gray-100 text-gray-800';
   };
