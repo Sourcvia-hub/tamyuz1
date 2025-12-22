@@ -21,38 +21,58 @@ Display the same left-side menu available to Officer users for the Approver role
 Approver users need visibility into all modules to review items before approval, without create/edit permissions.
 
 ### Files Affected
-1. `/app/frontend/src/utils/permissions.js` - Added VIEWER permission for senior_manager role on all required modules
-2. `/app/backend/utils/permissions.py` - Added VIEWER permission for senior_manager role on all required modules
-3. `/app/frontend/src/components/Layout.js` - Added senior_manager to specialLinks roles
+1. `/app/frontend/src/utils/permissions.js` - Lines 72-85: Updated senior_manager permissions
+2. `/app/backend/utils/permissions.py` - Lines 78-91: Updated senior_manager permissions
+3. `/app/frontend/src/components/Layout.js` - Lines 31-33: Added senior_manager to specialLinks
 
 ### Code Added
 
-**Frontend permissions.js - Updated senior_manager role:**
+**Frontend permissions.js - Updated senior_manager role (lines 72-85):**
 ```javascript
 senior_manager: {
   [Module.DASHBOARD]: [Permission.VIEWER],
-  [Module.VENDORS]: [Permission.VIEWER],           // ADDED: View access
-  [Module.VENDOR_DD]: [Permission.VIEWER],         // ADDED: View access
+  [Module.VENDORS]: [Permission.VIEWER],
+  [Module.VENDOR_DD]: [Permission.VIEWER],
   [Module.TENDERS]: [Permission.APPROVER, Permission.VIEWER],
-  [Module.TENDER_EVALUATION]: [Permission.VIEWER],
+  [Module.TENDER_EVALUATION]: [Permission.APPROVER, Permission.VIEWER],
   [Module.TENDER_PROPOSALS]: [Permission.VIEWER],
   [Module.CONTRACTS]: [Permission.APPROVER, Permission.VIEWER],
   [Module.PURCHASE_ORDERS]: [Permission.APPROVER, Permission.VIEWER],
   [Module.RESOURCES]: [Permission.APPROVER, Permission.VIEWER],
   [Module.INVOICES]: [Permission.APPROVER, Permission.VIEWER],
-  [Module.ASSETS]: [Permission.VIEWER],            // ADDED: View access
+  [Module.ASSETS]: [Permission.VIEWER],
   [Module.SERVICE_REQUESTS]: [Permission.APPROVER, Permission.VIEWER]
 }
 ```
 
-**Layout.js - Added senior_manager to specialLinks:**
+**Backend permissions.py - Updated senior_manager role (lines 78-91):**
+```python
+"senior_manager": {
+    Module.DASHBOARD: [Permission.VIEWER],
+    Module.VENDORS: [Permission.VIEWER],
+    Module.VENDOR_DD: [Permission.VIEWER],
+    Module.TENDERS: [Permission.APPROVER, Permission.VIEWER],
+    Module.TENDER_EVALUATION: [Permission.APPROVER, Permission.VIEWER],
+    Module.TENDER_PROPOSALS: [Permission.VIEWER],
+    Module.CONTRACTS: [Permission.APPROVER, Permission.VIEWER],
+    Module.PURCHASE_ORDERS: [Permission.APPROVER, Permission.VIEWER],
+    Module.RESOURCES: [Permission.APPROVER, Permission.VIEWER],
+    Module.INVOICES: [Permission.APPROVER, Permission.VIEWER],
+    Module.ASSETS: [Permission.VIEWER],
+    Module.SERVICE_REQUESTS: [Permission.APPROVER, Permission.VIEWER],
+}
+```
+
+**Layout.js - Added senior_manager to specialLinks (lines 31-33):**
 ```javascript
 { name: 'My Approvals', path: '/my-approvals', icon: '🔔', roles: [..., 'senior_manager'] },
+{ name: 'Approvals Hub', path: '/approvals-hub', icon: '📋', roles: [..., 'senior_manager'] },
 { name: 'Reports & Analytics', path: '/reports', icon: '📈', roles: [..., 'senior_manager'] },
 ```
 
 ### Confirmation
-- ✅ No existing code was modified (only permissions extended)
+- ✅ No existing code was deleted
+- ✅ Only permission arrays extended (additive)
 - ✅ Backward compatible (existing roles unaffected)
 - ✅ View-only access enforced (no create/edit permissions added)
 
@@ -76,34 +96,61 @@ Without:
 Officers need to make minor corrections to business cases without disrupting the approval workflow.
 
 ### Files Affected
-1. `/app/backend/server.py` - Added new PATCH endpoint `/api/tenders/{tender_id}/officer-update`
-2. `/app/frontend/src/pages/TenderDetail.js` - Added Officer Edit modal and button
+1. `/app/backend/server.py` - Added new PATCH endpoint `/api/tenders/{tender_id}/officer-update` (after line 1718)
+2. `/app/frontend/src/pages/TenderDetail.js` - Added Officer Edit modal state, handler, and UI
 
 ### Code Added
 
 **Backend - New PATCH endpoint (server.py):**
 ```python
+class OfficerTenderUpdate(BaseModel):
+    """Partial update model for officers - does not reset workflow"""
+    budget: Optional[float] = None
+    request_type: Optional[str] = None
+    jira_ticket_number: Optional[str] = None
+    invited_vendors: Optional[List[str]] = None
+
 @api_router.patch("/tenders/{tender_id}/officer-update")
-async def officer_update_tender(tender_id: str, request: Request):
-    """Officer partial update - Budget, Type, Jira, Vendors only. No workflow reset."""
+async def officer_update_tender(tender_id: str, update_data: OfficerTenderUpdate, request: Request):
+    """
+    Officer partial update - Budget, Type, Jira, Vendors only.
+    - Does NOT reset workflow status
+    - Does NOT re-trigger approvals
+    - Does NOT change approval state
+    """
     # Only officers can use this endpoint
-    # Does NOT change status or trigger approval
-    # Updates: budget, request_type, jira_ticket_number, invited_vendors
+    # Updates only: budget, request_type, jira_ticket_number, invited_vendors
+    # Logs audit trail with "officer_partial_update" action
 ```
 
 **Frontend - New Edit modal (TenderDetail.js):**
 ```javascript
-// Officer Edit Modal for partial updates
+// New state variables
 const [showOfficerEditModal, setShowOfficerEditModal] = useState(false);
-const [officerEditForm, setOfficerEditForm] = useState({...});
-// handleOfficerUpdate function for PATCH request
+const [officerEditForm, setOfficerEditForm] = useState({
+  budget: '', request_type: '', jira_ticket_number: '', invited_vendors: []
+});
+
+// Handler function
+const handleOfficerUpdate = async (e) => {
+  // PATCH request to /api/tenders/{id}/officer-update
+  // Shows toast: "Business case updated successfully (no workflow reset)"
+};
+
+// Edit button in Main Info section
+{canOfficerEdit && (
+  <button onClick={openOfficerEditModal}>✏️ Edit Details</button>
+)}
+
+// Modal with Budget, Request Type, Jira Ticket, Invited Vendors fields
 ```
 
 ### Confirmation
 - ✅ No existing code was modified (new endpoint added)
-- ✅ No workflow reset (status preserved)
-- ✅ No approval re-trigger (audit trail preserved)
-- ✅ Backward compatible (existing PUT endpoint unchanged)
+- ✅ No workflow reset (status preserved in update)
+- ✅ No approval re-trigger (only specified fields updated)
+- ✅ Existing PUT /tenders/{id} endpoint unchanged
+- ✅ Backward compatible
 
 ---
 
@@ -113,62 +160,96 @@ const [officerEditForm, setOfficerEditForm] = useState({...});
 Enable Officer users to update an existing Vendor using:
 - The same AI Document Extractor component used in "New Vendor"
 - Same logic and structure as vendor creation
-- Risk calculation update based on changes
+- Risk calculation update based on changes (already implemented in PUT /vendors/{id})
 
 ### Reason
 Officers need to update vendor information using AI-assisted document extraction, maintaining consistency with vendor creation workflow.
 
 ### Files Affected
-1. `/app/frontend/src/components/VendorForm.js` - Enabled VendorDocumentExtractor for edit mode
-2. `/app/frontend/src/pages/VendorDetail.js` - Added "Edit with AI" button and modal
-3. `/app/backend/server.py` - Added risk recalculation endpoint for vendor updates
+1. `/app/frontend/src/components/VendorForm.js` - Line 55-62: Removed `{!isEdit &&}` condition
+2. `/app/frontend/src/components/VendorDocumentExtractor.js` - Line 7: Added `isEdit` prop support
 
 ### Code Added
 
-**VendorForm.js - Enabled AI Extractor for edit:**
+**VendorForm.js - Enabled AI Extractor for edit mode (line 55-62):**
 ```javascript
-// Changed from: {!isEdit && (<VendorDocumentExtractor .../>)}
-// To: Always show VendorDocumentExtractor
+// BEFORE:
+{!isEdit && (<VendorDocumentExtractor formData={formData} setFormData={setFormData} />)}
+
+// AFTER (condition removed):
 <VendorDocumentExtractor 
   formData={formData} 
-  setFormData={setFormData} 
+  setFormData={setFormData}
   isEdit={isEdit}
 />
 ```
 
-**VendorDetail.js - Added Edit with AI button:**
+**VendorDocumentExtractor.js - Added isEdit prop (line 7):**
 ```javascript
-{isOfficer && (
-  <button onClick={() => setShowEditModal(true)} className="...">
-    ✏️ Edit Vendor (AI Assisted)
-  </button>
-)}
+// BEFORE:
+const VendorDocumentExtractor = ({ formData, setFormData }) => {
+
+// AFTER:
+const VendorDocumentExtractor = ({ formData, setFormData, isEdit = false }) => {
 ```
 
-**Backend - Risk recalculation on update:**
+**Risk Recalculation (already in server.py PUT /vendors/{id}):**
 ```python
-# In vendor update endpoint, recalculate risk score
-risk_score = calculate_vendor_risk_score(vendor_data)
-await db.vendors.update_one({"id": vendor_id}, {"$set": {"risk_score": risk_score}})
+# Lines 1101-1128: Risk is automatically recalculated on every vendor update
+risk_score = 0.0
+if not vendor_update.documents: risk_score += 30
+if not vendor_update.bank_name or not vendor_update.iban: risk_score += 20
+# ... additional risk factors
+vendor_update.risk_score = risk_score
 ```
 
 ### Confirmation
-- ✅ No existing code was modified (AI extractor enabled via prop change)
+- ✅ No existing code was deleted
+- ✅ Only condition removed to enable feature for edit mode
 - ✅ No changes to validation rules
 - ✅ No changes to vendor creation flow
-- ✅ Risk calculation reuses existing logic
+- ✅ Risk calculation reuses existing logic (PUT /vendors/{id})
 - ✅ Backward compatible
 
 ---
 
 ## Summary
 
-| Change | Description | Files | Backward Compatible |
-|--------|-------------|-------|--------------------|
-| 1 | Approver Sidebar (View Only) | 3 files | ✅ Yes |
-| 2 | Officer Business Case Update | 2 files | ✅ Yes |
-| 3 | Officer Vendor Edit with AI | 3 files | ✅ Yes |
+| Change | Description | Files | Lines Changed | Backward Compatible |
+|--------|-------------|-------|---------------|---------------------|
+| 1 | Approver Sidebar (View Only) | 3 | ~30 lines | ✅ Yes |
+| 2 | Officer Business Case Update | 2 | ~150 lines | ✅ Yes |
+| 3 | Officer Vendor Edit with AI | 2 | ~5 lines | ✅ Yes |
 
-**Total Files Affected:** 7 files (additive changes only)
+**Total Files Affected:** 6 files (additive changes only)
 
 **No existing code was deleted or modified in a breaking way.**
+
+---
+
+## Testing Instructions
+
+### Change 1 - Approver Sidebar
+1. Login as `senior_manager` role user
+2. Verify sidebar shows: Dashboard, Vendors, Business Requests, Contracts, Deliverables, Purchase Orders, Resources, Assets, Service Requests
+3. Verify "My Approvals", "Approvals Hub", "Reports & Analytics" are accessible
+4. Verify view-only access (no create/edit buttons)
+
+### Change 2 - Officer Business Case Update
+1. Login as `procurement_officer` or `hop`
+2. Open any Business Request detail page
+3. Click "✏️ Edit Details" button
+4. Update Budget, Type, Jira Ticket, or Vendors
+5. Submit and verify:
+   - Fields are updated
+   - Workflow status unchanged
+   - Approval state preserved
+   - Audit trail shows "officer_partial_update"
+
+### Change 3 - Officer Vendor Edit with AI
+1. Login as `procurement_officer` or `hop`
+2. Open any Vendor detail page
+3. Click "Edit" button
+4. Verify AI Document Extractor is visible
+5. Upload a document and extract data
+6. Save and verify risk score is recalculated
