@@ -950,6 +950,103 @@ const TenderDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Officer Edit Modal - Partial Update (No Workflow Reset) */}
+        {showOfficerEditModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Edit Business Case</h2>
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">No Workflow Reset</span>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Update budget, type, Jira ticket, or vendors without affecting the approval workflow.
+              </p>
+              
+              <form onSubmit={handleOfficerUpdate} className="space-y-4">
+                {/* Budget */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Budget (SAR)</label>
+                  <input
+                    type="number"
+                    value={officerEditForm.budget}
+                    onChange={(e) => setOfficerEditForm({ ...officerEditForm, budget: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter budget amount"
+                  />
+                </div>
+                
+                {/* Request Type */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Request Type</label>
+                  <select
+                    value={officerEditForm.request_type}
+                    onChange={(e) => setOfficerEditForm({ ...officerEditForm, request_type: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select type...</option>
+                    <option value="technology">Technology</option>
+                    <option value="services">Services</option>
+                    <option value="goods">Goods</option>
+                    <option value="construction">Construction</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="maintenance">Maintenance</option>
+                  </select>
+                </div>
+                
+                {/* Jira Ticket Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Jira Ticket Number</label>
+                  <input
+                    type="text"
+                    value={officerEditForm.jira_ticket_number}
+                    onChange={(e) => setOfficerEditForm({ ...officerEditForm, jira_ticket_number: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., PROJ-123"
+                  />
+                </div>
+                
+                {/* Invited Vendors */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Invited Vendors</label>
+                  <SearchableSelect
+                    options={vendors.map((vendor) => ({
+                      value: vendor.id,
+                      label: vendor.name_english || vendor.commercial_name || vendor.company_name || 'Unknown Vendor'
+                    }))}
+                    value={officerEditForm.invited_vendors}
+                    onChange={(selected) => setOfficerEditForm({ ...officerEditForm, invited_vendors: selected })}
+                    placeholder="Search and select vendors..."
+                    isMulti
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Current: {officerEditForm.invited_vendors?.length || 0} vendors selected
+                  </p>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setShowOfficerEditModal(false)}
+                    className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                    disabled={officerEditLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    disabled={officerEditLoading}
+                  >
+                    {officerEditLoading ? 'Updating...' : 'Update (No Reset)'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
