@@ -158,6 +158,57 @@ const TenderDetail = () => {
   const canViewEvaluation = isOfficer || isAdditionalApprover || isHoP;
   const canAmendEvaluation = (isOfficer || isAdditionalApprover) && 
     ['evaluation_complete', 'pending_additional_approval'].includes(tender?.status);
+  
+  // Officer can perform partial updates without resetting workflow
+  const canOfficerEdit = isOfficer;
+
+  // Open Officer Edit Modal with current values
+  const openOfficerEditModal = () => {
+    if (tender) {
+      setOfficerEditForm({
+        budget: tender.budget || '',
+        request_type: tender.request_type || '',
+        jira_ticket_number: tender.jira_ticket_number || '',
+        invited_vendors: tender.invited_vendors || []
+      });
+      setShowOfficerEditModal(true);
+    }
+  };
+
+  // Handle Officer Partial Update (no workflow reset)
+  const handleOfficerUpdate = async (e) => {
+    e.preventDefault();
+    setOfficerEditLoading(true);
+    
+    try {
+      // Only send fields that have values
+      const updateData = {};
+      if (officerEditForm.budget) updateData.budget = parseFloat(officerEditForm.budget);
+      if (officerEditForm.request_type) updateData.request_type = officerEditForm.request_type;
+      if (officerEditForm.jira_ticket_number !== undefined) updateData.jira_ticket_number = officerEditForm.jira_ticket_number;
+      if (officerEditForm.invited_vendors) updateData.invited_vendors = officerEditForm.invited_vendors;
+      
+      await axios.patch(`${API}/tenders/${id}/officer-update`, updateData, { withCredentials: true });
+      
+      toast({
+        title: "Success",
+        description: "Business case updated successfully (no workflow reset)",
+      });
+      
+      setShowOfficerEditModal(false);
+      fetchTender(); // Refresh data
+      fetchAuditTrail(); // Refresh audit trail
+    } catch (error) {
+      console.error('Error updating tender:', error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.detail || "Failed to update business case",
+        variant: "destructive"
+      });
+    } finally {
+      setOfficerEditLoading(false);
+    }
+  };
 
   // Open evaluation edit modal
   const handleEditEvaluation = (proposal) => {
