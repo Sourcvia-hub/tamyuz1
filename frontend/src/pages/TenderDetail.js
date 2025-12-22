@@ -38,6 +38,16 @@ const TenderDetail = () => {
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [selectedProposalForEdit, setSelectedProposalForEdit] = useState(null);
   
+  // Officer Edit Modal (Change 2 - Partial Update)
+  const [showOfficerEditModal, setShowOfficerEditModal] = useState(false);
+  const [officerEditForm, setOfficerEditForm] = useState({
+    budget: '',
+    request_type: '',
+    jira_ticket_number: '',
+    invited_vendors: []
+  });
+  const [officerEditLoading, setOfficerEditLoading] = useState(false);
+  
   // Form states
   const [proposalForm, setProposalForm] = useState({ vendor_id: '', technical_proposal: '', financial_proposal: '' });
   const [selectedApproverId, setSelectedApproverId] = useState(null);
