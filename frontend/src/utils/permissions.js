@@ -80,8 +80,8 @@ const ROLE_PERMISSIONS = {
     [Module.PURCHASE_ORDERS]: [Permission.APPROVER, Permission.VIEWER],
     [Module.RESOURCES]: [Permission.APPROVER, Permission.VIEWER],
     [Module.INVOICES]: [Permission.APPROVER, Permission.VIEWER],
-    [Module.ASSETS]: [Permission.NO_ACCESS],
-    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER]
+    [Module.ASSETS]: [Permission.VIEWER],
+    [Module.SERVICE_REQUESTS]: [Permission.APPROVER, Permission.VIEWER]
   },
   procurement_manager: {
     [Module.DASHBOARD]: [Permission.VIEWER],
