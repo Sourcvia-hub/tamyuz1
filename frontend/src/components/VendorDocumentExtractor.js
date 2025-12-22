@@ -4,7 +4,7 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const VendorDocumentExtractor = ({ formData, setFormData }) => {
+const VendorDocumentExtractor = ({ formData, setFormData, isEdit = false }) => {
   const [uploading, setUploading] = useState(false);
   const [extracting, setExtracting] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
