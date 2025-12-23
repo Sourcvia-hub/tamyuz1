@@ -48,6 +48,19 @@ const TenderDetail = () => {
   });
   const [officerEditLoading, setOfficerEditLoading] = useState(false);
   
+  // Enhanced Workflow Modals
+  const [showUpdateEvaluationModal, setShowUpdateEvaluationModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [selectedReviewers, setSelectedReviewers] = useState([]);
+  const [selectedApprovers, setSelectedApprovers] = useState([]);
+  const [workflowNotes, setWorkflowNotes] = useState('');
+  const [updateEvalForm, setUpdateEvalForm] = useState({
+    evaluation_notes: '',
+    recommendation: ''
+  });
+  
   // Form states
   const [proposalForm, setProposalForm] = useState({ vendor_id: '', technical_proposal: '', financial_proposal: '' });
   const [selectedApproverId, setSelectedApproverId] = useState(null);
