@@ -235,12 +235,14 @@ const VendorDetail = () => {
                 Complete DD
               </button>
             )}
-            <button
-              onClick={handleEdit}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Edit Vendor
-            </button>
+            {canEdit(user?.role, Module.VENDORS) && (
+              <button
+                onClick={handleEdit}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Edit Vendor
+              </button>
+            )}
           </div>
         </div>
 
