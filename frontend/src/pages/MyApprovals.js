@@ -238,17 +238,30 @@ const MyApprovals = () => {
     }
   };
 
+  const getItemTypeCategory = (type) => {
+    // Normalize item types to their base category
+    if (type.includes('business_request')) return 'business_request';
+    if (type.includes('contract')) return 'contract';
+    if (type.includes('deliverable')) return 'deliverable';
+    if (type.includes('asset')) return 'asset';
+    if (type.includes('vendor')) return 'vendor';
+    if (type.includes('po') || type.includes('purchase_order')) return 'po';
+    return type;
+  };
+
   const filteredPending = pendingApprovals.filter(item => {
     if (selectedFilter === 'all') return true;
-    return item.item_type === selectedFilter;
+    return getItemTypeCategory(item.item_type) === selectedFilter;
   });
 
   const itemTypeCounts = {
     all: pendingApprovals.length,
-    business_request: pendingApprovals.filter(i => i.item_type === 'business_request').length,
-    contract: pendingApprovals.filter(i => i.item_type === 'contract').length,
-    deliverable: pendingApprovals.filter(i => i.item_type === 'deliverable').length,
-    asset: pendingApprovals.filter(i => i.item_type === 'asset').length,
+    business_request: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'business_request').length,
+    contract: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'contract').length,
+    deliverable: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'deliverable').length,
+    asset: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'asset').length,
+    vendor: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'vendor').length,
+    po: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'po').length,
   };
 
   if (loading) {
