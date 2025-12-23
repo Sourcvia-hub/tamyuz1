@@ -836,8 +836,10 @@ async def forward_for_review(tender_id: str, data: ForwardForReviewRequest, requ
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    if tender.get("status") not in ["evaluation_complete", "returned_for_revision"]:
-        raise HTTPException(status_code=400, detail="Evaluation must be complete before forwarding for review")
+    # Accept legacy status + new statuses
+    allowed_statuses = ["evaluation_complete", "returned_for_revision", "pending_additional_approval"]
+    if tender.get("status") not in allowed_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot forward for review from '{tender.get('status')}' status. Allowed: {allowed_statuses}")
     
     if not data.reviewer_user_ids or len(data.reviewer_user_ids) == 0:
         raise HTTPException(status_code=400, detail="At least one reviewer must be selected")
