@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import WorkflowStatusBadge from '../components/workflow/WorkflowStatusBadge';
 import { useAuth } from '../App';
 import { useToast } from '../hooks/use-toast';
+import { canCreate, canEdit, Module } from '../utils/permissions';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -19,6 +20,11 @@ const Vendors = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState(searchParams.get('filter') || 'all');
+  
+  // Permission checks
+  const userCanCreate = canCreate(user?.role, Module.VENDORS);
+  const userCanEdit = canEdit(user?.role, Module.VENDORS);
+  
   const [formData, setFormData] = useState({
     // Company Information
     vendor_type: 'local',
