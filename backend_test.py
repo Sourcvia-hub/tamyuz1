@@ -1179,6 +1179,314 @@ class SourceviaBackendTester:
             except Exception as e:
                 self.log_result("File Delete", False, f"Exception: {str(e)}")
 
+    def test_enhanced_evaluation_workflow(self):
+        """Test Enhanced Evaluation Workflow as specified in review request"""
+        print("\n=== ENHANCED EVALUATION WORKFLOW TESTING ===")
+        
+        # Test credentials from review request
+        officer_creds = {"email": "test_officer@sourcevia.com", "password": "Password123!"}
+        business_user_creds = {"email": "businessuser@sourcevia.com", "password": "Password123!"}
+        hop_creds = {"email": "hop@sourcevia.com", "password": "Password123!"}
+        
+        # 1. Login as Officer
+        print("\n--- Testing Officer Authentication ---")
+        try:
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=officer_creds)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                actual_role = user.get("role")
+                
+                if actual_role in ["procurement_officer", "procurement_manager"]:
+                    self.log_result("Officer Login", True, f"Logged in as {actual_role}")
+                    self.test_data["officer_token"] = data.get("session_token")
+                    self.test_data["officer_user_id"] = user.get("id")
+                else:
+                    self.log_result("Officer Login", False, f"Expected officer role, got {actual_role}")
+                    return
+            else:
+                self.log_result("Officer Login", False, f"Status: {response.status_code}, Response: {response.text}")
+                return
+                
+        except Exception as e:
+            self.log_result("Officer Login", False, f"Exception: {str(e)}")
+            return
+
+        # 2. Get Active Users List
+        print("\n--- Testing Active Users List API ---")
+        try:
+            response = self.session.get(f"{BACKEND_URL}/business-requests/active-users-list")
+            
+            if response.status_code == 200:
+                data = response.json()
+                users = data.get("users", [])
+                count = data.get("count", 0)
+                
+                if count > 0:
+                    self.log_result("Get Active Users List", True, f"Found {count} active users")
+                    
+                    # Find business user and HoP user IDs
+                    businessuser_id = None
+                    hop_user_id = None
+                    
+                    for user in users:
+                        if user.get("email") == "businessuser@sourcevia.com":
+                            businessuser_id = user.get("id")
+                        elif user.get("email") == "hop@sourcevia.com":
+                            hop_user_id = user.get("id")
+                    
+                    if businessuser_id:
+                        self.test_data["businessuser_id"] = businessuser_id
+                        self.log_result("Find Business User ID", True, f"Found businessuser ID: {businessuser_id}")
+                    else:
+                        self.log_result("Find Business User ID", False, "businessuser@sourcevia.com not found in active users")
+                    
+                    if hop_user_id:
+                        self.test_data["hop_user_id"] = hop_user_id
+                        self.log_result("Find HoP User ID", True, f"Found HoP ID: {hop_user_id}")
+                    else:
+                        self.log_result("Find HoP User ID", False, "hop@sourcevia.com not found in active users")
+                        
+                else:
+                    self.log_result("Get Active Users List", False, "No active users found")
+            else:
+                self.log_result("Get Active Users List", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Get Active Users List", False, f"Exception: {str(e)}")
+
+        # 3. Find a Business Request with "pending_additional_approval" status
+        print("\n--- Finding BR with pending_additional_approval status ---")
+        br_id = None
+        try:
+            response = self.session.get(f"{BACKEND_URL}/tenders")
+            
+            if response.status_code == 200:
+                tenders = response.json()
+                
+                # Look for BR with pending_additional_approval status
+                for tender in tenders:
+                    if tender.get("status") == "pending_additional_approval":
+                        br_id = tender.get("id")
+                        self.test_data["br_id"] = br_id
+                        self.log_result("Find BR with pending_additional_approval", True, f"Found BR: {br_id}")
+                        break
+                
+                if not br_id:
+                    self.log_result("Find BR with pending_additional_approval", False, "No BR found with pending_additional_approval status")
+                    return
+            else:
+                self.log_result("Find BR with pending_additional_approval", False, f"Status: {response.status_code}")
+                return
+                
+        except Exception as e:
+            self.log_result("Find BR with pending_additional_approval", False, f"Exception: {str(e)}")
+            return
+
+        # 4. Test Forward for Review
+        print("\n--- Testing Forward for Review ---")
+        if br_id and "businessuser_id" in self.test_data:
+            try:
+                forward_data = {
+                    "reviewer_user_ids": [self.test_data["businessuser_id"]],
+                    "notes": "Please review this evaluation"
+                }
+                
+                response = self.session.post(f"{BACKEND_URL}/business-requests/{br_id}/forward-for-review", json=forward_data)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    success = data.get("success", False)
+                    message = data.get("message", "")
+                    
+                    if success:
+                        self.log_result("Forward for Review", True, f"Success: {message}")
+                        
+                        # Verify status changed to pending_review
+                        status_response = self.session.get(f"{BACKEND_URL}/business-requests/{br_id}/evaluation-workflow-status")
+                        if status_response.status_code == 200:
+                            status_data = status_response.json()
+                            current_status = status_data.get("status")
+                            if current_status == "pending_review":
+                                self.log_result("Verify Status Change to pending_review", True, f"Status: {current_status}")
+                            else:
+                                self.log_result("Verify Status Change to pending_review", False, f"Expected pending_review, got {current_status}")
+                        else:
+                            self.log_result("Verify Status Change to pending_review", False, f"Could not verify status: {status_response.status_code}")
+                    else:
+                        self.log_result("Forward for Review", False, f"Success=False: {message}")
+                else:
+                    self.log_result("Forward for Review", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("Forward for Review", False, f"Exception: {str(e)}")
+
+        # 5. Test Reviewer Decision (Login as business user)
+        print("\n--- Testing Reviewer Decision ---")
+        try:
+            # Login as business user
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=business_user_creds)
+            
+            if response.status_code == 200:
+                data = response.json()
+                user = data.get("user", {})
+                self.log_result("Business User Login", True, f"Logged in as {user.get('role')}")
+                
+                # Submit reviewer decision
+                if br_id:
+                    decision_data = {
+                        "decision": "validated",
+                        "notes": "Reviewed and validated"
+                    }
+                    
+                    response = self.session.post(f"{BACKEND_URL}/business-requests/{br_id}/reviewer-decision", json=decision_data)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        success = data.get("success", False)
+                        message = data.get("message", "")
+                        
+                        if success:
+                            self.log_result("Reviewer Decision", True, f"Success: {message}")
+                        else:
+                            self.log_result("Reviewer Decision", False, f"Success=False: {message}")
+                    else:
+                        self.log_result("Reviewer Decision", False, f"Status: {response.status_code}, Response: {response.text}")
+            else:
+                self.log_result("Business User Login", False, f"Status: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Reviewer Decision", False, f"Exception: {str(e)}")
+
+        # 6. Test Forward for Approval (Login back as Officer)
+        print("\n--- Testing Forward for Approval ---")
+        try:
+            # Login back as officer
+            response = self.session.post(f"{BACKEND_URL}/auth/login", json=officer_creds)
+            
+            if response.status_code == 200:
+                self.log_result("Officer Re-login", True, "Re-authenticated as officer")
+                
+                # Forward for approval
+                if br_id and "hop_user_id" in self.test_data:
+                    approval_data = {
+                        "approver_user_ids": [self.test_data["hop_user_id"]],
+                        "notes": "Ready for approval"
+                    }
+                    
+                    response = self.session.post(f"{BACKEND_URL}/business-requests/{br_id}/forward-for-approval", json=approval_data)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        success = data.get("success", False)
+                        message = data.get("message", "")
+                        
+                        if success:
+                            self.log_result("Forward for Approval", True, f"Success: {message}")
+                            
+                            # Verify status changed to pending_approval
+                            status_response = self.session.get(f"{BACKEND_URL}/business-requests/{br_id}/evaluation-workflow-status")
+                            if status_response.status_code == 200:
+                                status_data = status_response.json()
+                                current_status = status_data.get("status")
+                                if current_status == "pending_approval":
+                                    self.log_result("Verify Status Change to pending_approval", True, f"Status: {current_status}")
+                                else:
+                                    self.log_result("Verify Status Change to pending_approval", False, f"Expected pending_approval, got {current_status}")
+                        else:
+                            self.log_result("Forward for Approval", False, f"Success=False: {message}")
+                    else:
+                        self.log_result("Forward for Approval", False, f"Status: {response.status_code}, Response: {response.text}")
+            else:
+                self.log_result("Officer Re-login", False, f"Status: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Forward for Approval", False, f"Exception: {str(e)}")
+
+        # 7. Test Skip to HoP (on another BR if available)
+        print("\n--- Testing Skip to HoP ---")
+        try:
+            # Find another BR for skip test
+            response = self.session.get(f"{BACKEND_URL}/tenders")
+            
+            if response.status_code == 200:
+                tenders = response.json()
+                skip_br_id = None
+                
+                # Look for another BR that can be skipped to HoP
+                for tender in tenders:
+                    if (tender.get("status") in ["evaluation_complete", "review_complete", "approval_complete", "pending_additional_approval"] 
+                        and tender.get("id") != br_id):
+                        skip_br_id = tender.get("id")
+                        break
+                
+                if skip_br_id:
+                    skip_data = {
+                        "notes": "Urgent request"
+                    }
+                    
+                    response = self.session.post(f"{BACKEND_URL}/business-requests/{skip_br_id}/skip-to-hop", json=skip_data)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        success = data.get("success", False)
+                        message = data.get("message", "")
+                        
+                        if success:
+                            self.log_result("Skip to HoP", True, f"Success: {message}")
+                            
+                            # Verify status changed to pending_hop_approval
+                            status_response = self.session.get(f"{BACKEND_URL}/business-requests/{skip_br_id}/evaluation-workflow-status")
+                            if status_response.status_code == 200:
+                                status_data = status_response.json()
+                                current_status = status_data.get("status")
+                                if current_status == "pending_hop_approval":
+                                    self.log_result("Verify Status Change to pending_hop_approval", True, f"Status: {current_status}")
+                                else:
+                                    self.log_result("Verify Status Change to pending_hop_approval", False, f"Expected pending_hop_approval, got {current_status}")
+                        else:
+                            self.log_result("Skip to HoP", False, f"Success=False: {message}")
+                    else:
+                        self.log_result("Skip to HoP", False, f"Status: {response.status_code}, Response: {response.text}")
+                else:
+                    self.log_result("Skip to HoP", False, "No suitable BR found for skip test")
+            else:
+                self.log_result("Skip to HoP", False, f"Could not fetch BRs: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Skip to HoP", False, f"Exception: {str(e)}")
+
+        # 8. Verify Audit Trail
+        print("\n--- Testing Audit Trail ---")
+        if br_id:
+            try:
+                response = self.session.get(f"{BACKEND_URL}/business-requests/{br_id}/evaluation-workflow-status")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    audit_trail = data.get("audit_trail", [])
+                    
+                    if audit_trail and len(audit_trail) > 0:
+                        self.log_result("Verify Audit Trail", True, f"Found {len(audit_trail)} audit trail entries")
+                        
+                        # Check for specific workflow actions
+                        actions_found = [entry.get("action") for entry in audit_trail]
+                        expected_actions = ["forwarded_for_review", "reviewer_validated"]
+                        
+                        found_actions = [action for action in expected_actions if action in actions_found]
+                        if found_actions:
+                            self.log_result("Verify Workflow Actions in Audit", True, f"Found actions: {found_actions}")
+                        else:
+                            self.log_result("Verify Workflow Actions in Audit", False, f"Expected actions not found. Found: {actions_found}")
+                    else:
+                        self.log_result("Verify Audit Trail", False, "No audit trail entries found")
+                else:
+                    self.log_result("Verify Audit Trail", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("Verify Audit Trail", False, f"Exception: {str(e)}")
+
     def test_hop_comprehensive_access(self):
         """Test comprehensive HoP role access and functionality as per review request"""
         print("\n=== COMPREHENSIVE HoP ACCESS TESTING ===")
