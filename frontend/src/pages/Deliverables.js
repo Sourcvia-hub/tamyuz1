@@ -405,7 +405,7 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
       }, { withCredentials: true });
       onCreated();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to create", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to create"), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
