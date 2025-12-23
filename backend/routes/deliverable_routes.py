@@ -58,6 +58,7 @@ class UpdateDeliverableRequest(BaseModel):
     amount: Optional[float] = None
     line_items: Optional[List[Dict[str, Any]]] = None
     documents: Optional[List[str]] = None
+    assigned_to: Optional[str] = None  # User assignment
 
 
 class ReviewDeliverableRequest(BaseModel):
