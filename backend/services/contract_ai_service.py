@@ -377,7 +377,6 @@ VENDOR INFORMATION:
         pr_details: Optional[Dict[str, Any]] = None
     ) -> ContractAIAdvisory:
         """Generate AI advisory including drafting hints and clause suggestions"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         # Generate base drafting hints
         drafting_hints = self._generate_base_drafting_hints(classification)
@@ -401,14 +400,8 @@ VENDOR INFORMATION:
         )
         
         # Try to enhance with AI
-        if self.emergent_key:
+        if self.client:
             try:
-                chat = LlmChat(
-                    api_key=self.emergent_key,
-                    session_id=f"contract-advisory-{datetime.now().timestamp()}",
-                    system_message=CONTRACT_ADVISORY_PROMPT
-                ).with_model("openai", "gpt-4o")
-                
                 context = f"""
 CLASSIFICATION: {classification}
 
@@ -422,11 +415,19 @@ PR DETAILS:
 {json.dumps(pr_details, indent=2, default=str) if pr_details else "Not provided"}
 """
                 
-                user_message = UserMessage(text=f"Generate advisory for this contract:\n{context}")
-                response = await chat.send_message(user_message)
+                response = self.client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": CONTRACT_ADVISORY_PROMPT},
+                        {"role": "user", "content": f"Generate advisory for this contract:\n{context}"}
+                    ],
+                    temperature=0.1
+                )
+                
+                result_text = response.choices[0].message.content
                 
                 try:
-                    json_match = re.search(r'\{[\s\S]*\}', response)
+                    json_match = re.search(r'\{[\s\S]*\}', result_text)
                     if json_match:
                         data = json.loads(json_match.group())
                         advisory.ai_analysis_notes = data.get("ai_analysis_notes")
