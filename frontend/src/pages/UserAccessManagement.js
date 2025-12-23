@@ -110,7 +110,7 @@ const UserAccessManagement = () => {
       await axios.post(`${API}/users/${userId}/force-password-reset`, {}, { withCredentials: true });
       toast({ title: '✅ Success', description: 'User will be required to reset password on next login', variant: 'success' });
     } catch (error) {
-      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed', variant: 'destructive' });
+      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed'), variant: 'destructive' });
     }
   };
 
