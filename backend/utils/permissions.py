@@ -36,17 +36,33 @@ class Module(str, Enum):
 ROLE_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {
     "user": {
         Module.DASHBOARD: [Permission.VIEWER],  # Own requests only
-        Module.VENDORS: [Permission.REQUESTER],  # Can create draft vendors
+        Module.VENDORS: [Permission.VIEWER],  # View only
         Module.VENDOR_DD: [Permission.VIEWER],
         Module.TENDERS: [Permission.REQUESTER],  # Can create PRs
         Module.TENDER_EVALUATION: [Permission.VIEWER],
         Module.TENDER_PROPOSALS: [Permission.VIEWER],
-        Module.CONTRACTS: [Permission.REQUESTER],  # Can create draft contracts
-        Module.PURCHASE_ORDERS: [Permission.REQUESTER],  # Can create draft POs
+        Module.CONTRACTS: [Permission.VIEWER],  # View only
+        Module.PURCHASE_ORDERS: [Permission.REQUESTER],  # Can create POs
         Module.RESOURCES: [Permission.REQUESTER],  # Can create resource requests
         Module.INVOICES: [Permission.REQUESTER],  # Can create invoices
         Module.ASSETS: [Permission.NO_ACCESS],
         Module.SERVICE_REQUESTS: [Permission.REQUESTER],  # Can create service requests
+        Module.DELIVERABLES: [Permission.REQUESTER],  # Can create deliverables
+    },
+    "business_user": {
+        Module.DASHBOARD: [Permission.VIEWER],
+        Module.VENDORS: [Permission.VIEWER],  # View only
+        Module.VENDOR_DD: [Permission.VIEWER],
+        Module.TENDERS: [Permission.REQUESTER],
+        Module.TENDER_EVALUATION: [Permission.VIEWER],
+        Module.TENDER_PROPOSALS: [Permission.VIEWER],
+        Module.CONTRACTS: [Permission.VIEWER],  # View only
+        Module.PURCHASE_ORDERS: [Permission.REQUESTER],  # Can create POs
+        Module.RESOURCES: [Permission.REQUESTER],  # Can create resources
+        Module.INVOICES: [Permission.VERIFIER],
+        Module.ASSETS: [Permission.NO_ACCESS],
+        Module.SERVICE_REQUESTS: [Permission.REQUESTER],
+        Module.DELIVERABLES: [Permission.REQUESTER],  # Can create deliverables
     },
     "direct_manager": {
         Module.DASHBOARD: [Permission.VIEWER],  # Domain only
@@ -61,6 +77,7 @@ ROLE_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {
         Module.INVOICES: [Permission.VERIFIER],
         Module.ASSETS: [Permission.NO_ACCESS],
         Module.SERVICE_REQUESTS: [Permission.REQUESTER],
+        Module.DELIVERABLES: [Permission.VERIFIER],
     },
     "procurement_officer": {
         Module.DASHBOARD: [Permission.VIEWER],  # View all requests
@@ -75,6 +92,7 @@ ROLE_PERMISSIONS: Dict[str, Dict[str, List[str]]] = {
         Module.INVOICES: [Permission.VERIFIER],  # Can review invoices
         Module.ASSETS: [Permission.VERIFIER],  # Can view assets
         Module.SERVICE_REQUESTS: [Permission.VERIFIER],  # Can review service requests
+        Module.DELIVERABLES: [Permission.VERIFIER],  # Can review deliverables
     },
     "senior_manager": {  # Approver role - View-only access to all modules
         Module.DASHBOARD: [Permission.VIEWER],
