@@ -23,7 +23,8 @@ export const Module = {
   RESOURCES: 'resources',
   INVOICES: 'invoices',
   ASSETS: 'assets',
-  SERVICE_REQUESTS: 'service_requests'
+  SERVICE_REQUESTS: 'service_requests',
+  DELIVERABLES: 'deliverables'
 };
 
 const ROLE_PERMISSIONS = {
