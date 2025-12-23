@@ -1374,12 +1374,83 @@ const TenderDetail = () => {
           </div>
         )}
 
-        {/* Update Evaluation Modal */}
+        {/* Re-evaluate Proposals Modal */}
         {showUpdateEvaluationModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-              <h2 className="text-xl font-bold mb-4">✏️ Update Evaluation</h2>
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">🔄 Re-evaluate Proposals</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Review and update the proposal evaluation. You can change the selected proposal, adjust scores, and update your recommendation.
+              </p>
+              
               <div className="space-y-4">
+                {/* Select Proposal */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-sm font-medium mb-2">Selected Proposal *</label>
+                  <select
+                    value={updateEvalForm.selected_proposal_id}
+                    onChange={(e) => setUpdateEvalForm({...updateEvalForm, selected_proposal_id: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg"
+                  >
+                    <option value="">-- Select a proposal --</option>
+                    {proposals.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.vendor_name || 'Unknown Vendor'} - {p.technical_proposal?.substring(0, 50)}...
+                        {p.total_score ? ` (Score: ${p.total_score.toFixed(2)})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {tender?.selected_proposal_id && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Currently selected: {proposals.find(p => p.id === tender.selected_proposal_id)?.vendor_name || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+
+                {/* Scores */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Technical Score</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={updateEvalForm.technical_score || ''}
+                      onChange={(e) => setUpdateEvalForm({...updateEvalForm, technical_score: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      placeholder="0-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Financial Score</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={updateEvalForm.financial_score || ''}
+                      onChange={(e) => setUpdateEvalForm({...updateEvalForm, financial_score: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      placeholder="0-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Overall Score</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={updateEvalForm.overall_score || ''}
+                      onChange={(e) => setUpdateEvalForm({...updateEvalForm, overall_score: parseFloat(e.target.value) || 0})}
+                      className="w-full px-3 py-2 border rounded-lg"
+                      placeholder="0-100"
+                    />
+                  </div>
+                </div>
+
+                {/* Evaluation Notes */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Evaluation Notes</label>
                   <textarea
@@ -1387,24 +1458,51 @@ const TenderDetail = () => {
                     onChange={(e) => setUpdateEvalForm({...updateEvalForm, evaluation_notes: e.target.value})}
                     className="w-full px-3 py-2 border rounded-lg"
                     rows={3}
-                    placeholder="Add or update evaluation notes..."
+                    placeholder="Detailed evaluation notes..."
                   />
                 </div>
+
+                {/* Recommendation */}
                 <div>
                   <label className="block text-sm font-medium mb-1">Recommendation</label>
-                  <textarea
+                  <select
                     value={updateEvalForm.recommendation}
                     onChange={(e) => setUpdateEvalForm({...updateEvalForm, recommendation: e.target.value})}
                     className="w-full px-3 py-2 border rounded-lg"
-                    rows={2}
-                    placeholder="Your recommendation..."
-                  />
+                  >
+                    <option value="">-- Select recommendation --</option>
+                    <option value="strongly_recommend">Strongly Recommend</option>
+                    <option value="recommend">Recommend</option>
+                    <option value="neutral">Neutral</option>
+                    <option value="not_recommend">Do Not Recommend</option>
+                    <option value="reject">Reject</option>
+                  </select>
                 </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <button onClick={() => setShowUpdateEvaluationModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
-                  <button onClick={handleUpdateEvaluation} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                    Update Evaluation
+
+                {/* Actions */}
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <button 
+                    onClick={() => navigate(`/tenders/${id}/evaluate`)}
+                    className="px-4 py-2 text-blue-600 hover:underline"
+                  >
+                    📋 Go to Full Evaluation Page
                   </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setShowUpdateEvaluationModal(false)} 
+                      className="px-4 py-2 border rounded-lg"
+                      disabled={reevaluationLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={handleUpdateEvaluation} 
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                      disabled={reevaluationLoading}
+                    >
+                      {reevaluationLoading ? 'Saving...' : '✓ Save Re-evaluation'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
