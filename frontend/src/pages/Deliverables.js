@@ -326,20 +326,30 @@ const DeliverableCard = ({ deliverable, getStatusBadge, getStatusLabel, onSubmit
             )}
           </div>
           <p className="text-sm text-gray-600 mb-2">{deliverable.description}</p>
-          <div className="flex gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap gap-4 text-sm text-gray-500">
             <span>📄 {deliverable.deliverable_number}</span>
             {deliverable.vendor_invoice_number && <span>📋 Inv: {deliverable.vendor_invoice_number}</span>}
             <span>💰 {deliverable.amount?.toLocaleString()} SAR</span>
             {deliverable.contract_info && <span>📑 {deliverable.contract_info.contract_number || deliverable.contract_info.title}</span>}
             {deliverable.po_info && <span>📝 {deliverable.po_info.po_number}</span>}
           </div>
-          {deliverable.ai_validation_status && (
-            <div className="mt-2 text-sm">
+          <div className="flex flex-wrap gap-4 mt-2 text-sm">
+            {deliverable.ai_validation_status && (
               <span className={`px-2 py-0.5 rounded text-xs ${deliverable.ai_validation_status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                 AI: {deliverable.ai_validation_status}
               </span>
-            </div>
-          )}
+            )}
+            {deliverable.assigned_to_name && (
+              <span className="px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
+                👤 Assigned: {deliverable.assigned_to_name}
+              </span>
+            )}
+            {deliverable.attachments?.length > 0 && (
+              <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+                📎 {deliverable.attachments.length} attachment{deliverable.attachments.length > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <button onClick={onViewDetails} className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
