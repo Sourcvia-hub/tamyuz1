@@ -269,12 +269,14 @@ const PurchaseOrders = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Purchase Orders</h1>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-          >
-            Create PO
-          </button>
+          {userCanCreate && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              Create PO
+            </button>
+          )}
         </div>
 
         {/* Filter Buttons */}
