@@ -96,24 +96,35 @@ const MyApprovals = () => {
 
   const handleReject = async (notification) => {
     setProcessingItem(notification.id);
+    const itemType = getItemTypeCategory(notification.item_type);
     try {
-      if (notification.item_type === 'business_request') {
+      if (itemType === 'business_request') {
         await axios.post(`${API}/business-requests/${notification.item_id}/additional-approver-decision`, {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
-      } else if (notification.item_type === 'contract') {
-        await axios.post(`${API}/contract-governance/hop-decision/${notification.item_id}`, {
+      } else if (itemType === 'contract') {
+        await axios.post(`${API}/entity-workflow/contract/${notification.item_id}/hop-decision`, {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
-      } else if (notification.item_type === 'deliverable') {
-        await axios.post(`${API}/deliverables/${notification.item_id}/hop-decision`, {
+      } else if (itemType === 'deliverable') {
+        await axios.post(`${API}/entity-workflow/deliverable/${notification.item_id}/hop-decision`, {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
-      } else if (notification.item_type === 'asset') {
-        await axios.post(`${API}/assets/${notification.item_id}/hop-decision`, {
+      } else if (itemType === 'asset') {
+        await axios.post(`${API}/entity-workflow/asset/${notification.item_id}/hop-decision`, {
+          decision: 'rejected',
+          notes: notes || ''
+        }, { withCredentials: true });
+      } else if (itemType === 'vendor') {
+        await axios.post(`${API}/entity-workflow/vendor/${notification.item_id}/hop-decision`, {
+          decision: 'rejected',
+          notes: notes || ''
+        }, { withCredentials: true });
+      } else if (itemType === 'po') {
+        await axios.post(`${API}/entity-workflow/purchase_order/${notification.item_id}/hop-decision`, {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
@@ -132,19 +143,30 @@ const MyApprovals = () => {
 
   const handleReturn = async (notification) => {
     setProcessingItem(notification.id);
+    const itemType = getItemTypeCategory(notification.item_type);
     try {
-      if (notification.item_type === 'contract') {
-        await axios.post(`${API}/contract-governance/hop-decision/${notification.item_id}`, {
+      if (itemType === 'contract') {
+        await axios.post(`${API}/entity-workflow/contract/${notification.item_id}/hop-decision`, {
           decision: 'returned',
           notes: notes || ''
         }, { withCredentials: true });
-      } else if (notification.item_type === 'deliverable') {
-        await axios.post(`${API}/deliverables/${notification.item_id}/hop-decision`, {
+      } else if (itemType === 'deliverable') {
+        await axios.post(`${API}/entity-workflow/deliverable/${notification.item_id}/hop-decision`, {
           decision: 'returned',
           notes: notes || ''
         }, { withCredentials: true });
-      } else if (notification.item_type === 'asset') {
-        await axios.post(`${API}/assets/${notification.item_id}/hop-decision`, {
+      } else if (itemType === 'asset') {
+        await axios.post(`${API}/entity-workflow/asset/${notification.item_id}/hop-decision`, {
+          decision: 'returned',
+          notes: notes || ''
+        }, { withCredentials: true });
+      } else if (itemType === 'vendor') {
+        await axios.post(`${API}/entity-workflow/vendor/${notification.item_id}/hop-decision`, {
+          decision: 'returned',
+          notes: notes || ''
+        }, { withCredentials: true });
+      } else if (itemType === 'po') {
+        await axios.post(`${API}/entity-workflow/purchase_order/${notification.item_id}/hop-decision`, {
           decision: 'returned',
           notes: notes || ''
         }, { withCredentials: true });
