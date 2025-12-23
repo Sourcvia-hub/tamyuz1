@@ -40,7 +40,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.REQUESTER],
     [Module.INVOICES]: [Permission.VERIFIER],
     [Module.ASSETS]: [Permission.NO_ACCESS],
-    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER]
+    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER],
+    [Module.DELIVERABLES]: [Permission.REQUESTER]
   },
   direct_manager: {
     [Module.DASHBOARD]: [Permission.VIEWER],
@@ -54,7 +55,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.VERIFIER],
     [Module.INVOICES]: [Permission.VERIFIER],
     [Module.ASSETS]: [Permission.NO_ACCESS],
-    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER]
+    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER],
+    [Module.DELIVERABLES]: [Permission.VERIFIER]
   },
   procurement_officer: {
     [Module.DASHBOARD]: [Permission.VIEWER],
@@ -68,7 +70,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.REQUESTER, Permission.VERIFIER],
     [Module.INVOICES]: [Permission.REQUESTER, Permission.VERIFIER],
     [Module.ASSETS]: [Permission.REQUESTER],
-    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER, Permission.VERIFIER]
+    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER, Permission.VERIFIER],
+    [Module.DELIVERABLES]: [Permission.REQUESTER, Permission.VERIFIER]
   },
   senior_manager: {
     [Module.DASHBOARD]: [Permission.VIEWER],
@@ -82,7 +85,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.APPROVER, Permission.VIEWER],
     [Module.INVOICES]: [Permission.APPROVER, Permission.VIEWER],
     [Module.ASSETS]: [Permission.VIEWER],
-    [Module.SERVICE_REQUESTS]: [Permission.APPROVER, Permission.VIEWER]
+    [Module.SERVICE_REQUESTS]: [Permission.APPROVER, Permission.VIEWER],
+    [Module.DELIVERABLES]: [Permission.APPROVER, Permission.VIEWER]
   },
   procurement_manager: {
     [Module.DASHBOARD]: [Permission.VIEWER],
@@ -96,7 +100,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.APPROVER, Permission.VIEWER],
     [Module.INVOICES]: [Permission.APPROVER, Permission.VIEWER],
     [Module.ASSETS]: [Permission.APPROVER, Permission.VIEWER],
-    [Module.SERVICE_REQUESTS]: [Permission.APPROVER, Permission.VIEWER]
+    [Module.SERVICE_REQUESTS]: [Permission.APPROVER, Permission.VIEWER],
+    [Module.DELIVERABLES]: [Permission.APPROVER, Permission.VERIFIER]
   },
   admin: {
     [Module.DASHBOARD]: [Permission.CONTROLLER],
