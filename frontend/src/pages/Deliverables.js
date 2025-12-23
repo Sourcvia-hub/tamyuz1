@@ -604,10 +604,26 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
 };
 
 // Detail Modal
-const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, onClose, onHoPDecision, user }) => {
+const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, onClose, onHoPDecision, user, onRefresh, toast }) => {
   const isHoP = ['procurement_manager', 'admin', 'hop'].includes(user?.role);
+  const canAssign = isOfficer(user?.role);
   const [notes, setNotes] = useState('');
   const [auditTrail, setAuditTrail] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [assignableUsers, setAssignableUsers] = useState([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const [currentDeliverable, setCurrentDeliverable] = useState(deliverable);
+
+  const fetchDeliverableDetails = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/deliverables/${deliverable.id}`, { withCredentials: true });
+      setCurrentDeliverable(res.data);
+    } catch (error) {
+      console.log('Failed to refresh deliverable');
+    }
+  }, [deliverable.id]);
 
   useEffect(() => {
     const fetchAuditTrail = async () => {
@@ -620,56 +636,256 @@ const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, o
     };
     if (deliverable?.id) {
       fetchAuditTrail();
+      fetchDeliverableDetails();
     }
-  }, [deliverable?.id]);
+  }, [deliverable?.id, fetchDeliverableDetails]);
+
+  useEffect(() => {
+    const fetchAssignableUsers = async () => {
+      if (canAssign) {
+        try {
+          const res = await axios.get(`${API}/deliverables/users/assignable`, { withCredentials: true });
+          setAssignableUsers(res.data.users || []);
+        } catch (error) {
+          console.log('Failed to fetch assignable users');
+        }
+      }
+    };
+    fetchAssignableUsers();
+  }, [canAssign]);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast?.({ title: "❌ Error", description: "File too large. Maximum size is 10MB", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      await axios.post(`${API}/deliverables/${deliverable.id}/attachments`, formData, {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast?.({ title: "✅ Uploaded", description: "Attachment uploaded successfully", variant: "success" });
+      fetchDeliverableDetails();
+      onRefresh?.();
+    } catch (error) {
+      toast?.({ title: "❌ Error", description: getErrorMessage(error, "Failed to upload"), variant: "destructive" });
+    } finally {
+      setUploading(false);
+      e.target.value = ''; // Reset input
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Are you sure you want to delete this attachment?')) return;
+
+    try {
+      await axios.delete(`${API}/deliverables/${deliverable.id}/attachments/${attachmentId}`, { withCredentials: true });
+      toast?.({ title: "✅ Deleted", description: "Attachment deleted", variant: "success" });
+      fetchDeliverableDetails();
+      onRefresh?.();
+    } catch (error) {
+      toast?.({ title: "❌ Error", description: getErrorMessage(error, "Failed to delete"), variant: "destructive" });
+    }
+  };
+
+  const handleDownloadAttachment = async (attachment) => {
+    try {
+      const response = await axios.get(
+        `${API}/deliverables/${deliverable.id}/attachments/${attachment.id}/download`,
+        { withCredentials: true, responseType: 'blob' }
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', attachment.filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      toast?.({ title: "❌ Error", description: getErrorMessage(error, "Failed to download"), variant: "destructive" });
+    }
+  };
+
+  const handleAssign = async () => {
+    if (!selectedUserId) {
+      toast?.({ title: "⚠️ Warning", description: "Please select a user", variant: "warning" });
+      return;
+    }
+
+    setAssigning(true);
+    try {
+      await axios.post(`${API}/deliverables/${deliverable.id}/assign`, {
+        user_id: selectedUserId
+      }, { withCredentials: true });
+      toast?.({ title: "✅ Assigned", description: "Deliverable assigned successfully", variant: "success" });
+      setShowAssignModal(false);
+      fetchDeliverableDetails();
+      onRefresh?.();
+    } catch (error) {
+      toast?.({ title: "❌ Error", description: getErrorMessage(error, "Failed to assign"), variant: "destructive" });
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleUnassign = async () => {
+    if (!window.confirm('Are you sure you want to remove the assignment?')) return;
+
+    try {
+      await axios.delete(`${API}/deliverables/${deliverable.id}/assign`, { withCredentials: true });
+      toast?.({ title: "✅ Removed", description: "Assignment removed", variant: "success" });
+      fetchDeliverableDetails();
+      onRefresh?.();
+    } catch (error) {
+      toast?.({ title: "❌ Error", description: getErrorMessage(error, "Failed to remove assignment"), variant: "destructive" });
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h2 className="text-xl font-bold">{deliverable.title}</h2>
-            <p className="text-gray-500">{deliverable.deliverable_number}</p>
+            <h2 className="text-xl font-bold">{currentDeliverable.title}</h2>
+            <p className="text-gray-500">{currentDeliverable.deliverable_number}</p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-sm ${getStatusBadge(deliverable.status)}`}>
-            {getStatusLabel(deliverable.status)}
+          <span className={`px-3 py-1 rounded-full text-sm ${getStatusBadge(currentDeliverable.status)}`}>
+            {getStatusLabel(currentDeliverable.status)}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-gray-50 p-3 rounded">
             <p className="text-sm text-gray-600">Amount</p>
-            <p className="text-lg font-semibold">{deliverable.amount?.toLocaleString()} SAR</p>
+            <p className="text-lg font-semibold">{currentDeliverable.amount?.toLocaleString()} SAR</p>
           </div>
           <div className="bg-gray-50 p-3 rounded">
             <p className="text-sm text-gray-600">Vendor Invoice</p>
-            <p className="text-lg font-semibold">{deliverable.vendor_invoice_number || '-'}</p>
+            <p className="text-lg font-semibold">{currentDeliverable.vendor_invoice_number || '-'}</p>
+          </div>
+        </div>
+
+        {/* Assignment Section */}
+        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-600">Assigned To</p>
+              <p className="font-semibold text-blue-800">
+                {currentDeliverable.assigned_to_name || 'Not assigned'}
+              </p>
+            </div>
+            {canAssign && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowAssignModal(true)}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  {currentDeliverable.assigned_to ? 'Reassign' : 'Assign'}
+                </button>
+                {currentDeliverable.assigned_to && (
+                  <button
+                    onClick={handleUnassign}
+                    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         <div className="mb-4">
           <h3 className="font-semibold mb-2">Description</h3>
-          <p className="text-gray-700">{deliverable.description}</p>
+          <p className="text-gray-700">{currentDeliverable.description}</p>
         </div>
 
-        {deliverable.ai_validation_summary && (
+        {/* Attachments Section */}
+        <div className="mb-4 border rounded-lg p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-semibold">📎 Attachments</h3>
+            <label className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 cursor-pointer">
+              {uploading ? 'Uploading...' : '+ Add File'}
+              <input
+                type="file"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={uploading}
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.gif,.zip,.txt"
+              />
+            </label>
+          </div>
+          {currentDeliverable.attachments?.length > 0 ? (
+            <div className="space-y-2">
+              {currentDeliverable.attachments.map((att) => (
+                <div key={att.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">📄</span>
+                    <div>
+                      <p className="text-sm font-medium">{att.filename}</p>
+                      <p className="text-xs text-gray-500">
+                        {formatFileSize(att.file_size)} • {new Date(att.upload_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleDownloadAttachment(att)}
+                      className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAttachment(att.id)}
+                      className="px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-4">No attachments yet</p>
+          )}
+          <p className="text-xs text-gray-400 mt-2">
+            Allowed: PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, GIF, ZIP, TXT (max 10MB)
+          </p>
+        </div>
+
+        {currentDeliverable.ai_validation_summary && (
           <div className="mb-4 p-3 bg-blue-50 rounded-lg">
             <h3 className="font-semibold text-blue-800 mb-2">AI Validation Summary</h3>
-            <p className="text-sm text-blue-700">{deliverable.ai_validation_summary}</p>
-            {deliverable.ai_confidence && (
-              <p className="text-xs text-blue-600 mt-1">Confidence: {deliverable.ai_confidence}</p>
+            <p className="text-sm text-blue-700">{currentDeliverable.ai_validation_summary}</p>
+            {currentDeliverable.ai_confidence && (
+              <p className="text-xs text-blue-600 mt-1">Confidence: {currentDeliverable.ai_confidence}</p>
             )}
           </div>
         )}
 
-        {deliverable.payment_reference && (
+        {currentDeliverable.payment_reference && (
           <div className="mb-4 p-3 bg-green-50 rounded-lg">
-            <p className="text-sm text-green-700">Payment Reference: <strong>{deliverable.payment_reference}</strong></p>
+            <p className="text-sm text-green-700">Payment Reference: <strong>{currentDeliverable.payment_reference}</strong></p>
           </div>
         )}
 
         {/* HoP Decision Section */}
-        {deliverable.status === 'pending_hop_approval' && isHoP && (
+        {currentDeliverable.status === 'pending_hop_approval' && isHoP && (
           <div className="border-t pt-4 mt-4">
             <h3 className="font-semibold mb-2">HoP Decision</h3>
             <textarea
@@ -681,19 +897,19 @@ const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, o
             />
             <div className="flex gap-2">
               <button
-                onClick={() => onHoPDecision(deliverable.id, 'approved', notes)}
+                onClick={() => onHoPDecision(currentDeliverable.id, 'approved', notes)}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
                 ✓ Approve
               </button>
               <button
-                onClick={() => onHoPDecision(deliverable.id, 'returned', notes)}
+                onClick={() => onHoPDecision(currentDeliverable.id, 'returned', notes)}
                 className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
               >
                 ↩ Return
               </button>
               <button
-                onClick={() => onHoPDecision(deliverable.id, 'rejected', notes)}
+                onClick={() => onHoPDecision(currentDeliverable.id, 'rejected', notes)}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 ✗ Reject
@@ -714,6 +930,45 @@ const DeliverableDetailModal = ({ deliverable, getStatusBadge, getStatusLabel, o
         <div className="flex justify-end pt-4 border-t mt-4">
           <button onClick={onClose} className="px-4 py-2 border rounded-lg">Close</button>
         </div>
+
+        {/* Assign User Modal */}
+        {showAssignModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-bold mb-4">Assign Deliverable</h3>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Select User *</label>
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
+                  <option value="">-- Select a user --</option>
+                  {assignableUsers.map(u => (
+                    <option key={u.id} value={u.id}>
+                      {u.name || u.email} ({u.role})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setShowAssignModal(false)}
+                  className="px-4 py-2 border rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAssign}
+                  disabled={assigning}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {assigning ? 'Assigning...' : 'Assign'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
