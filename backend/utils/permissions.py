@@ -29,6 +29,7 @@ class Module(str, Enum):
     INVOICES = "invoices"
     ASSETS = "assets"
     SERVICE_REQUESTS = "service_requests"
+    DELIVERABLES = "deliverables"
 
 
 # Role-based permissions mapping
