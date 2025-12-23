@@ -194,6 +194,15 @@ const AssetDetail = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
+        {/* Approval Workflow Panel */}
+        <EntityWorkflowPanel
+          entityType="asset"
+          entityId={id}
+          entityTitle={asset?.name}
+          onStatusChange={() => fetchAsset()}
+          showAuditTrail={true}
+        />
+
         {/* Approval Status Banner */}
         {asset.approval_status && (
           <div className={`p-4 rounded-lg ${
