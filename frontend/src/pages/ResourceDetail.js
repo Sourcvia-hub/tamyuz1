@@ -162,6 +162,15 @@ const ResourceDetail = () => {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Approval Workflow Panel */}
+        <EntityWorkflowPanel
+          entityType="resource"
+          entityId={id}
+          entityTitle={resource?.name}
+          onStatusChange={() => fetchResource()}
+          showAuditTrail={true}
+        />
+
         {/* Header */}
         <div className="flex justify-between items-start">
           <button
