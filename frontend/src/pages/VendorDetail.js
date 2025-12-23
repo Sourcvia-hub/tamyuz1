@@ -192,6 +192,17 @@ const VendorDetail = () => {
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Approval Workflow Panel - Only for High Risk Vendors */}
+        {vendor?.risk_score >= 70 && (
+          <EntityWorkflowPanel
+            entityType="vendor"
+            entityId={id}
+            entityTitle={vendor?.name_english || vendor?.company_name}
+            onStatusChange={() => fetchVendor()}
+            showAuditTrail={true}
+          />
+        )}
+
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
