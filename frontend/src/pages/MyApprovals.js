@@ -105,7 +105,12 @@ const MyApprovals = () => {
     const itemType = getItemTypeCategory(notification.item_type);
     try {
       if (itemType === 'business_request') {
-        await axios.post(`${API}/business-requests/${notification.item_id}/additional-approver-decision`, {
+        // For PRs pending HoP approval, use hop-decision endpoint
+        const isPendingHoP = notification.message?.includes('HoP') || notification.status === 'pending_hop_approval';
+        const endpoint = isPendingHoP 
+          ? `${API}/business-requests/${notification.item_id}/hop-decision`
+          : `${API}/business-requests/${notification.item_id}/additional-approver-decision`;
+        await axios.post(endpoint, {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
