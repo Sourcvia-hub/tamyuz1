@@ -577,9 +577,12 @@ async def get_my_pending_approvals(request: Request):
     
     # 2. If user is HoP, include pending contracts, deliverables, and assets
     if is_hop:
-        # Get contracts pending HoP approval
+        # Get contracts pending HoP approval (check both status fields)
         pending_contracts = await db.contracts.find(
-            {"status": "pending_hop_approval"},
+            {"$or": [
+                {"status": "pending_hop_approval"},
+                {"workflow_status": "pending_hop_approval"}
+            ]},
             {"_id": 0}
         ).to_list(50)
         
@@ -592,7 +595,7 @@ async def get_my_pending_approvals(request: Request):
             
             all_items.append({
                 "id": f"contract_{contract['id']}",
-                "item_type": "contract",
+                "item_type": "contract_approval",
                 "item_id": contract["id"],
                 "item_number": contract.get("contract_number"),
                 "item_title": contract.get("title"),
@@ -606,7 +609,10 @@ async def get_my_pending_approvals(request: Request):
         
         # Get deliverables pending HoP approval
         pending_deliverables = await db.deliverables.find(
-            {"status": "pending_hop_approval"},
+            {"$or": [
+                {"status": "pending_hop_approval"},
+                {"workflow_status": "pending_hop_approval"}
+            ]},
             {"_id": 0}
         ).to_list(50)
         
