@@ -639,7 +639,10 @@ async def get_my_pending_approvals(request: Request):
         
         # Get assets pending HoP approval
         pending_assets = await db.assets.find(
-            {"approval_status": "pending_hop_approval"},
+            {"$or": [
+                {"approval_status": "pending_hop_approval"},
+                {"workflow_status": "pending_hop_approval"}
+            ]},
             {"_id": 0}
         ).to_list(50)
         
