@@ -55,10 +55,14 @@ class PaymentAuthorizationAIService:
     """AI Service for Payment Authorization validation"""
     
     def __init__(self):
-        """Initialize with Emergent LLM key"""
-        self.emergent_key = os.environ.get("EMERGENT_LLM_KEY")
-        if not self.emergent_key:
-            logger.warning("No EMERGENT_LLM_KEY provided. AI features will use rule-based validation.")
+        """Initialize with OpenAI API key"""
+        self.openai_key = os.environ.get("OPENAI_API_KEY")
+        if not self.openai_key:
+            logger.warning("No OPENAI_API_KEY provided. AI features will use rule-based validation.")
+        self.client = None
+        if self.openai_key:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=self.openai_key)
     
     async def validate_deliverable_for_payment(
         self,
@@ -77,7 +81,7 @@ class PaymentAuthorizationAIService:
         context = self._build_validation_context(deliverable, contract, po, tender, vendor)
         
         # Try AI validation first
-        if self.emergent_key:
+        if self.client:
             try:
                 return await self._ai_validate(context)
             except Exception as e:
