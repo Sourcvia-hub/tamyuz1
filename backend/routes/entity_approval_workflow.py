@@ -408,10 +408,12 @@ async def entity_hop_decision(entity_type: str, entity_id: str, data: HoPDecisio
         elif entity_type == "deliverable":
             final_status = "approved"
     
+    # Update both workflow_status and approval_status to ensure consistency
     await collection.update_one(
         {config["id_field"]: entity_id},
         {"$set": {
             "workflow_status": data.decision,
+            "approval_status": data.decision,  # Also update approval_status for assets
             "status": final_status,
             "hop_decision": data.decision,
             "hop_decision_by": user.id,
