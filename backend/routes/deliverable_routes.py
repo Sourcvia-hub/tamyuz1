@@ -2,15 +2,22 @@
 Deliverable Routes - Unified deliverables with AI validation and HoP approval
 Replaces the old Invoice model with an integrated workflow
 """
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, UploadFile, File, Form
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timezone
 from pydantic import BaseModel
+from pathlib import Path
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/deliverables", tags=["Deliverables"])
+
+# File upload configuration
+UPLOAD_DIR = Path("/app/backend/uploads/deliverables")
+ALLOWED_EXTENSIONS = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.png', '.jpg', '.jpeg', '.gif', '.zip', '.txt'}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 # Import dependencies
 from utils.database import db
