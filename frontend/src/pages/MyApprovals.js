@@ -204,20 +204,36 @@ const MyApprovals = () => {
   };
 
   const navigateToItem = (notification) => {
-    switch (notification.item_type) {
+    const itemType = notification.item_type;
+    switch (itemType) {
       case 'business_request':
+      case 'business_request_approval':
         navigate(`/tenders/${notification.item_id}`);
         break;
       case 'contract':
+      case 'contract_approval':
         navigate(`/contracts/${notification.item_id}`);
         break;
       case 'deliverable':
+      case 'deliverable_approval':
         navigate(`/deliverables`);
         break;
       case 'asset':
+      case 'asset_approval':
         navigate(`/assets/${notification.item_id}`);
         break;
+      case 'vendor':
+      case 'vendor_approval':
+        navigate(`/vendors/${notification.item_id}`);
+        break;
+      case 'po':
+      case 'po_approval':
+      case 'purchase_order':
+      case 'purchase_order_approval':
+        navigate(`/purchase-orders/${notification.item_id}`);
+        break;
       default:
+        console.log('Unknown item type:', itemType);
         break;
     }
   };
