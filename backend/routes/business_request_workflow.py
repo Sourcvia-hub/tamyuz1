@@ -977,6 +977,7 @@ async def reviewer_decision(tender_id: str, data: ReviewerDecisionRequest, reque
 async def forward_for_approval(tender_id: str, data: ForwardForApprovalRequest, request: Request):
     """
     Officer forwards to multiple approvers (parallel - all must approve)
+    Can skip review step and go directly to approval
     """
     user = await require_auth(request)
     
@@ -987,8 +988,8 @@ async def forward_for_approval(tender_id: str, data: ForwardForApprovalRequest, 
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Allow forwarding from evaluation_complete, review_complete, returned states, or legacy status
-    allowed_statuses = ["evaluation_complete", "review_complete", "returned_for_revision", "pending_additional_approval"]
+    # Allow forwarding from multiple states - review step is optional
+    allowed_statuses = ["evaluation_complete", "review_complete", "returned_for_revision", "pending_additional_approval", "pending_review"]
     if tender.get("status") not in allowed_statuses:
         raise HTTPException(status_code=400, detail=f"Cannot forward for approval in '{tender.get('status')}' status. Allowed: {allowed_statuses}")
     
