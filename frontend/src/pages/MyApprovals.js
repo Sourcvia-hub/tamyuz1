@@ -144,7 +144,7 @@ const MyApprovals = () => {
       fetchPendingApprovals();
       fetchApprovalHistory();
     } catch (error) {
-      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to return", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to return"), variant: "destructive" });
     } finally {
       setProcessingItem(null);
     }
