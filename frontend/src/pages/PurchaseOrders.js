@@ -7,6 +7,7 @@ import SearchableSelect from '../components/SearchableSelect';
 import AIPOItemAnalyzer from '../components/AIPOItemAnalyzer';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../hooks/use-toast';
+import { canCreate, Module } from '../utils/permissions';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -23,6 +24,9 @@ const PurchaseOrders = () => {
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Permission check
+  const userCanCreate = canCreate(user?.role, Module.PURCHASE_ORDERS);
   
   const [formData, setFormData] = useState({
     tender_id: '',
