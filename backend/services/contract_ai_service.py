@@ -229,26 +229,24 @@ class ContractAIService:
     
     async def extract_contract_fields(self, document_text: str) -> ContractAIExtraction:
         """Extract structured fields from contract document using AI"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        if not self.emergent_key:
-            raise ValueError("EMERGENT_LLM_KEY required for contract extraction")
+        if not self.client:
+            raise ValueError("OPENAI_API_KEY required for contract extraction")
         
         try:
-            chat = LlmChat(
-                api_key=self.emergent_key,
-                session_id=f"contract-extract-{datetime.now().timestamp()}",
-                system_message=CONTRACT_EXTRACTION_PROMPT
-            ).with_model("openai", "gpt-4o")
-            
-            user_message = UserMessage(
-                text=f"Extract information from this contract document:\n\n{document_text[:20000]}"
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": CONTRACT_EXTRACTION_PROMPT},
+                    {"role": "user", "content": f"Extract information from this contract document:\n\n{document_text[:20000]}"}
+                ],
+                temperature=0.1
             )
             
-            response = await chat.send_message(user_message)
+            result_text = response.choices[0].message.content
             
             try:
-                json_match = re.search(r'\{[\s\S]*\}', response)
+                json_match = re.search(r'\{[\s\S]*\}', result_text)
                 if json_match:
                     data = json.loads(json_match.group())
                     return ContractAIExtraction(
