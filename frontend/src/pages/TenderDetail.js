@@ -1340,6 +1340,133 @@ const TenderDetail = () => {
             </div>
           </div>
         )}
+
+        {/* Update Evaluation Modal */}
+        {showUpdateEvaluationModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+              <h2 className="text-xl font-bold mb-4">✏️ Update Evaluation</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Evaluation Notes</label>
+                  <textarea
+                    value={updateEvalForm.evaluation_notes}
+                    onChange={(e) => setUpdateEvalForm({...updateEvalForm, evaluation_notes: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    rows={3}
+                    placeholder="Add or update evaluation notes..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Recommendation</label>
+                  <textarea
+                    value={updateEvalForm.recommendation}
+                    onChange={(e) => setUpdateEvalForm({...updateEvalForm, recommendation: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    rows={2}
+                    placeholder="Your recommendation..."
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button onClick={() => setShowUpdateEvaluationModal(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
+                  <button onClick={handleUpdateEvaluation} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                    Update Evaluation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Forward for Review Modal */}
+        {showReviewModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">👥 Forward for Review</h2>
+              <p className="text-sm text-gray-600 mb-4">Select users to review and validate this evaluation. All selected reviewers will receive a notification.</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Select Reviewers ({selectedReviewers.length} selected)</label>
+                  <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
+                    {activeUsers.map(u => (
+                      <label key={u.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedReviewers.includes(u.id)}
+                          onChange={() => toggleReviewer(u.id)}
+                          className="rounded"
+                        />
+                        <span className="flex-1">{u.name || u.email}</span>
+                        <span className="text-xs text-gray-500">({u.role})</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Notes (optional)</label>
+                  <textarea
+                    value={workflowNotes}
+                    onChange={(e) => setWorkflowNotes(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    rows={2}
+                    placeholder="Add notes for reviewers..."
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button onClick={() => { setShowReviewModal(false); setSelectedReviewers([]); setWorkflowNotes(''); }} className="px-4 py-2 border rounded-lg">Cancel</button>
+                  <button onClick={handleForwardForReview} className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700" disabled={selectedReviewers.length === 0}>
+                    Forward for Review
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Forward for Approval Modal */}
+        {showApprovalModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">✅ Forward for Approval</h2>
+              <p className="text-sm text-gray-600 mb-4">Select approvers. <strong>All selected approvers must approve</strong> for the request to proceed (parallel approval).</p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Select Approvers ({selectedApprovers.length} selected)</label>
+                  <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
+                    {activeUsers.map(u => (
+                      <label key={u.id} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedApprovers.includes(u.id)}
+                          onChange={() => toggleApprover(u.id)}
+                          className="rounded"
+                        />
+                        <span className="flex-1">{u.name || u.email}</span>
+                        <span className="text-xs text-gray-500">({u.role})</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Notes (optional)</label>
+                  <textarea
+                    value={workflowNotes}
+                    onChange={(e) => setWorkflowNotes(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    rows={2}
+                    placeholder="Add notes for approvers..."
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <button onClick={() => { setShowApprovalModal(false); setSelectedApprovers([]); setWorkflowNotes(''); }} className="px-4 py-2 border rounded-lg">Cancel</button>
+                  <button onClick={handleForwardForApproval} className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700" disabled={selectedApprovers.length === 0}>
+                    Forward for Approval
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
