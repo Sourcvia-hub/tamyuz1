@@ -126,6 +126,14 @@ try:
 except Exception as exc:
     print(f"[BR Workflow] Failed to mount router: {exc}")
 
+# Include Entity Approval Workflow Routes (Contracts, POs, Resources, Assets, Vendors)
+try:
+    from routes.entity_approval_workflow import router as entity_workflow_router
+    api_router.include_router(entity_workflow_router)
+    print("[Entity Workflow] Router mounted at /api/entity-workflow")
+except Exception as exc:
+    print(f"[Entity Workflow] Failed to mount router: {exc}")
+
 # Include User Management Routes (HoP-only)
 try:
     from routes.user_management_routes import router as user_mgmt_router
