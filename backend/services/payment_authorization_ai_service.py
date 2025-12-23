@@ -157,24 +157,22 @@ VENDOR INFORMATION:
         return "\n".join(context_parts)
     
     async def _ai_validate(self, context: str) -> Dict[str, Any]:
-        """Perform AI-powered validation"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        """Perform AI-powered validation using OpenAI"""
         
-        chat = LlmChat(
-            api_key=self.emergent_key,
-            session_id=f"paf-validate-{datetime.now().timestamp()}",
-            system_message=PAYMENT_AUTHORIZATION_VALIDATION_PROMPT
-        ).with_model("openai", "gpt-4o")
-        
-        user_message = UserMessage(
-            text=f"Please validate this deliverable for payment authorization:\n\n{context}"
+        response = self.client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": PAYMENT_AUTHORIZATION_VALIDATION_PROMPT},
+                {"role": "user", "content": f"Please validate this deliverable for payment authorization:\n\n{context}"}
+            ],
+            temperature=0.1
         )
         
-        response = await chat.send_message(user_message)
+        result_text = response.choices[0].message.content
         
         # Parse JSON response
         try:
-            json_match = re.search(r'\{[\s\S]*\}', response)
+            json_match = re.search(r'\{[\s\S]*\}', result_text)
             if json_match:
                 data = json.loads(json_match.group())
                 return {
