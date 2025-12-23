@@ -381,7 +381,9 @@ async def entity_hop_decision(entity_type: str, entity_id: str, data: HoPDecisio
     if not entity:
         raise HTTPException(status_code=404, detail=f"{entity_type.capitalize()} not found")
     
-    if entity.get("workflow_status") != "pending_hop_approval":
+    # Check both workflow_status and approval_status (different entities use different fields)
+    current_workflow_status = entity.get("workflow_status") or entity.get("approval_status") or entity.get("status")
+    if current_workflow_status != "pending_hop_approval":
         raise HTTPException(status_code=400, detail="This item is not pending HoP approval")
     
     valid_decisions = ["approved", "rejected"]
