@@ -1317,22 +1317,15 @@ async def get_tender_audit_trail(tender_id: str, request: Request):
     if not tender:
         raise HTTPException(status_code=404, detail="Tender not found")
     
-    # Get audit trail
+    # Get audit trail (now includes both audit_logs collection AND entity's audit_trail field)
     audit_trail = await get_entity_audit_trail("tender", tender_id)
     
-    # Also include the tender's built-in audit_trail if exists
-    if tender.get("audit_trail"):
-        for entry in tender["audit_trail"]:
-            # Convert to standard format
-            if entry.get("user_id"):
-                # Look up user name
-                entry_user = await db.users.find_one({"id": entry["user_id"]}, {"_id": 0, "name": 1, "role": 1})
-                entry["user_name"] = entry_user.get("name") if entry_user else "Unknown"
-                entry["user_role"] = entry_user.get("role") if entry_user else None
-            audit_trail.append(entry)
-    
-    # Sort by timestamp
-    audit_trail.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    # Enrich with user names
+    for entry in audit_trail:
+        if entry.get("user_id") and not entry.get("user_name"):
+            entry_user = await db.users.find_one({"id": entry["user_id"]}, {"_id": 0, "name": 1, "role": 1})
+            entry["user_name"] = entry_user.get("name") if entry_user else "Unknown"
+            entry["user_role"] = entry_user.get("role") if entry_user else None
     
     return audit_trail
 
