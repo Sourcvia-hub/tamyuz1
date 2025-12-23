@@ -582,20 +582,13 @@ PR DETAILS:
         document_text: Optional[str] = None
     ) -> ContractDDAnalysis:
         """Analyze Contract Due Diligence questionnaire responses"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         # Calculate rule-based scores first
         analysis = self._rule_based_dd_analysis(dd_responses)
         
         # Enhance with AI if available
-        if self.emergent_key:
+        if self.client:
             try:
-                chat = LlmChat(
-                    api_key=self.emergent_key,
-                    session_id=f"contract-dd-{datetime.now().timestamp()}",
-                    system_message=CONTRACT_DD_ANALYSIS_PROMPT
-                ).with_model("openai", "gpt-4o")
-                
                 context = f"""
 DUE DILIGENCE RESPONSES:
 {json.dumps(dd_responses, indent=2, default=str)}
@@ -604,11 +597,19 @@ DOCUMENT TEXT (if available):
 {document_text[:10000] if document_text else "Not provided"}
 """
                 
-                user_message = UserMessage(text=f"Analyze this Due Diligence:\n{context}")
-                response = await chat.send_message(user_message)
+                response = self.client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": CONTRACT_DD_ANALYSIS_PROMPT},
+                        {"role": "user", "content": f"Analyze this Due Diligence:\n{context}"}
+                    ],
+                    temperature=0.1
+                )
+                
+                result_text = response.choices[0].message.content
                 
                 try:
-                    json_match = re.search(r'\{[\s\S]*\}', response)
+                    json_match = re.search(r'\{[\s\S]*\}', result_text)
                     if json_match:
                         data = json.loads(json_match.group())
                         # Update analysis with AI insights
