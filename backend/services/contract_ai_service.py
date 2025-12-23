@@ -283,19 +283,12 @@ class ContractAIService:
         vendor_info: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Classify contract based on SAMA outsourcing regulations"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
         
-        if not self.emergent_key:
+        if not self.client:
             # Fallback to rule-based classification
             return self._rule_based_classification(context_questionnaire, contract_details)
         
         try:
-            chat = LlmChat(
-                api_key=self.emergent_key,
-                session_id=f"contract-classify-{datetime.now().timestamp()}",
-                system_message=CONTRACT_CLASSIFICATION_PROMPT
-            ).with_model("openai", "gpt-4o")
-            
             context = f"""
 CONTRACT CONTEXT QUESTIONNAIRE:
 {json.dumps(context_questionnaire, indent=2, default=str)}
@@ -307,11 +300,19 @@ VENDOR INFORMATION:
 {json.dumps(vendor_info, indent=2, default=str) if vendor_info else "Not provided"}
 """
             
-            user_message = UserMessage(text=f"Classify this contract:\n{context}")
-            response = await chat.send_message(user_message)
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": CONTRACT_CLASSIFICATION_PROMPT},
+                    {"role": "user", "content": f"Classify this contract:\n{context}"}
+                ],
+                temperature=0.1
+            )
+            
+            result_text = response.choices[0].message.content
             
             try:
-                json_match = re.search(r'\{[\s\S]*\}', response)
+                json_match = re.search(r'\{[\s\S]*\}', result_text)
                 if json_match:
                     return json.loads(json_match.group())
             except json.JSONDecodeError:
