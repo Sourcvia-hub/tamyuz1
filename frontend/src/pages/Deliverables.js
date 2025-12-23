@@ -162,7 +162,7 @@ const Deliverables = () => {
       fetchDeliverables();
       setShowDetailModal(false);
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to process"), variant: "destructive" });
     }
   };
 
