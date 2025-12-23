@@ -16,7 +16,7 @@ You've requested two features:
 
 **Frontend Build Process:**
 - React apps "bake in" the `REACT_APP_BACKEND_URL` at BUILD time
-- Current build uses: `https://contract-gov-ai.preview.emergentagent.com`
+- Current build uses: `https://audit-trail-pro.preview.emergentagent.com`
 - Current backend runs on: `http://localhost:8001`
 - Result: Frontend can't reach backend → Login fails → Features don't show
 
