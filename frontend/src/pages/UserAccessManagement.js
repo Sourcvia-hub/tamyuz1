@@ -90,7 +90,7 @@ const UserAccessManagement = () => {
       fetchUsers();
       setEditingUser(null);
     } catch (error) {
-      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed to update role', variant: 'destructive' });
+      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed to update role'), variant: 'destructive' });
     }
   };
 
