@@ -997,6 +997,188 @@ class SourceviaBackendTester:
         except Exception as e:
             self.log_result("Vendor Fields Optional", False, f"Exception: {str(e)}")
 
+    def test_deliverable_features(self):
+        """Test new Deliverable features - Attachments and User Assignment"""
+        print("\n=== DELIVERABLE FEATURES TESTING ===")
+        
+        # Test as procurement officer as specified in review request
+        if not self.authenticate_as('procurement_officer'):
+            self.log_result("Deliverable Features Setup", False, "Could not authenticate as procurement_officer")
+            return
+
+        # 1. Test Assignable Users API (Officer only endpoint)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/deliverables/users/assignable")
+            
+            if response.status_code == 200:
+                data = response.json()
+                users = data.get("users", [])
+                count = data.get("count", 0)
+                
+                if count > 0:
+                    self.log_result("Get Assignable Users", True, f"Found {count} assignable users")
+                    # Store a user for assignment testing
+                    if users:
+                        self.test_data["assignable_user_id"] = users[0].get("id")
+                        self.test_data["assignable_user_name"] = users[0].get("name") or users[0].get("email")
+                else:
+                    self.log_result("Get Assignable Users", False, "No assignable users found")
+            else:
+                self.log_result("Get Assignable Users", False, f"Status: {response.status_code}, Response: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Get Assignable Users", False, f"Exception: {str(e)}")
+
+        # 2. Get existing deliverable for testing
+        deliverable_id = None
+        try:
+            response = self.session.get(f"{BACKEND_URL}/deliverables")
+            
+            if response.status_code == 200:
+                data = response.json()
+                deliverables = data.get("deliverables", [])
+                
+                if deliverables:
+                    deliverable_id = deliverables[0].get("id")
+                    self.log_result("Get Existing Deliverable", True, f"Found deliverable: {deliverable_id}")
+                    self.test_data["deliverable_id"] = deliverable_id
+                else:
+                    self.log_result("Get Existing Deliverable", False, "No deliverables found for testing")
+                    return
+            else:
+                self.log_result("Get Existing Deliverable", False, f"Status: {response.status_code}")
+                return
+                
+        except Exception as e:
+            self.log_result("Get Existing Deliverable", False, f"Exception: {str(e)}")
+            return
+
+        # 3. Test Assign Deliverable
+        if deliverable_id and "assignable_user_id" in self.test_data:
+            try:
+                assign_data = {
+                    "user_id": self.test_data["assignable_user_id"],
+                    "notes": "Test assignment from backend testing"
+                }
+                
+                response = self.session.post(f"{BACKEND_URL}/deliverables/{deliverable_id}/assign", json=assign_data)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    assigned_to_name = data.get("assigned_to_name")
+                    
+                    if assigned_to_name:
+                        self.log_result("Assign Deliverable", True, f"Assigned to: {assigned_to_name}")
+                    else:
+                        self.log_result("Assign Deliverable", False, "No assigned_to_name in response")
+                else:
+                    self.log_result("Assign Deliverable", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("Assign Deliverable", False, f"Exception: {str(e)}")
+
+        # 4. Test Unassign Deliverable
+        if deliverable_id:
+            try:
+                response = self.session.delete(f"{BACKEND_URL}/deliverables/{deliverable_id}/assign")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    message = data.get("message", "")
+                    
+                    if "removed" in message.lower():
+                        self.log_result("Unassign Deliverable", True, "Assignment removed successfully")
+                    else:
+                        self.log_result("Unassign Deliverable", False, f"Unexpected message: {message}")
+                else:
+                    self.log_result("Unassign Deliverable", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("Unassign Deliverable", False, f"Exception: {str(e)}")
+
+        # 5. Test File Upload
+        if deliverable_id:
+            try:
+                # Create a simple test file
+                import tempfile
+                import os
+                
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                    f.write("test content for deliverable attachment")
+                    temp_file_path = f.name
+                
+                # Upload the file
+                with open(temp_file_path, 'rb') as f:
+                    files = {'file': ('test_attachment.txt', f, 'text/plain')}
+                    
+                    # Remove Content-Type header for multipart upload
+                    old_headers = self.session.headers.copy()
+                    if 'Content-Type' in self.session.headers:
+                        del self.session.headers['Content-Type']
+                    
+                    response = self.session.post(f"{BACKEND_URL}/deliverables/{deliverable_id}/attachments", files=files)
+                    
+                    # Restore headers
+                    self.session.headers.update(old_headers)
+                
+                # Clean up temp file
+                os.unlink(temp_file_path)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    attachment = data.get("attachment", {})
+                    attachment_id = attachment.get("id")
+                    
+                    if attachment_id:
+                        self.log_result("File Upload", True, f"Uploaded attachment: {attachment_id}")
+                        self.test_data["attachment_id"] = attachment_id
+                    else:
+                        self.log_result("File Upload", False, "No attachment ID in response")
+                else:
+                    self.log_result("File Upload", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("File Upload", False, f"Exception: {str(e)}")
+
+        # 6. Test File Download
+        if deliverable_id and "attachment_id" in self.test_data:
+            try:
+                attachment_id = self.test_data["attachment_id"]
+                response = self.session.get(f"{BACKEND_URL}/deliverables/{deliverable_id}/attachments/{attachment_id}/download")
+                
+                if response.status_code == 200:
+                    # Check if we got file content
+                    content_length = len(response.content)
+                    if content_length > 0:
+                        self.log_result("File Download", True, f"Downloaded file ({content_length} bytes)")
+                    else:
+                        self.log_result("File Download", False, "Empty file content")
+                else:
+                    self.log_result("File Download", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("File Download", False, f"Exception: {str(e)}")
+
+        # 7. Test File Delete
+        if deliverable_id and "attachment_id" in self.test_data:
+            try:
+                attachment_id = self.test_data["attachment_id"]
+                response = self.session.delete(f"{BACKEND_URL}/deliverables/{deliverable_id}/attachments/{attachment_id}")
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    message = data.get("message", "")
+                    
+                    if "deleted" in message.lower():
+                        self.log_result("File Delete", True, "Attachment deleted successfully")
+                    else:
+                        self.log_result("File Delete", False, f"Unexpected message: {message}")
+                else:
+                    self.log_result("File Delete", False, f"Status: {response.status_code}, Response: {response.text}")
+                    
+            except Exception as e:
+                self.log_result("File Delete", False, f"Exception: {str(e)}")
+
     def test_hop_comprehensive_access(self):
         """Test comprehensive HoP role access and functionality as per review request"""
         print("\n=== COMPREHENSIVE HoP ACCESS TESTING ===")
