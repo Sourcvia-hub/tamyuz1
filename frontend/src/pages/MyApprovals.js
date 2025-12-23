@@ -164,33 +164,42 @@ const MyApprovals = () => {
   };
 
   const getItemTypeLabel = (type) => {
+    const category = getItemTypeCategory(type);
     const labels = {
       business_request: '📋 Business Request',
       contract: '📄 Contract',
       deliverable: '📦 Deliverable',
       asset: '🏢 Asset',
+      vendor: '🏪 Vendor',
+      po: '📦 Purchase Order',
     };
-    return labels[type] || type;
+    return labels[category] || type;
   };
 
   const getItemTypeIcon = (type) => {
+    const category = getItemTypeCategory(type);
     const icons = {
       business_request: '📋',
       contract: '📄',
       deliverable: '📦',
       asset: '🏢',
+      vendor: '🏪',
+      po: '📦',
     };
-    return icons[type] || '📝';
+    return icons[category] || '📝';
   };
 
   const getItemTypeColor = (type) => {
+    const category = getItemTypeCategory(type);
     const colors = {
       business_request: 'bg-blue-100 text-blue-800',
       contract: 'bg-purple-100 text-purple-800',
       deliverable: 'bg-green-100 text-green-800',
       asset: 'bg-orange-100 text-orange-800',
+      vendor: 'bg-teal-100 text-teal-800',
+      po: 'bg-indigo-100 text-indigo-800',
     };
-    return colors[type] || 'bg-gray-100 text-gray-800';
+    return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
   const getStatusBadge = (status) => {
