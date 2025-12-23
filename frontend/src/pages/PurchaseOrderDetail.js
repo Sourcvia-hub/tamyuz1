@@ -137,6 +137,15 @@ const PurchaseOrderDetail = () => {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* Approval Workflow Panel */}
+        <EntityWorkflowPanel
+          entityType="po"
+          entityId={id}
+          entityTitle={po?.title || `PO #${po?.po_number}`}
+          onStatusChange={() => fetchPO()}
+          showAuditTrail={true}
+        />
+
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
