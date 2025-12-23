@@ -169,13 +169,17 @@ Return as JSON:
 
 
 class ContractAIService:
-    """AI Service for Contract Intelligence using Emergent LLM Integration"""
+    """AI Service for Contract Intelligence using OpenAI"""
     
     def __init__(self):
-        """Initialize with Emergent LLM key"""
-        self.emergent_key = os.environ.get("EMERGENT_LLM_KEY")
-        if not self.emergent_key:
-            logger.warning("No EMERGENT_LLM_KEY provided. AI features will be disabled.")
+        """Initialize with OpenAI API key"""
+        self.openai_key = os.environ.get("OPENAI_API_KEY")
+        if not self.openai_key:
+            logger.warning("No OPENAI_API_KEY provided. AI features will be disabled.")
+        self.client = None
+        if self.openai_key:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=self.openai_key)
     
     async def extract_contract_document(self, file_path: str, file_type: str) -> str:
         """Extract text from uploaded contract document"""
