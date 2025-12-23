@@ -666,6 +666,60 @@ async def get_my_pending_approvals(request: Request):
                 "vendor_name": vendor_name,
                 "amount": asset.get("cost", 0)
             })
+        
+        # Get vendors pending HoP approval (high-risk vendors)
+        pending_vendors = await db.vendors.find(
+            {"$or": [
+                {"status": "pending_hop_approval"},
+                {"workflow_status": "pending_hop_approval"}
+            ]},
+            {"_id": 0}
+        ).to_list(50)
+        
+        for vendor in pending_vendors:
+            all_items.append({
+                "id": f"vendor_{vendor['id']}",
+                "item_type": "vendor",
+                "item_id": vendor["id"],
+                "item_number": vendor.get("vendor_number"),
+                "item_title": vendor.get("name_english") or vendor.get("commercial_name", "Unknown Vendor"),
+                "status": "pending",
+                "message": f"Vendor {vendor.get('vendor_number')} requires HoP approval",
+                "requested_by_name": "Officer",
+                "requested_at": vendor.get("submitted_for_approval_at") or vendor.get("created_at"),
+                "vendor_name": vendor.get("name_english") or vendor.get("commercial_name", "Unknown"),
+                "amount": 0
+            })
+        
+        # Get purchase orders pending HoP approval
+        pending_pos = await db.purchase_orders.find(
+            {"$or": [
+                {"status": "pending_hop_approval"},
+                {"workflow_status": "pending_hop_approval"}
+            ]},
+            {"_id": 0}
+        ).to_list(50)
+        
+        for po in pending_pos:
+            vendor = await db.vendors.find_one(
+                {"id": po.get("vendor_id")},
+                {"_id": 0, "name_english": 1, "commercial_name": 1}
+            )
+            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            
+            all_items.append({
+                "id": f"po_{po['id']}",
+                "item_type": "po",
+                "item_id": po["id"],
+                "item_number": po.get("po_number"),
+                "item_title": po.get("title") or f"PO {po.get('po_number')}",
+                "status": "pending",
+                "message": f"Purchase Order {po.get('po_number')} requires HoP approval",
+                "requested_by_name": "Officer",
+                "requested_at": po.get("submitted_for_approval_at") or po.get("created_at"),
+                "vendor_name": vendor_name,
+                "amount": po.get("total_value", 0)
+            })
     
     # Sort all items by requested_at (handle both datetime and string types)
     def get_sort_key(item):
