@@ -147,7 +147,7 @@ const Deliverables = () => {
       toast({ title: "✅ Submitted to HoP", description: "Deliverable sent for HoP approval", variant: "success" });
       fetchDeliverables();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to submit to HoP", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to submit to HoP"), variant: "destructive" });
     }
   };
 
