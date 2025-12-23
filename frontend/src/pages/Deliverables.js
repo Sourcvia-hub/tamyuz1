@@ -137,7 +137,7 @@ const Deliverables = () => {
       toast({ title: "✅ Validated", description: "Deliverable validated successfully", variant: "success" });
       fetchDeliverables();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to validate", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to validate"), variant: "destructive" });
     }
   };
 
