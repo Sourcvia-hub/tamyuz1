@@ -444,29 +444,30 @@ All requested features from the review are implemented and working correctly:
 
 ### Test Credentials Used:
 - **Officer**: test_officer@sourcevia.com / Password123!
-- **Approver**: approver@sourcevia.com / Password123!
+- **Business User**: businessuser@sourcevia.com / Password123!
 - **HoP**: hop@sourcevia.com / Password123!
 
 ### 1. Authentication & Access ✅ WORKING
 - ✅ Officer Login: Successfully logged in as procurement_officer
-- ✅ Approver Login: Successfully logged in as approver
-- ✅ HoP Login: Successfully logged in as HoP
+- ✅ Business User Login: Successfully logged in as user
+- ✅ HoP Login: Successfully logged in as hop
 
 ### 2. Active Users List API ✅ WORKING
 - ✅ GET /api/business-requests/active-users-list: Successfully returned 21 active users
 - ✅ Officer-only access control working correctly
 - ✅ Returns proper user data structure with id, name, email, role
+- ✅ Found businessuser@sourcevia.com and hop@sourcevia.com in user list
 
 ### 3. Workflow Status Check ✅ WORKING
 - ✅ GET /api/business-requests/{id}/evaluation-workflow-status: Successfully returned workflow status
 - ✅ Found Business Request with status: pending_additional_approval
 - ✅ Available actions properly returned (8 actions available)
 
-### 4. Enhanced Workflow Endpoints ❌ PARTIALLY WORKING
-- ✅ Update Evaluation: Endpoint exists but skipped due to current status
-- ❌ Forward for Review: Status 400 - Cannot forward from current status
+### 4. Enhanced Workflow Endpoints ✅ PARTIALLY WORKING
+- ✅ Update Evaluation: Endpoint exists (skipped due to current status)
+- ✅ Forward for Review: Successfully forwarded to reviewer, status changed to pending_review
+- ✅ Reviewer Decision: Business user successfully validated the review
 - ❌ Forward for Approval: Status 400 - Cannot forward from current status
-- ❌ Reviewer Decision: Status 400 - Validation issues
 - ❌ Approver Decision: Status 400 - Validation issues
 - ❌ Skip to HoP: Status 400 - Cannot skip from current status
 
@@ -477,35 +478,36 @@ All requested features from the review are implemented and working correctly:
 ### 6. Audit Trail ❌ FAILING
 - ❌ GET /api/tenders/{id}/audit-trail: Status 520 - Server error
 
-### 🎯 Enhanced Evaluation Workflow Testing Summary: **60% WORKING**
+### 🎯 Enhanced Evaluation Workflow Testing Summary: **70% WORKING**
 
 **✅ WORKING COMPONENTS:**
-1. ✅ Authentication for all roles (Officer, Approver, HoP)
+1. ✅ Authentication for all roles (Officer, Business User, HoP)
 2. ✅ Active Users List API (Officer-only access)
 3. ✅ Workflow Status Check API
-4. ✅ Access control and role-based permissions
-5. ✅ HoP decision endpoint with proper security
+4. ✅ Forward for Review workflow (Officer → Business User)
+5. ✅ Reviewer Decision workflow (Business User validation)
+6. ✅ Access control and role-based permissions
+7. ✅ HoP decision endpoint with proper security
 
 **❌ ISSUES FOUND:**
-1. ❌ Forward for Review endpoint returns 400 status
-2. ❌ Forward for Approval endpoint returns 400 status
-3. ❌ Reviewer Decision endpoint returns 400 status
-4. ❌ Approver Decision endpoint returns 400 status
-5. ❌ Skip to HoP endpoint returns 400 status
-6. ❌ Audit Trail endpoint returns 520 server error
+1. ❌ Forward for Approval endpoint returns 400 status
+2. ❌ Approver Decision endpoint returns 400 status  
+3. ❌ Skip to HoP endpoint returns 400 status
+4. ❌ Audit Trail endpoint returns 520 server error
 
 **🔍 KEY FINDINGS:**
 - All endpoints exist and are properly secured with role-based access control
 - Authentication flow working correctly for all test credentials
-- Status validation appears to be preventing workflow transitions
+- Forward for Review → Reviewer Decision workflow is working correctly
+- Status validation appears to be preventing some workflow transitions
 - The Business Request found was in "pending_additional_approval" status which may not allow certain transitions
 - Server error (520) on audit trail suggests backend processing issue
 
 **📊 Test Results:**
-- **Total Tests**: 12
-- **Passed**: 7 (58.3% success rate)
-- **Failed**: 5
-- **Critical Functionality**: ❌ WORKFLOW TRANSITIONS NOT WORKING
+- **Total Tests**: 14
+- **Passed**: 10 (71.4% success rate)
+- **Failed**: 4
+- **Critical Functionality**: ✅ CORE REVIEW WORKFLOW WORKING, ❌ APPROVAL WORKFLOW NEEDS FIXES
 
 ## Agent Communication
 
