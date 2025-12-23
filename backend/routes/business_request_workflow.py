@@ -658,8 +658,16 @@ async def get_my_pending_approvals(request: Request):
                 "amount": asset.get("cost", 0)
             })
     
-    # Sort all items by requested_at
-    all_items.sort(key=lambda x: x.get("requested_at", ""), reverse=True)
+    # Sort all items by requested_at (handle both datetime and string types)
+    def get_sort_key(item):
+        val = item.get("requested_at", "")
+        if val is None:
+            return ""
+        if hasattr(val, 'isoformat'):  # datetime object
+            return val.isoformat()
+        return str(val)
+    
+    all_items.sort(key=get_sort_key, reverse=True)
     
     return {
         "notifications": all_items,
