@@ -1227,12 +1227,14 @@ async def create_audit_log(
     return audit_log
 
 async def get_entity_audit_trail(entity_type: str, entity_id: str, limit: int = 100):
-    """Get audit trail for any entity type"""
+    """Get audit trail for any entity type - merges from audit_logs collection and entity's audit_trail field"""
+    result = []
+    
+    # Get from audit_logs collection
     logs = await db.audit_logs.find(
         {"entity_type": entity_type, "entity_id": entity_id}
     ).sort("timestamp", -1).to_list(limit)
     
-    result = []
     for log in logs:
         if '_id' in log:
             del log['_id']
@@ -1240,7 +1242,60 @@ async def get_entity_audit_trail(entity_type: str, entity_id: str, limit: int = 
             log['timestamp'] = datetime.fromisoformat(log['timestamp'])
         result.append(log)
     
-    return result
+    # Also get from entity's audit_trail field (used by new workflow system)
+    collection_map = {
+        "vendor": db.vendors,
+        "tender": db.tenders,
+        "contract": db.contracts,
+        "purchase_order": db.purchase_orders,
+        "deliverable": db.deliverables,
+        "asset": db.assets,
+        "resource": db.resources,
+    }
+    
+    collection = collection_map.get(entity_type)
+    if collection:
+        entity = await collection.find_one({"id": entity_id}, {"audit_trail": 1, "workflow_history": 1})
+        if entity:
+            # Check audit_trail field
+            entity_audit = entity.get("audit_trail", [])
+            if entity_audit:
+                for entry in entity_audit:
+                    # Normalize the entry format
+                    normalized = {
+                        "entity_type": entity_type,
+                        "entity_id": entity_id,
+                        "action": entry.get("action", "unknown"),
+                        "user_id": entry.get("user_id", ""),
+                        "timestamp": entry.get("timestamp", ""),
+                        "details": entry.get("notes", entry.get("details", "")),
+                    }
+                    result.append(normalized)
+            
+            # Also check workflow_history field
+            workflow_history = entity.get("workflow_history", [])
+            if workflow_history:
+                for entry in workflow_history:
+                    normalized = {
+                        "entity_type": entity_type,
+                        "entity_id": entity_id,
+                        "action": entry.get("action", "unknown"),
+                        "user_id": entry.get("user_id", ""),
+                        "timestamp": entry.get("timestamp", ""),
+                        "details": entry.get("notes", entry.get("details", "")),
+                    }
+                    result.append(normalized)
+    
+    # Sort all results by timestamp descending
+    def get_timestamp(item):
+        ts = item.get("timestamp", "")
+        if hasattr(ts, 'isoformat'):
+            return ts.isoformat()
+        return str(ts) if ts else ""
+    
+    result.sort(key=get_timestamp, reverse=True)
+    
+    return result[:limit]
 
 # ==================== AUDIT TRAIL ENDPOINTS ====================
 
