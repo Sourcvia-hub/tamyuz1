@@ -368,20 +368,48 @@ const TenderDetail = () => {
 
   // Update evaluation
   const handleUpdateEvaluation = async () => {
+    setReevaluationLoading(true);
     try {
-      await axios.post(`${API}/business-requests/${id}/update-evaluation`, {
-        evaluation_notes: updateEvalForm.evaluation_notes || undefined,
-        recommendation: updateEvalForm.recommendation || undefined
-      }, { withCredentials: true });
-      toast({ title: "✅ Updated", description: "Evaluation updated successfully", variant: "success" });
+      const payload = {};
+      if (updateEvalForm.evaluation_notes) payload.evaluation_notes = updateEvalForm.evaluation_notes;
+      if (updateEvalForm.recommendation) payload.recommendation = updateEvalForm.recommendation;
+      if (updateEvalForm.selected_proposal_id) payload.selected_proposal_id = updateEvalForm.selected_proposal_id;
+      if (updateEvalForm.technical_score > 0) payload.technical_score = updateEvalForm.technical_score;
+      if (updateEvalForm.financial_score > 0) payload.financial_score = updateEvalForm.financial_score;
+      if (updateEvalForm.overall_score > 0) payload.overall_score = updateEvalForm.overall_score;
+      
+      await axios.post(`${API}/business-requests/${id}/update-evaluation`, payload, { withCredentials: true });
+      toast({ title: "✅ Re-evaluation Complete", description: "Evaluation updated successfully", variant: "success" });
       setShowUpdateEvaluationModal(false);
-      setUpdateEvalForm({ evaluation_notes: '', recommendation: '' });
+      setUpdateEvalForm({ 
+        evaluation_notes: '', 
+        recommendation: '', 
+        selected_proposal_id: '',
+        technical_score: 0,
+        financial_score: 0,
+        overall_score: 0
+      });
       fetchTender();
       fetchWorkflowStatus();
       fetchAuditTrail();
     } catch (error) {
       toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to update evaluation"), variant: "destructive" });
+    } finally {
+      setReevaluationLoading(false);
     }
+  };
+
+  // Open re-evaluation modal with current data
+  const openReevaluationModal = () => {
+    setUpdateEvalForm({
+      evaluation_notes: tender?.evaluation_notes || '',
+      recommendation: tender?.evaluation_recommendation || '',
+      selected_proposal_id: tender?.selected_proposal_id || '',
+      technical_score: tender?.evaluation_technical_score || 0,
+      financial_score: tender?.evaluation_financial_score || 0,
+      overall_score: tender?.evaluation_overall_score || 0
+    });
+    setShowUpdateEvaluationModal(true);
   };
 
   // Forward for review (multiple reviewers)
