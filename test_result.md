@@ -539,3 +539,28 @@ All requested features from the review are implemented and working correctly:
 - ❌ Officer → Skip to HoP (NOT WORKING)
 
 **Recommendation**: Main agent should investigate workflow status validation logic for approval transitions and fix the audit trail server error. The Enhanced Evaluation Workflow endpoints exist and core review functionality works, but approval workflow requires status/validation fixes to function properly.
+
+## NEW: Reporting Feature Testing - Regular vs Expert Reports
+
+### Testing Required: December 23, 2025
+
+### Test Credentials:
+- **HoP**: hop@sourcevia.com / Password123!
+
+### Features to Test:
+1. Reports page UI loads correctly with Report Type toggle
+2. Regular Report button shows "Showing active/approved items only" 
+3. Expert Report button shows "Showing all items regardless of status"
+4. Switching between report types fetches correct API endpoint
+5. Regular Report calls: /api/reports/procurement-overview
+6. Expert Report calls: /api/reports/expert-overview
+7. Data displayed differs between report types (Expert shows more data with totals, drafts, pending, etc.)
+
+### Expected Differences:
+- **Regular Report**: Shows only active/approved items
+  - Summary: Active Spend, Active Contracts, Active Vendors
+  - Cards show only "Active" counts
+  
+- **Expert Report**: Shows ALL items with detailed breakdown
+  - Summary: Total Spend, Total Contracts, Total Vendors, Pending Payments
+  - Cards show Total, Active, Pending, Draft, Rejected, High Risk, etc.
