@@ -77,7 +77,7 @@ const MyApprovals = () => {
       fetchPendingApprovals();
       fetchApprovalHistory();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to approve", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to approve", variant: "destructive" });
     } finally {
       setProcessingItem(null);
     }
@@ -113,7 +113,7 @@ const MyApprovals = () => {
       fetchPendingApprovals();
       fetchApprovalHistory();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to reject", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to reject", variant: "destructive" });
     } finally {
       setProcessingItem(null);
     }
@@ -144,7 +144,7 @@ const MyApprovals = () => {
       fetchPendingApprovals();
       fetchApprovalHistory();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to return", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to return", variant: "destructive" });
     } finally {
       setProcessingItem(null);
     }
