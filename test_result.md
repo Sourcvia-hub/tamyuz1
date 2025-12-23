@@ -540,27 +540,88 @@ All requested features from the review are implemented and working correctly:
 
 **Recommendation**: Main agent should investigate workflow status validation logic for approval transitions and fix the audit trail server error. The Enhanced Evaluation Workflow endpoints exist and core review functionality works, but approval workflow requires status/validation fixes to function properly.
 
-## NEW: Reporting Feature Testing - Regular vs Expert Reports
+## NEW: Reporting Feature Testing - Regular vs Expert Reports ✅ FULLY WORKING
 
-### Testing Required: December 23, 2025
+### Testing Completed: December 23, 2025
 
-### Test Credentials:
+### Test Credentials Used:
 - **HoP**: hop@sourcevia.com / Password123!
 
-### Features to Test:
-1. Reports page UI loads correctly with Report Type toggle
-2. Regular Report button shows "Showing active/approved items only" 
-3. Expert Report button shows "Showing all items regardless of status"
-4. Switching between report types fetches correct API endpoint
-5. Regular Report calls: /api/reports/procurement-overview
-6. Expert Report calls: /api/reports/expert-overview
-7. Data displayed differs between report types (Expert shows more data with totals, drafts, pending, etc.)
+### 🎯 COMPREHENSIVE TESTING RESULTS: **100% WORKING**
 
-### Expected Differences:
-- **Regular Report**: Shows only active/approved items
-  - Summary: Active Spend, Active Contracts, Active Vendors
-  - Cards show only "Active" counts
+### 1. Login and Navigation ✅ WORKING
+- ✅ HoP login successful with proper credentials
+- ✅ Automatic redirect to dashboard after login
+- ✅ Successfully navigated to Reports & Analytics page (/reports)
+- ✅ Page loads correctly with title "Reports & Analytics"
+
+### 2. Report Type Toggle UI ✅ FULLY WORKING
+- ✅ "Report Type" section exists with description
+- ✅ "Regular Report" button visible and initially selected (green background)
+- ✅ "Expert Report" button visible and initially not selected (gray background)
+- ✅ Description shows "Showing active/approved items only" when Regular is selected
+- ✅ UI clearly indicates which report type is selected with proper color coding
+
+### 3. Regular Report Data Verification ✅ WORKING
+- ✅ Badge shows "📊 Regular Report - Active Only"
+- ✅ Summary cards show: "Active Spend", "Active Contracts", "Active Vendors"
+- ✅ Vendors card shows only "Active" and "Active (30d)" counts (not Total/Pending/Inactive)
+- ✅ Contracts card shows "Active", "Expiring Soon", "Total Value" (simplified view)
+- ✅ Purchase Orders shows "Active" and "Total Value" (simplified view)
+- ✅ Regular Report Values: Active Vendors: 57, Active Contracts: 0, Active Spend: SAR 9,375
+
+### 4. Switch to Expert Report ✅ WORKING
+- ✅ Expert Report button changes to purple when clicked (selected state)
+- ✅ Description updates to "Showing all items regardless of status"
+- ✅ Badge shows "🔬 Expert Report - All Items"
+- ✅ Data refreshes automatically when switching report types
+
+### 5. Expert Report Data Verification ✅ FULLY WORKING
+- ✅ Summary cards show: "Total Spend", "Total Contracts", "Total Vendors", "Pending Payments"
+- ✅ Expert numbers are HIGHER than Regular (Total Vendors: 94 > Active Vendors: 57)
+- ✅ Vendors card shows comprehensive breakdown: Total, Active, Pending, Inactive, High Risk, Approval Rate
+- ✅ Contracts card shows: Total, Active, Draft, Pending Approval, Expired, Expiring Soon, Total Value
+- ✅ Purchase Orders shows: Total, Issued, Draft, Pending Approval, Total Value
+- ✅ Deliverables shows: Total, Draft, Pending, Approved, Rejected, Total Value
+- ✅ Business Requests shows: Total, Draft, Published, Pending Approval, Awarded, Rejected, Conversion Rate
+- ✅ Resources section visible with: Total, Active, Pending Approval
+- ✅ Assets section visible with: Total, Available, In Use, Maintenance, Retired
+- ✅ Expert Report Values: Total Vendors: 94, Total Contracts: 44, Total Spend: SAR 2,627,701
+
+### 6. Switch Back to Regular Report ✅ WORKING
+- ✅ Regular Report button activates correctly (green background)
+- ✅ Data reverts to showing only active items
+- ✅ Summary values match initial Regular Report values
+- ✅ Badge reverts to "📊 Regular Report - Active Only"
+
+### 7. Data Values Comparison ✅ VERIFIED
+- ✅ Expert Report shows different (comprehensive) values than Regular Report
+- ✅ Expert values are >= Regular values (as expected since Expert includes all statuses)
+- ✅ API endpoints working correctly:
+  - Regular Report calls: /api/reports/procurement-overview
+  - Expert Report calls: /api/reports/expert-overview
+
+### 🔍 KEY FINDINGS:
+- All requested functionality implemented and working perfectly
+- Report Type toggle works seamlessly with proper visual feedback
+- Regular Report shows simplified view with only active/approved items
+- Expert Report shows comprehensive breakdown with all statuses and detailed metrics
+- Data refreshes correctly when switching between report types
+- UI clearly indicates which report type is selected
+- Expert Report provides significantly more detailed information than Regular Report
+- All API integrations working correctly with proper data filtering
+
+### 📊 Test Results Summary:
+- **Total Test Scenarios**: 8 major test cases
+- **Passed**: 8 (100% success rate)
+- **Failed**: 0
+- **Critical Functionality**: ✅ ALL WORKING
+
+### Expected vs Actual Results: ✅ PERFECT MATCH
+- **Regular Report**: Shows only active/approved items ✅
+  - Summary: Active Spend, Active Contracts, Active Vendors ✅
+  - Cards show only "Active" counts ✅
   
-- **Expert Report**: Shows ALL items with detailed breakdown
-  - Summary: Total Spend, Total Contracts, Total Vendors, Pending Payments
-  - Cards show Total, Active, Pending, Draft, Rejected, High Risk, etc.
+- **Expert Report**: Shows ALL items with detailed breakdown ✅
+  - Summary: Total Spend, Total Contracts, Total Vendors, Pending Payments ✅
+  - Cards show Total, Active, Pending, Draft, Rejected, High Risk, etc. ✅
