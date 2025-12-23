@@ -737,3 +737,524 @@ async def get_workflow_status(tender_id: str, request: Request):
         # Audit trail
         "audit_trail": tender.get("audit_trail", [])
     }
+
+
+
+# ==================== ENHANCED EVALUATION WORKFLOW ENDPOINTS ====================
+
+@router.get("/active-users-list")
+async def get_active_users_list(request: Request):
+    """Get list of all active users for review/approval assignment"""
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_officer", "procurement_manager", "admin", "hop"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get all active users
+    users = await db.users.find(
+        {"status": {"$ne": "disabled"}},
+        {"_id": 0, "id": 1, "email": 1, "name": 1, "role": 1}
+    ).sort("name", 1).to_list(500)
+    
+    return {"users": users, "count": len(users)}
+
+
+@router.post("/{tender_id}/update-evaluation")
+async def update_evaluation(tender_id: str, data: UpdateEvaluationRequest, request: Request):
+    """
+    Officer reviews and updates/amends the evaluation
+    Can change selected proposal, scores, and notes
+    """
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_officer", "procurement_manager", "admin", "hop"]:
+        raise HTTPException(status_code=403, detail="Only officers can update evaluations")
+    
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    # Allow update in evaluation_complete or returned states
+    allowed_statuses = ["evaluation_complete", "returned_for_revision", "pending_review", "pending_approval"]
+    if tender.get("status") not in allowed_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot update evaluation in '{tender.get('status')}' status")
+    
+    # Build update data
+    update_data = {
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "evaluation_updated_by": user.id,
+        "evaluation_updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    if data.selected_proposal_id:
+        # Verify proposal exists
+        proposal = await db.proposals.find_one({"id": data.selected_proposal_id, "tender_id": tender_id})
+        if not proposal:
+            raise HTTPException(status_code=404, detail="Selected proposal not found")
+        update_data["selected_proposal_id"] = data.selected_proposal_id
+    
+    if data.evaluation_notes:
+        update_data["evaluation_notes"] = data.evaluation_notes
+    if data.technical_score is not None:
+        update_data["evaluation_technical_score"] = data.technical_score
+    if data.financial_score is not None:
+        update_data["evaluation_financial_score"] = data.financial_score
+    if data.overall_score is not None:
+        update_data["evaluation_overall_score"] = data.overall_score
+    if data.recommendation:
+        update_data["evaluation_recommendation"] = data.recommendation
+    
+    # Reset status if it was returned
+    if tender.get("status") == "returned_for_revision":
+        update_data["status"] = "evaluation_complete"
+    
+    audit_trail = add_audit_trail(tender, "evaluation_updated", user.id, data.evaluation_notes)
+    update_data["audit_trail"] = audit_trail
+    
+    await db.tenders.update_one({"id": tender_id}, {"$set": update_data})
+    
+    return {"success": True, "message": "Evaluation updated successfully"}
+
+
+@router.post("/{tender_id}/forward-for-review")
+async def forward_for_review(tender_id: str, data: ForwardForReviewRequest, request: Request):
+    """
+    Officer forwards evaluation to multiple users for review/validation (parallel)
+    All reviewers will receive notifications
+    """
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_officer", "procurement_manager", "admin", "hop"]:
+        raise HTTPException(status_code=403, detail="Only officers can forward for review")
+    
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    if tender.get("status") not in ["evaluation_complete", "returned_for_revision"]:
+        raise HTTPException(status_code=400, detail="Evaluation must be complete before forwarding for review")
+    
+    if not data.reviewer_user_ids or len(data.reviewer_user_ids) == 0:
+        raise HTTPException(status_code=400, detail="At least one reviewer must be selected")
+    
+    # Get reviewer info
+    reviewers = []
+    reviewer_statuses = []
+    for reviewer_id in data.reviewer_user_ids:
+        reviewer = await db.users.find_one({"id": reviewer_id}, {"_id": 0, "id": 1, "name": 1, "email": 1})
+        if reviewer:
+            reviewers.append(reviewer)
+            reviewer_statuses.append({
+                "user_id": reviewer_id,
+                "user_name": reviewer.get("name") or reviewer.get("email"),
+                "status": "pending",
+                "assigned_at": datetime.now(timezone.utc).isoformat()
+            })
+    
+    reviewer_names = ", ".join([r.get("name") or r.get("email") for r in reviewers])
+    audit_trail = add_audit_trail(tender, "forwarded_for_review", user.id, f"Reviewers: {reviewer_names}")
+    
+    await db.tenders.update_one(
+        {"id": tender_id},
+        {"$set": {
+            "status": "pending_review",
+            "reviewers": reviewer_statuses,
+            "review_requested_by": user.id,
+            "review_requested_at": datetime.now(timezone.utc).isoformat(),
+            "review_notes": data.notes,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Create notifications for all reviewers
+    for reviewer in reviewers:
+        await create_approval_notification(
+            user_id=reviewer["id"],
+            item_type="business_request_review",
+            item_id=tender_id,
+            item_number=tender.get("tender_number"),
+            item_title=tender.get("title"),
+            requested_by=user.id,
+            message=f"Business Request '{tender.get('title')}' requires your review and validation. {data.notes or ''}"
+        )
+    
+    return {"success": True, "message": f"Forwarded to {len(reviewers)} reviewer(s) for review"}
+
+
+@router.post("/{tender_id}/reviewer-decision")
+async def reviewer_decision(tender_id: str, data: ReviewerDecisionRequest, request: Request):
+    """
+    Reviewer submits their validation decision
+    All reviewers must validate for the request to proceed
+    """
+    user = await require_auth(request)
+    
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    if tender.get("status") != "pending_review":
+        raise HTTPException(status_code=400, detail="This request is not pending review")
+    
+    # Check if user is one of the reviewers
+    reviewers = tender.get("reviewers", [])
+    user_reviewer = None
+    for r in reviewers:
+        if r.get("user_id") == user.id:
+            user_reviewer = r
+            break
+    
+    if not user_reviewer:
+        raise HTTPException(status_code=403, detail="You are not assigned as a reviewer for this request")
+    
+    if user_reviewer.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="You have already submitted your review")
+    
+    valid_decisions = ["validated", "returned"]
+    if data.decision not in valid_decisions:
+        raise HTTPException(status_code=400, detail=f"Invalid decision. Must be: {valid_decisions}")
+    
+    # Update the reviewer's status
+    for r in reviewers:
+        if r.get("user_id") == user.id:
+            r["status"] = data.decision
+            r["decision_at"] = datetime.now(timezone.utc).isoformat()
+            r["notes"] = data.notes
+            break
+    
+    audit_trail = add_audit_trail(tender, f"reviewer_{data.decision}", user.id, data.notes)
+    
+    # Update notification
+    await db.approval_notifications.update_one(
+        {"item_id": tender_id, "user_id": user.id, "item_type": "business_request_review", "status": "pending"},
+        {"$set": {
+            "status": data.decision,
+            "decision_at": datetime.now(timezone.utc).isoformat(),
+            "decision_notes": data.notes
+        }}
+    )
+    
+    # Check if all reviewers have responded
+    all_responded = all(r.get("status") != "pending" for r in reviewers)
+    any_returned = any(r.get("status") == "returned" for r in reviewers)
+    
+    new_status = tender.get("status")
+    if all_responded:
+        if any_returned:
+            new_status = "returned_for_revision"  # Any return sends back to officer
+        else:
+            new_status = "review_complete"  # All validated
+    
+    await db.tenders.update_one(
+        {"id": tender_id},
+        {"$set": {
+            "status": new_status,
+            "reviewers": reviewers,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    status_message = "Review submitted"
+    if all_responded:
+        if any_returned:
+            status_message = "Returned to officer for revision"
+        else:
+            status_message = "All reviews complete - ready for approval"
+    
+    return {"success": True, "message": status_message, "all_reviewed": all_responded}
+
+
+@router.post("/{tender_id}/forward-for-approval")
+async def forward_for_approval(tender_id: str, data: ForwardForApprovalRequest, request: Request):
+    """
+    Officer forwards to multiple approvers (parallel - all must approve)
+    """
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_officer", "procurement_manager", "admin", "hop"]:
+        raise HTTPException(status_code=403, detail="Only officers can forward for approval")
+    
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    # Allow forwarding from evaluation_complete, review_complete, or returned states
+    allowed_statuses = ["evaluation_complete", "review_complete", "returned_for_revision"]
+    if tender.get("status") not in allowed_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot forward for approval in '{tender.get('status')}' status")
+    
+    if not data.approver_user_ids or len(data.approver_user_ids) == 0:
+        raise HTTPException(status_code=400, detail="At least one approver must be selected")
+    
+    # Get approver info
+    approvers = []
+    approver_statuses = []
+    for approver_id in data.approver_user_ids:
+        approver = await db.users.find_one({"id": approver_id}, {"_id": 0, "id": 1, "name": 1, "email": 1, "role": 1})
+        if approver:
+            approvers.append(approver)
+            approver_statuses.append({
+                "user_id": approver_id,
+                "user_name": approver.get("name") or approver.get("email"),
+                "user_role": approver.get("role"),
+                "status": "pending",
+                "assigned_at": datetime.now(timezone.utc).isoformat()
+            })
+    
+    approver_names = ", ".join([a.get("name") or a.get("email") for a in approvers])
+    audit_trail = add_audit_trail(tender, "forwarded_for_approval", user.id, f"Approvers: {approver_names}")
+    
+    await db.tenders.update_one(
+        {"id": tender_id},
+        {"$set": {
+            "status": "pending_approval",
+            "approvers": approver_statuses,
+            "approval_requested_by": user.id,
+            "approval_requested_at": datetime.now(timezone.utc).isoformat(),
+            "approval_notes": data.notes,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Create notifications for all approvers
+    for approver in approvers:
+        await create_approval_notification(
+            user_id=approver["id"],
+            item_type="business_request_approval",
+            item_id=tender_id,
+            item_number=tender.get("tender_number"),
+            item_title=tender.get("title"),
+            requested_by=user.id,
+            message=f"Business Request '{tender.get('title')}' requires your approval. {data.notes or ''}"
+        )
+    
+    return {"success": True, "message": f"Forwarded to {len(approvers)} approver(s)"}
+
+
+@router.post("/{tender_id}/approver-decision")
+async def approver_decision(tender_id: str, data: ApproverDecisionRequest, request: Request):
+    """
+    Approver submits their decision (parallel - all must approve)
+    """
+    user = await require_auth(request)
+    
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    if tender.get("status") != "pending_approval":
+        raise HTTPException(status_code=400, detail="This request is not pending approval")
+    
+    # Check if user is one of the approvers
+    approvers = tender.get("approvers", [])
+    user_approver = None
+    for a in approvers:
+        if a.get("user_id") == user.id:
+            user_approver = a
+            break
+    
+    if not user_approver:
+        raise HTTPException(status_code=403, detail="You are not assigned as an approver for this request")
+    
+    if user_approver.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="You have already submitted your decision")
+    
+    valid_decisions = ["approved", "rejected", "returned"]
+    if data.decision not in valid_decisions:
+        raise HTTPException(status_code=400, detail=f"Invalid decision. Must be: {valid_decisions}")
+    
+    # Update the approver's status
+    for a in approvers:
+        if a.get("user_id") == user.id:
+            a["status"] = data.decision
+            a["decision_at"] = datetime.now(timezone.utc).isoformat()
+            a["notes"] = data.notes
+            break
+    
+    audit_trail = add_audit_trail(tender, f"approver_{data.decision}", user.id, data.notes)
+    
+    # Update notification
+    await db.approval_notifications.update_one(
+        {"item_id": tender_id, "user_id": user.id, "item_type": "business_request_approval", "status": "pending"},
+        {"$set": {
+            "status": data.decision,
+            "decision_at": datetime.now(timezone.utc).isoformat(),
+            "decision_notes": data.notes
+        }}
+    )
+    
+    # Check if all approvers have responded
+    all_responded = all(a.get("status") != "pending" for a in approvers)
+    any_rejected = any(a.get("status") == "rejected" for a in approvers)
+    any_returned = any(a.get("status") == "returned" for a in approvers)
+    all_approved = all(a.get("status") == "approved" for a in approvers)
+    
+    new_status = tender.get("status")
+    if all_responded:
+        if any_rejected:
+            new_status = "rejected"
+        elif any_returned:
+            new_status = "returned_for_revision"
+        elif all_approved:
+            new_status = "approval_complete"  # Ready for HoP
+    
+    await db.tenders.update_one(
+        {"id": tender_id},
+        {"$set": {
+            "status": new_status,
+            "approvers": approvers,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    status_message = "Decision submitted"
+    if all_responded:
+        if any_rejected:
+            status_message = "Request rejected"
+        elif any_returned:
+            status_message = "Returned to officer for revision"
+        elif all_approved:
+            status_message = "All approvers approved - ready for HoP final approval"
+    
+    return {"success": True, "message": status_message, "all_decided": all_responded}
+
+
+@router.post("/{tender_id}/skip-to-hop")
+async def skip_to_hop(tender_id: str, data: ForwardToHoPRequest, request: Request):
+    """
+    Officer skips review/approval steps and forwards directly to HoP
+    """
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_officer", "procurement_manager", "admin", "hop"]:
+        raise HTTPException(status_code=403, detail="Only officers can skip to HoP")
+    
+    tender = await db.tenders.find_one({"id": tender_id})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    # Allow skip from evaluation_complete or review_complete or approval_complete
+    allowed_statuses = ["evaluation_complete", "review_complete", "approval_complete", "returned_for_revision"]
+    if tender.get("status") not in allowed_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot skip to HoP from '{tender.get('status')}' status")
+    
+    audit_trail = add_audit_trail(tender, "skipped_to_hop", user.id, data.notes)
+    
+    await db.tenders.update_one(
+        {"id": tender_id},
+        {"$set": {
+            "status": "pending_hop_approval",
+            "hop_approval_requested_by": user.id,
+            "hop_approval_requested_at": datetime.now(timezone.utc).isoformat(),
+            "hop_approval_notes": data.notes,
+            "skipped_to_hop": True,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Notify HoP users
+    hop_users = await db.users.find(
+        {"role": {"$in": ["procurement_manager", "hop", "admin"]}},
+        {"id": 1}
+    ).to_list(10)
+    
+    for hop_user in hop_users:
+        await create_approval_notification(
+            user_id=hop_user["id"],
+            item_type="business_request",
+            item_id=tender_id,
+            item_number=tender.get("tender_number"),
+            item_title=tender.get("title"),
+            requested_by=user.id,
+            message=f"Business Request '{tender.get('title')}' requires HoP final approval (direct submission)"
+        )
+    
+    return {"success": True, "message": "Forwarded directly to HoP for final approval"}
+
+
+@router.get("/{tender_id}/evaluation-workflow-status")
+async def get_evaluation_workflow_status(tender_id: str, request: Request):
+    """Get detailed evaluation workflow status including reviewers and approvers"""
+    user = await require_auth(request)
+    
+    tender = await db.tenders.find_one({"id": tender_id}, {"_id": 0})
+    if not tender:
+        raise HTTPException(status_code=404, detail="Business Request not found")
+    
+    # Check user's role
+    is_officer = user.role in ["procurement_officer", "procurement_manager", "admin", "hop"]
+    is_reviewer = any(r.get("user_id") == user.id for r in tender.get("reviewers", []))
+    is_approver = any(a.get("user_id") == user.id for a in tender.get("approvers", []))
+    is_hop = user.role in ["procurement_manager", "admin", "hop"]
+    
+    # Determine available actions
+    can_update_evaluation = is_officer and tender.get("status") in ["evaluation_complete", "returned_for_revision", "review_complete", "approval_complete"]
+    can_forward_for_review = is_officer and tender.get("status") in ["evaluation_complete", "returned_for_revision"]
+    can_forward_for_approval = is_officer and tender.get("status") in ["evaluation_complete", "review_complete", "returned_for_revision"]
+    can_skip_to_hop = is_officer and tender.get("status") in ["evaluation_complete", "review_complete", "approval_complete", "returned_for_revision"]
+    can_forward_to_hop = is_officer and tender.get("status") in ["approval_complete"]
+    can_review = is_reviewer and tender.get("status") == "pending_review"
+    can_approve = is_approver and tender.get("status") == "pending_approval"
+    can_hop_decide = is_hop and tender.get("status") == "pending_hop_approval"
+    
+    # Get my pending status
+    my_review_status = None
+    my_approval_status = None
+    for r in tender.get("reviewers", []):
+        if r.get("user_id") == user.id:
+            my_review_status = r.get("status")
+    for a in tender.get("approvers", []):
+        if a.get("user_id") == user.id:
+            my_approval_status = a.get("status")
+    
+    return {
+        "tender_id": tender_id,
+        "tender_number": tender.get("tender_number"),
+        "title": tender.get("title"),
+        "status": tender.get("status"),
+        
+        # Evaluation info
+        "selected_proposal_id": tender.get("selected_proposal_id"),
+        "evaluation_notes": tender.get("evaluation_notes"),
+        "evaluation_submitted_by": tender.get("evaluation_submitted_by"),
+        "evaluation_submitted_at": tender.get("evaluation_submitted_at"),
+        "evaluation_updated_by": tender.get("evaluation_updated_by"),
+        "evaluation_updated_at": tender.get("evaluation_updated_at"),
+        
+        # Reviewers
+        "reviewers": tender.get("reviewers", []),
+        "review_requested_at": tender.get("review_requested_at"),
+        
+        # Approvers  
+        "approvers": tender.get("approvers", []),
+        "approval_requested_at": tender.get("approval_requested_at"),
+        
+        # HoP
+        "hop_decision": tender.get("hop_decision"),
+        "hop_decision_at": tender.get("hop_decision_at"),
+        "skipped_to_hop": tender.get("skipped_to_hop", False),
+        
+        # User's status
+        "my_review_status": my_review_status,
+        "my_approval_status": my_approval_status,
+        
+        # Available actions
+        "actions": {
+            "can_update_evaluation": can_update_evaluation,
+            "can_forward_for_review": can_forward_for_review,
+            "can_forward_for_approval": can_forward_for_approval,
+            "can_skip_to_hop": can_skip_to_hop,
+            "can_forward_to_hop": can_forward_to_hop,
+            "can_review": can_review,
+            "can_approve": can_approve,
+            "can_hop_decide": can_hop_decide
+        },
+        
+        # Audit trail
+        "audit_trail": tender.get("audit_trail", [])
+    }
