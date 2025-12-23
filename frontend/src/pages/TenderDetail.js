@@ -661,7 +661,7 @@ const TenderDetail = () => {
             )}
             
             {/* Officer: Update Evaluation */}
-            {isOfficer && ['evaluation_complete', 'returned_for_revision', 'review_complete', 'approval_complete'].includes(tender.status) && (
+            {isOfficer && ['evaluation_complete', 'returned_for_revision', 'review_complete', 'approval_complete', 'pending_additional_approval'].includes(tender.status) && (
               <button
                 onClick={() => setShowUpdateEvaluationModal(true)}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
@@ -671,7 +671,7 @@ const TenderDetail = () => {
             )}
             
             {/* Officer: Forward for Review */}
-            {isOfficer && ['evaluation_complete', 'returned_for_revision'].includes(tender.status) && (
+            {isOfficer && ['evaluation_complete', 'returned_for_revision', 'pending_additional_approval'].includes(tender.status) && (
               <button
                 onClick={() => { fetchActiveUsers(); setShowReviewModal(true); }}
                 className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
@@ -681,7 +681,7 @@ const TenderDetail = () => {
             )}
             
             {/* Officer: Forward for Approval */}
-            {isOfficer && ['evaluation_complete', 'review_complete', 'returned_for_revision'].includes(tender.status) && (
+            {isOfficer && ['evaluation_complete', 'review_complete', 'returned_for_revision', 'pending_additional_approval'].includes(tender.status) && (
               <button
                 onClick={() => { fetchActiveUsers(); setShowApprovalModal(true); }}
                 className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
@@ -691,7 +691,7 @@ const TenderDetail = () => {
             )}
             
             {/* Officer: Skip to HoP */}
-            {isOfficer && ['evaluation_complete', 'review_complete', 'approval_complete', 'returned_for_revision'].includes(tender.status) && (
+            {isOfficer && ['evaluation_complete', 'review_complete', 'approval_complete', 'returned_for_revision', 'pending_additional_approval'].includes(tender.status) && (
               <button
                 onClick={handleSkipToHoP}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
