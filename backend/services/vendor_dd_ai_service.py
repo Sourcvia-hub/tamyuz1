@@ -241,36 +241,30 @@ class VendorDDAIService:
             return f"[Error extracting DOCX: {str(e)}]"
     
     async def extract_fields(self, document_text: str) -> Dict[str, Any]:
-        """Extract structured fields from document text using Emergent LLM"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        """Extract structured fields from document text using OpenAI"""
         
-        if not self.emergent_key:
-            raise ValueError("EMERGENT_LLM_KEY required for field extraction")
+        if not self.client:
+            raise ValueError("OPENAI_API_KEY required for field extraction")
         
         try:
-            # Initialize chat with Emergent key
-            chat = LlmChat(
-                api_key=self.emergent_key,
-                session_id=f"vendor-dd-extract-{datetime.now().timestamp()}",
-                system_message=FIELD_EXTRACTION_PROMPT
-            ).with_model("openai", "gpt-4o")
-            
-            # Create message
-            user_message = UserMessage(
-                text=f"Extract fields from this vendor registration document:\n\n{document_text[:15000]}"
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": FIELD_EXTRACTION_PROMPT},
+                    {"role": "user", "content": f"Extract fields from this vendor registration document:\n\n{document_text[:15000]}"}
+                ],
+                temperature=0.1
             )
             
-            # Send message and get response
-            response = await chat.send_message(user_message)
+            result_text = response.choices[0].message.content
             
             # Parse JSON response
             try:
-                # Try to extract JSON from response
-                json_match = re.search(r'\{[\s\S]*\}', response)
+                json_match = re.search(r'\{[\s\S]*\}', result_text)
                 if json_match:
                     return json.loads(json_match.group())
                 else:
-                    logger.error(f"No JSON found in response: {response[:500]}")
+                    logger.error(f"No JSON found in response: {result_text[:500]}")
                     return {}
             except json.JSONDecodeError as e:
                 logger.error(f"JSON decode error: {e}")
