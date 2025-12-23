@@ -84,7 +84,7 @@ const AssetDetail = () => {
       toast({ title: "✅ Submitted", description: "Asset submitted for approval", variant: "success" });
       fetchAsset();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to submit", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to submit"), variant: "destructive" });
     } finally {
       setActionLoading(false);
     }
@@ -97,7 +97,7 @@ const AssetDetail = () => {
       toast({ title: decision === 'approved' ? "✅ Forwarded to HoP" : "❌ Rejected", description: `Asset ${decision}`, variant: "success" });
       fetchAsset();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to process"), variant: "destructive" });
     } finally {
       setActionLoading(false);
     }
@@ -115,7 +115,7 @@ const AssetDetail = () => {
       toast({ title: decision === 'approved' ? "✅ Approved" : decision === 'returned' ? "↩️ Returned" : "❌ Rejected", description: messages[decision], variant: decision === 'approved' ? "success" : "warning" });
       fetchAsset();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to process", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to process"), variant: "destructive" });
     } finally {
       setActionLoading(false);
     }
