@@ -1135,6 +1135,7 @@ async def approver_decision(tender_id: str, data: ApproverDecisionRequest, reque
 async def skip_to_hop(tender_id: str, data: ForwardToHoPRequest, request: Request):
     """
     Officer skips review/approval steps and forwards directly to HoP
+    Can be used at any point in the workflow
     """
     user = await require_auth(request)
     
@@ -1145,8 +1146,8 @@ async def skip_to_hop(tender_id: str, data: ForwardToHoPRequest, request: Reques
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Allow skip from multiple statuses including legacy
-    allowed_statuses = ["evaluation_complete", "review_complete", "approval_complete", "returned_for_revision", "pending_additional_approval"]
+    # Allow skip from any workflow state - full flexibility for officers
+    allowed_statuses = ["evaluation_complete", "review_complete", "approval_complete", "returned_for_revision", "pending_additional_approval", "pending_review", "pending_approval"]
     if tender.get("status") not in allowed_statuses:
         raise HTTPException(status_code=400, detail=f"Cannot skip to HoP from '{tender.get('status')}' status. Allowed: {allowed_statuses}")
     
