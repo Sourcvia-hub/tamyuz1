@@ -12,6 +12,7 @@ const ReportsAnalytics = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [reportMode, setReportMode] = useState('regular'); // 'regular' or 'expert'
   const [overview, setOverview] = useState(null);
   const [spendAnalysis, setSpendAnalysis] = useState(null);
   const [vendorPerformance, setVendorPerformance] = useState(null);
@@ -21,13 +22,17 @@ const ReportsAnalytics = () => {
 
   useEffect(() => {
     fetchData();
-  }, [activeTab, spendPeriod]);
+  }, [activeTab, spendPeriod, reportMode]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       if (activeTab === 'overview') {
-        const res = await axios.get(`${API}/reports/procurement-overview`, { withCredentials: true });
+        // Use different endpoints based on report mode
+        const endpoint = reportMode === 'expert' 
+          ? `${API}/reports/expert-overview` 
+          : `${API}/reports/procurement-overview`;
+        const res = await axios.get(endpoint, { withCredentials: true });
         setOverview(res.data);
       } else if (activeTab === 'spend') {
         const res = await axios.get(`${API}/reports/spend-analysis?period=${spendPeriod}`, { withCredentials: true });
