@@ -100,7 +100,7 @@ const UserAccessManagement = () => {
       toast({ title: '✅ Success', description: `User ${newStatus === 'active' ? 'enabled' : 'disabled'}`, variant: 'success' });
       fetchUsers();
     } catch (error) {
-      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed to update status', variant: 'destructive' });
+      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed to update status'), variant: 'destructive' });
     }
   };
 
