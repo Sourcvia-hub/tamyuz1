@@ -301,6 +301,8 @@ const Deliverables = () => {
             onClose={() => setShowDetailModal(false)}
             onHoPDecision={handleHoPDecision}
             user={user}
+            onRefresh={fetchDeliverables}
+            toast={toast}
           />
         )}
       </div>
