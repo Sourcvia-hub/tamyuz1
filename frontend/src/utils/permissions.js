@@ -130,12 +130,13 @@ const ROLE_PERMISSIONS = {
     [Module.TENDERS]: [Permission.REQUESTER],
     [Module.TENDER_EVALUATION]: [Permission.REQUESTER],
     [Module.TENDER_PROPOSALS]: [Permission.VIEWER],
-    [Module.CONTRACTS]: [Permission.REQUESTER],
+    [Module.CONTRACTS]: [Permission.VIEWER],
     [Module.PURCHASE_ORDERS]: [Permission.REQUESTER],
     [Module.RESOURCES]: [Permission.REQUESTER],
     [Module.INVOICES]: [Permission.VERIFIER],
     [Module.ASSETS]: [Permission.NO_ACCESS],
-    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER]
+    [Module.SERVICE_REQUESTS]: [Permission.REQUESTER],
+    [Module.DELIVERABLES]: [Permission.REQUESTER]
   }
 };
 
