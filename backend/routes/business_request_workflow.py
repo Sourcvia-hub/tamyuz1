@@ -1144,10 +1144,10 @@ async def skip_to_hop(tender_id: str, data: ForwardToHoPRequest, request: Reques
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Allow skip from evaluation_complete or review_complete or approval_complete
-    allowed_statuses = ["evaluation_complete", "review_complete", "approval_complete", "returned_for_revision"]
+    # Allow skip from multiple statuses including legacy
+    allowed_statuses = ["evaluation_complete", "review_complete", "approval_complete", "returned_for_revision", "pending_additional_approval"]
     if tender.get("status") not in allowed_statuses:
-        raise HTTPException(status_code=400, detail=f"Cannot skip to HoP from '{tender.get('status')}' status")
+        raise HTTPException(status_code=400, detail=f"Cannot skip to HoP from '{tender.get('status')}' status. Allowed: {allowed_statuses}")
     
     audit_trail = add_audit_trail(tender, "skipped_to_hop", user.id, data.notes)
     
