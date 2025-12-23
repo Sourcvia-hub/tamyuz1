@@ -7,6 +7,7 @@ import { useToast } from '../hooks/use-toast';
 import SearchableSelect from '../components/SearchableSelect';
 import AuditTrail from '../components/AuditTrail';
 import { getErrorMessage } from '../utils/errorUtils';
+import { canCreate, Module } from '../utils/permissions';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -23,6 +24,9 @@ const Deliverables = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [selectedDeliverable, setSelectedDeliverable] = useState(null);
+  
+  // Permission check
+  const userCanCreate = canCreate(user?.role, Module.DELIVERABLES);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
