@@ -7,6 +7,7 @@ import { useAuth } from '../App';
 import { useToast } from '../hooks/use-toast';
 import AuditTrail from '../components/AuditTrail';
 import { getErrorMessage } from '../utils/errorUtils';
+import EntityWorkflowPanel from '../components/EntityWorkflowPanel';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
