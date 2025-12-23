@@ -987,10 +987,10 @@ async def forward_for_approval(tender_id: str, data: ForwardForApprovalRequest, 
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Allow forwarding from evaluation_complete, review_complete, or returned states
-    allowed_statuses = ["evaluation_complete", "review_complete", "returned_for_revision"]
+    # Allow forwarding from evaluation_complete, review_complete, returned states, or legacy status
+    allowed_statuses = ["evaluation_complete", "review_complete", "returned_for_revision", "pending_additional_approval"]
     if tender.get("status") not in allowed_statuses:
-        raise HTTPException(status_code=400, detail=f"Cannot forward for approval in '{tender.get('status')}' status")
+        raise HTTPException(status_code=400, detail=f"Cannot forward for approval in '{tender.get('status')}' status. Allowed: {allowed_statuses}")
     
     if not data.approver_user_ids or len(data.approver_user_ids) == 0:
         raise HTTPException(status_code=400, detail="At least one approver must be selected")
