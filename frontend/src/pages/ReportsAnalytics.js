@@ -170,23 +170,32 @@ const ReportsAnalytics = () => {
             {/* Overview Tab */}
             {activeTab === 'overview' && overview && (
               <div className="space-y-6">
+                {/* Report Mode Badge */}
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                  reportMode === 'expert' 
+                    ? 'bg-purple-100 text-purple-800' 
+                    : 'bg-green-100 text-green-800'
+                }`}>
+                  {reportMode === 'expert' ? '🔬 Expert Report - All Items' : '📊 Regular Report - Active Only'}
+                </div>
+
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6">
-                    <p className="text-blue-100 text-sm">Total Spend</p>
-                    <p className="text-2xl font-bold">{formatCurrency(overview.summary.total_spend)}</p>
+                    <p className="text-blue-100 text-sm">{reportMode === 'expert' ? 'Total Spend' : 'Active Spend'}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(overview.summary.total_spend || overview.summary.total_active_spend)}</p>
                   </div>
                   <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6">
-                    <p className="text-green-100 text-sm">Active Contracts</p>
-                    <p className="text-2xl font-bold">{overview.summary.active_contracts}</p>
+                    <p className="text-green-100 text-sm">{reportMode === 'expert' ? 'Total Contracts' : 'Active Contracts'}</p>
+                    <p className="text-2xl font-bold">{overview.summary.total_contracts || overview.summary.active_contracts}</p>
                   </div>
                   <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6">
-                    <p className="text-purple-100 text-sm">Approved Vendors</p>
-                    <p className="text-2xl font-bold">{overview.summary.approved_vendors}</p>
+                    <p className="text-purple-100 text-sm">{reportMode === 'expert' ? 'Total Vendors' : 'Active Vendors'}</p>
+                    <p className="text-2xl font-bold">{overview.summary.total_vendors || overview.summary.active_vendors}</p>
                   </div>
                   <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-xl p-6">
                     <p className="text-orange-100 text-sm">Pending Payments</p>
-                    <p className="text-2xl font-bold">{overview.summary.pending_payments}</p>
+                    <p className="text-2xl font-bold">{overview.summary.pending_payments || 0}</p>
                   </div>
                 </div>
 
@@ -196,10 +205,21 @@ const ReportsAnalytics = () => {
                   <div className="bg-white rounded-xl shadow p-6">
                     <h3 className="font-semibold text-lg mb-4">🏢 Vendors</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.vendors.total}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Approved</span><span className="font-medium text-green-600">{overview.vendors.approved}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Active (30d)</span><span className="font-medium">{overview.vendors.active_30d}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Approval Rate</span><span className="font-medium">{overview.vendors.approval_rate}%</span></div>
+                      {reportMode === 'expert' ? (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.vendors.total}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.vendors.active}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Pending</span><span className="font-medium text-yellow-600">{overview.vendors.pending}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Inactive</span><span className="font-medium text-gray-500">{overview.vendors.inactive}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">High Risk</span><span className="font-medium text-red-600">{overview.vendors.high_risk}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Approval Rate</span><span className="font-medium">{overview.vendors.approval_rate}%</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.vendors.active}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Active (30d)</span><span className="font-medium">{overview.vendors.active_30d}</span></div>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -207,10 +227,23 @@ const ReportsAnalytics = () => {
                   <div className="bg-white rounded-xl shadow p-6">
                     <h3 className="font-semibold text-lg mb-4">📄 Contracts</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.contracts.total}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.contracts.active}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Expiring Soon</span><span className="font-medium text-orange-600">{overview.contracts.expiring_soon}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.contracts.total_value)}</span></div>
+                      {reportMode === 'expert' ? (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.contracts.total}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.contracts.active}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Draft</span><span className="font-medium text-gray-500">{overview.contracts.draft}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Pending Approval</span><span className="font-medium text-yellow-600">{overview.contracts.pending_approval}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Expired</span><span className="font-medium text-red-600">{overview.contracts.expired}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Expiring Soon</span><span className="font-medium text-orange-600">{overview.contracts.expiring_soon}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.contracts.total_value)}</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.contracts.active}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Expiring Soon</span><span className="font-medium text-orange-600">{overview.contracts.expiring_soon}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.contracts.total_value)}</span></div>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -218,9 +251,20 @@ const ReportsAnalytics = () => {
                   <div className="bg-white rounded-xl shadow p-6">
                     <h3 className="font-semibold text-lg mb-4">📦 Purchase Orders</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.purchase_orders.total}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Issued</span><span className="font-medium text-green-600">{overview.purchase_orders.issued}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.purchase_orders.total_value)}</span></div>
+                      {reportMode === 'expert' ? (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.purchase_orders.total}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Issued</span><span className="font-medium text-green-600">{overview.purchase_orders.issued}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Draft</span><span className="font-medium text-gray-500">{overview.purchase_orders.draft}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Pending Approval</span><span className="font-medium text-yellow-600">{overview.purchase_orders.pending_approval}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.purchase_orders.total_value)}</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.purchase_orders.active}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.purchase_orders.total_value)}</span></div>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -228,10 +272,21 @@ const ReportsAnalytics = () => {
                   <div className="bg-white rounded-xl shadow p-6">
                     <h3 className="font-semibold text-lg mb-4">📦 Deliverables</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.deliverables?.total || 0}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Pending</span><span className="font-medium text-yellow-600">{overview.deliverables?.pending || 0}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Approved</span><span className="font-medium text-green-600">{overview.deliverables?.approved || 0}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.deliverables?.total_value)}</span></div>
+                      {reportMode === 'expert' ? (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.deliverables.total}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Draft</span><span className="font-medium text-gray-500">{overview.deliverables.draft}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Pending</span><span className="font-medium text-yellow-600">{overview.deliverables.pending}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Approved</span><span className="font-medium text-green-600">{overview.deliverables.approved}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Rejected</span><span className="font-medium text-red-600">{overview.deliverables.rejected}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.deliverables.total_value)}</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Approved</span><span className="font-medium text-green-600">{overview.deliverables?.approved || 0}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Total Value</span><span className="font-medium">{formatCurrency(overview.deliverables?.total_value)}</span></div>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -239,11 +294,65 @@ const ReportsAnalytics = () => {
                   <div className="bg-white rounded-xl shadow p-6">
                     <h3 className="font-semibold text-lg mb-4">📋 Business Requests</h3>
                     <div className="space-y-3">
-                      <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.business_requests.total}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Awarded</span><span className="font-medium text-green-600">{overview.business_requests.awarded}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-600">Conversion Rate</span><span className="font-medium">{overview.business_requests.conversion_rate}%</span></div>
+                      {reportMode === 'expert' ? (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.business_requests.total}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Draft</span><span className="font-medium text-gray-500">{overview.business_requests.draft}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Published</span><span className="font-medium text-blue-600">{overview.business_requests.published}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Pending Approval</span><span className="font-medium text-yellow-600">{overview.business_requests.pending_approval}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Awarded</span><span className="font-medium text-green-600">{overview.business_requests.awarded}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Rejected</span><span className="font-medium text-red-600">{overview.business_requests.rejected}</span></div>
+                          <div className="flex justify-between"><span className="text-gray-600">Conversion Rate</span><span className="font-medium">{overview.business_requests.conversion_rate}%</span></div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between"><span className="text-gray-600">Awarded</span><span className="font-medium text-green-600">{overview.business_requests.awarded}</span></div>
+                        </>
+                      )}
                     </div>
                   </div>
+
+                  {/* Resources - Only visible in Expert mode or if data exists */}
+                  {(reportMode === 'expert' || overview.resources) && (
+                    <div className="bg-white rounded-xl shadow p-6">
+                      <h3 className="font-semibold text-lg mb-4">👥 Resources</h3>
+                      <div className="space-y-3">
+                        {reportMode === 'expert' ? (
+                          <>
+                            <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.resources.total}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.resources.active}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">Pending Approval</span><span className="font-medium text-yellow-600">{overview.resources.pending_approval}</span></div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.resources?.active || 0}</span></div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Assets - Only visible in Expert mode or if data exists */}
+                  {(reportMode === 'expert' || overview.assets) && (
+                    <div className="bg-white rounded-xl shadow p-6">
+                      <h3 className="font-semibold text-lg mb-4">🏷️ Assets</h3>
+                      <div className="space-y-3">
+                        {reportMode === 'expert' ? (
+                          <>
+                            <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{overview.assets.total}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">Available</span><span className="font-medium text-green-600">{overview.assets.available}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">In Use</span><span className="font-medium text-blue-600">{overview.assets.in_use}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">Maintenance</span><span className="font-medium text-yellow-600">{overview.assets.maintenance}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-600">Retired</span><span className="font-medium text-gray-500">{overview.assets.retired}</span></div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between"><span className="text-gray-600">Active</span><span className="font-medium text-green-600">{overview.assets?.active || 0}</span></div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
