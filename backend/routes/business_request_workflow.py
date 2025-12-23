@@ -401,16 +401,17 @@ async def forward_to_hop(tender_id: str, data: ForwardToHoPRequest, request: Req
     """
     user = await require_auth(request)
     
-    if user.role not in ["procurement_officer", "procurement_manager", "admin"]:
+    if user.role not in ["procurement_officer", "procurement_manager", "admin", "hop"]:
         raise HTTPException(status_code=403, detail="Only procurement officers can forward to HoP")
     
     tender = await db.tenders.find_one({"id": tender_id})
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Must be in evaluation_complete (either directly or after additional approval)
-    if tender.get("status") != "evaluation_complete":
-        raise HTTPException(status_code=400, detail="Evaluation must be complete before forwarding to HoP")
+    # Allow forwarding from multiple statuses
+    allowed_statuses = ["evaluation_complete", "review_complete", "approval_complete"]
+    if tender.get("status") not in allowed_statuses:
+        raise HTTPException(status_code=400, detail=f"Cannot forward to HoP from '{tender.get('status')}' status")
     
     audit_trail = add_audit_trail(tender, "forwarded_to_hop", user.id, data.notes)
     
@@ -426,8 +427,12 @@ async def forward_to_hop(tender_id: str, data: ForwardToHoPRequest, request: Req
         }}
     )
     
-    # Notify HoP users (procurement_manager role)
-    hop_users = await db.users.find({"role": "procurement_manager"}, {"id": 1}).to_list(10)
+    # Notify HoP users (procurement_manager, hop, admin roles)
+    hop_users = await db.users.find(
+        {"role": {"$in": ["procurement_manager", "hop", "admin"]}},
+        {"id": 1}
+    ).to_list(10)
+    
     for hop_user in hop_users:
         await create_approval_notification(
             user_id=hop_user["id"],
