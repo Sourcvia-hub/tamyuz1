@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorUtils';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
@@ -89,7 +90,7 @@ const UserAccessManagement = () => {
       fetchUsers();
       setEditingUser(null);
     } catch (error) {
-      toast({ title: '❌ Error', description: error.response?.data?.detail || 'Failed to update role', variant: 'destructive' });
+      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed to update role', variant: 'destructive' });
     }
   };
 
@@ -99,7 +100,7 @@ const UserAccessManagement = () => {
       toast({ title: '✅ Success', description: `User ${newStatus === 'active' ? 'enabled' : 'disabled'}`, variant: 'success' });
       fetchUsers();
     } catch (error) {
-      toast({ title: '❌ Error', description: error.response?.data?.detail || 'Failed to update status', variant: 'destructive' });
+      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed to update status', variant: 'destructive' });
     }
   };
 
@@ -109,7 +110,7 @@ const UserAccessManagement = () => {
       await axios.post(`${API}/users/${userId}/force-password-reset`, {}, { withCredentials: true });
       toast({ title: '✅ Success', description: 'User will be required to reset password on next login', variant: 'success' });
     } catch (error) {
-      toast({ title: '❌ Error', description: error.response?.data?.detail || 'Failed', variant: 'destructive' });
+      toast({ title: '❌ Error', description: getErrorMessage(error, 'Failed', variant: 'destructive' });
     }
   };
 
