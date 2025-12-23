@@ -106,6 +106,44 @@ const ReportsAnalytics = () => {
           </button>
         </div>
 
+        {/* Report Mode Toggle - Only visible on Overview tab */}
+        {activeTab === 'overview' && (
+          <div className="bg-white rounded-xl shadow p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-gray-900">Report Type</h3>
+                <p className="text-sm text-gray-500">
+                  {reportMode === 'regular' 
+                    ? 'Showing active/approved items only' 
+                    : 'Showing all items regardless of status'}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setReportMode('regular')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                    reportMode === 'regular'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  📊 Regular Report
+                </button>
+                <button
+                  onClick={() => setReportMode('expert')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                    reportMode === 'expert'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  🔬 Expert Report
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {tabs.map(tab => (
