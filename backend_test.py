@@ -4463,6 +4463,9 @@ class SourceviaBackendTester:
         # NEW: Test HoP Approval Workflow Features (PRIORITY TEST from review request)
         self.test_hop_approval_workflow()
         
+        # NEW: Test Deliverable Features - Attachments and User Assignment (PRIORITY TEST from review request)
+        self.test_deliverable_features()
+        
         self.test_vendor_workflow()
         self.test_purchase_request_workflow()
         self.test_contract_workflow()
