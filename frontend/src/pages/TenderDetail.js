@@ -346,6 +346,160 @@ const TenderDetail = () => {
     }
   };
 
+  // ==================== ENHANCED WORKFLOW HANDLERS ====================
+
+  // Fetch active users for review/approval assignment
+  const fetchActiveUsers = async () => {
+    try {
+      const response = await axios.get(`${API}/business-requests/active-users-list`, { withCredentials: true });
+      setActiveUsers(response.data.users || []);
+    } catch (error) {
+      console.error('Error fetching active users:', error);
+      // Fallback to approvers list
+      fetchApprovers();
+      setActiveUsers(approvers);
+    }
+  };
+
+  // Update evaluation
+  const handleUpdateEvaluation = async () => {
+    try {
+      await axios.post(`${API}/business-requests/${id}/update-evaluation`, {
+        evaluation_notes: updateEvalForm.evaluation_notes || undefined,
+        recommendation: updateEvalForm.recommendation || undefined
+      }, { withCredentials: true });
+      toast({ title: "✅ Updated", description: "Evaluation updated successfully", variant: "success" });
+      setShowUpdateEvaluationModal(false);
+      setUpdateEvalForm({ evaluation_notes: '', recommendation: '' });
+      fetchTender();
+      fetchWorkflowStatus();
+      fetchAuditTrail();
+    } catch (error) {
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to update evaluation"), variant: "destructive" });
+    }
+  };
+
+  // Forward for review (multiple reviewers)
+  const handleForwardForReview = async () => {
+    if (selectedReviewers.length === 0) {
+      toast({ title: "⚠️ Select Reviewers", description: "Please select at least one reviewer", variant: "warning" });
+      return;
+    }
+    try {
+      await axios.post(`${API}/business-requests/${id}/forward-for-review`, {
+        reviewer_user_ids: selectedReviewers,
+        notes: workflowNotes
+      }, { withCredentials: true });
+      toast({ title: "✅ Forwarded", description: `Sent to ${selectedReviewers.length} reviewer(s) for review`, variant: "success" });
+      setShowReviewModal(false);
+      setSelectedReviewers([]);
+      setWorkflowNotes('');
+      fetchTender();
+      fetchWorkflowStatus();
+      fetchAuditTrail();
+    } catch (error) {
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to forward for review"), variant: "destructive" });
+    }
+  };
+
+  // Forward for approval (multiple approvers - parallel)
+  const handleForwardForApproval = async () => {
+    if (selectedApprovers.length === 0) {
+      toast({ title: "⚠️ Select Approvers", description: "Please select at least one approver", variant: "warning" });
+      return;
+    }
+    try {
+      await axios.post(`${API}/business-requests/${id}/forward-for-approval`, {
+        approver_user_ids: selectedApprovers,
+        notes: workflowNotes
+      }, { withCredentials: true });
+      toast({ title: "✅ Forwarded", description: `Sent to ${selectedApprovers.length} approver(s) for approval`, variant: "success" });
+      setShowApprovalModal(false);
+      setSelectedApprovers([]);
+      setWorkflowNotes('');
+      fetchTender();
+      fetchWorkflowStatus();
+      fetchAuditTrail();
+    } catch (error) {
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to forward for approval"), variant: "destructive" });
+    }
+  };
+
+  // Reviewer decision
+  const handleReviewerDecision = async (decision) => {
+    try {
+      await axios.post(`${API}/business-requests/${id}/reviewer-decision`, {
+        decision,
+        notes: ''
+      }, { withCredentials: true });
+      toast({ 
+        title: decision === 'validated' ? "✅ Validated" : "↩ Returned", 
+        description: decision === 'validated' ? "Review validated" : "Returned to officer for revision",
+        variant: decision === 'validated' ? "success" : "warning"
+      });
+      fetchTender();
+      fetchWorkflowStatus();
+      fetchAuditTrail();
+    } catch (error) {
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to submit review"), variant: "destructive" });
+    }
+  };
+
+  // Approver decision
+  const handleApproverDecision = async (decision) => {
+    try {
+      await axios.post(`${API}/business-requests/${id}/approver-decision`, {
+        decision,
+        notes: ''
+      }, { withCredentials: true });
+      const titles = { approved: "✅ Approved", rejected: "❌ Rejected", returned: "↩ Returned" };
+      toast({ 
+        title: titles[decision] || decision, 
+        description: `Decision: ${decision}`,
+        variant: decision === 'approved' ? "success" : decision === 'rejected' ? "destructive" : "warning"
+      });
+      fetchTender();
+      fetchWorkflowStatus();
+      fetchAuditTrail();
+    } catch (error) {
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to submit decision"), variant: "destructive" });
+    }
+  };
+
+  // Skip directly to HoP
+  const handleSkipToHoP = async () => {
+    if (!window.confirm('Are you sure you want to skip review/approval and send directly to HoP?')) return;
+    try {
+      await axios.post(`${API}/business-requests/${id}/skip-to-hop`, {
+        notes: 'Skipped to HoP'
+      }, { withCredentials: true });
+      toast({ title: "⏭️ Skipped to HoP", description: "Request sent directly to HoP for final approval", variant: "success" });
+      fetchTender();
+      fetchWorkflowStatus();
+      fetchAuditTrail();
+    } catch (error) {
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to skip to HoP"), variant: "destructive" });
+    }
+  };
+
+  // Toggle user selection for reviewers
+  const toggleReviewer = (userId) => {
+    setSelectedReviewers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  // Toggle user selection for approvers
+  const toggleApprover = (userId) => {
+    setSelectedApprovers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
       draft: 'bg-gray-100 text-gray-800',
