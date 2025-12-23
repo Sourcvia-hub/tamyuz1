@@ -55,6 +55,42 @@ class HoPDecisionRequest(BaseModel):
     award_vendor_id: Optional[str] = None  # Vendor to award (if different from user's selection)
 
 
+# ==================== NEW: ENHANCED EVALUATION WORKFLOW MODELS ====================
+
+class ForwardForReviewRequest(BaseModel):
+    """Officer forwards to users for review/validation"""
+    reviewer_user_ids: List[str]  # Multiple reviewers (parallel)
+    notes: Optional[str] = None
+
+
+class ReviewerDecisionRequest(BaseModel):
+    """Reviewer makes their decision"""
+    decision: str  # "validated", "returned"
+    notes: Optional[str] = None
+
+
+class ForwardForApprovalRequest(BaseModel):
+    """Officer forwards to multiple approvers (all must approve)"""
+    approver_user_ids: List[str]  # Multiple approvers (parallel)
+    notes: Optional[str] = None
+
+
+class ApproverDecisionRequest(BaseModel):
+    """Approver makes their decision"""
+    decision: str  # "approved", "rejected", "returned"
+    notes: Optional[str] = None
+
+
+class UpdateEvaluationRequest(BaseModel):
+    """Officer updates/amends the evaluation"""
+    selected_proposal_id: Optional[str] = None
+    evaluation_notes: Optional[str] = None
+    technical_score: Optional[float] = None
+    financial_score: Optional[float] = None
+    overall_score: Optional[float] = None
+    recommendation: Optional[str] = None
+
+
 # ==================== HELPER FUNCTIONS ====================
 
 def add_audit_trail(tender: Dict, action: str, user_id: str, notes: Optional[str] = None) -> List[Dict]:
