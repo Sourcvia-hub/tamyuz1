@@ -533,3 +533,279 @@ async def get_deliverables_stats(request: Request):
         "total_pending_amount": amounts_by_status.get("pending_hop_approval", 0) + amounts_by_status.get("validated", 0),
         "total_approved_amount": amounts_by_status.get("approved", 0) + amounts_by_status.get("paid", 0)
     }
+
+
+
+# ==================== FILE UPLOAD ENDPOINTS ====================
+
+@router.post("/{deliverable_id}/attachments")
+async def upload_attachment(
+    deliverable_id: str,
+    request: Request,
+    file: UploadFile = File(...)
+):
+    """Upload an attachment to a deliverable"""
+    user = await require_auth(request)
+    
+    deliverable = await db.deliverables.find_one({"id": deliverable_id})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    # Validate file extension
+    file_extension = Path(file.filename).suffix.lower()
+    if file_extension not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Read and validate file size
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
+        )
+    
+    # Create uploads directory
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = str(uuid.uuid4())[:8]
+    safe_filename = f"{deliverable_id}_{timestamp}_{unique_id}{file_extension}"
+    file_path = UPLOAD_DIR / safe_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as f:
+            f.write(contents)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    
+    # Create attachment record
+    attachment = {
+        "id": str(uuid.uuid4()),
+        "filename": file.filename,
+        "stored_filename": safe_filename,
+        "upload_date": datetime.now(timezone.utc).isoformat(),
+        "file_size": len(contents),
+        "file_type": file_extension,
+        "uploaded_by": user.id,
+        "uploaded_by_name": user.name if hasattr(user, 'name') else user.email
+    }
+    
+    # Update deliverable with new attachment
+    attachments = deliverable.get("attachments", [])
+    attachments.append(attachment)
+    
+    audit_trail = add_audit_trail(deliverable, "attachment_uploaded", user.id, file.filename)
+    
+    await db.deliverables.update_one(
+        {"id": deliverable_id},
+        {"$set": {
+            "attachments": attachments,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Attachment uploaded successfully",
+        "attachment": attachment
+    }
+
+
+@router.delete("/{deliverable_id}/attachments/{attachment_id}")
+async def delete_attachment(deliverable_id: str, attachment_id: str, request: Request):
+    """Delete an attachment from a deliverable"""
+    user = await require_auth(request)
+    
+    deliverable = await db.deliverables.find_one({"id": deliverable_id})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    # Only allow deletion on draft status or by officers/HoP
+    user_role = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
+    is_privileged = user_role in ['procurement_officer', 'hop', 'procurement_manager', 'admin']
+    
+    if deliverable.get("status") not in ["draft"] and not is_privileged:
+        raise HTTPException(status_code=400, detail="Cannot delete attachments from submitted deliverables")
+    
+    # Find and remove attachment
+    attachments = deliverable.get("attachments", [])
+    attachment_to_delete = None
+    
+    for att in attachments:
+        if att.get("id") == attachment_id:
+            attachment_to_delete = att
+            break
+    
+    if not attachment_to_delete:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    
+    # Delete file from disk
+    try:
+        file_path = UPLOAD_DIR / attachment_to_delete["stored_filename"]
+        if file_path.exists():
+            file_path.unlink()
+    except Exception as e:
+        logger.warning(f"Failed to delete file: {e}")
+    
+    # Update deliverable
+    attachments = [a for a in attachments if a.get("id") != attachment_id]
+    audit_trail = add_audit_trail(deliverable, "attachment_deleted", user.id, attachment_to_delete.get("filename"))
+    
+    await db.deliverables.update_one(
+        {"id": deliverable_id},
+        {"$set": {
+            "attachments": attachments,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True, "message": "Attachment deleted"}
+
+
+@router.get("/{deliverable_id}/attachments/{attachment_id}/download")
+async def download_attachment(deliverable_id: str, attachment_id: str, request: Request):
+    """Get download URL/path for an attachment"""
+    from fastapi.responses import FileResponse
+    
+    user = await require_auth(request)
+    
+    deliverable = await db.deliverables.find_one({"id": deliverable_id})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    # Find attachment
+    attachments = deliverable.get("attachments", [])
+    attachment = None
+    
+    for att in attachments:
+        if att.get("id") == attachment_id:
+            attachment = att
+            break
+    
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    
+    file_path = UPLOAD_DIR / attachment["stored_filename"]
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found on server")
+    
+    return FileResponse(
+        path=str(file_path),
+        filename=attachment["filename"],
+        media_type="application/octet-stream"
+    )
+
+
+# ==================== USER ASSIGNMENT ENDPOINT ====================
+
+class AssignUserRequest(BaseModel):
+    user_id: str
+    notes: Optional[str] = None
+
+
+@router.post("/{deliverable_id}/assign")
+async def assign_deliverable(deliverable_id: str, data: AssignUserRequest, request: Request):
+    """Assign a deliverable to a user - Officers only"""
+    user = await require_auth(request)
+    
+    # Check if user is an officer or HoP
+    user_role = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
+    if user_role not in ['procurement_officer', 'hop', 'procurement_manager', 'admin']:
+        raise HTTPException(status_code=403, detail="Only officers can assign deliverables")
+    
+    deliverable = await db.deliverables.find_one({"id": deliverable_id})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    # Get target user info
+    target_user = await db.users.find_one({"id": data.user_id}, {"_id": 0, "name": 1, "email": 1})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Target user not found")
+    
+    target_name = target_user.get("name") or target_user.get("email", "Unknown")
+    
+    audit_trail = add_audit_trail(
+        deliverable, 
+        "assigned", 
+        user.id, 
+        f"Assigned to {target_name}" + (f" - {data.notes}" if data.notes else "")
+    )
+    
+    await db.deliverables.update_one(
+        {"id": deliverable_id},
+        {"$set": {
+            "assigned_to": data.user_id,
+            "assigned_to_name": target_name,
+            "assigned_by": user.id,
+            "assigned_at": datetime.now(timezone.utc).isoformat(),
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": f"Deliverable assigned to {target_name}",
+        "assigned_to": data.user_id,
+        "assigned_to_name": target_name
+    }
+
+
+@router.delete("/{deliverable_id}/assign")
+async def unassign_deliverable(deliverable_id: str, request: Request):
+    """Remove assignment from a deliverable - Officers only"""
+    user = await require_auth(request)
+    
+    # Check if user is an officer or HoP
+    user_role = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
+    if user_role not in ['procurement_officer', 'hop', 'procurement_manager', 'admin']:
+        raise HTTPException(status_code=403, detail="Only officers can unassign deliverables")
+    
+    deliverable = await db.deliverables.find_one({"id": deliverable_id})
+    if not deliverable:
+        raise HTTPException(status_code=404, detail="Deliverable not found")
+    
+    old_assignee = deliverable.get("assigned_to_name", "Unknown")
+    audit_trail = add_audit_trail(deliverable, "unassigned", user.id, f"Removed from {old_assignee}")
+    
+    await db.deliverables.update_one(
+        {"id": deliverable_id},
+        {"$set": {
+            "assigned_to": None,
+            "assigned_to_name": None,
+            "assigned_by": None,
+            "assigned_at": None,
+            "audit_trail": audit_trail,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True, "message": "Assignment removed"}
+
+
+# ==================== USERS LIST FOR ASSIGNMENT ====================
+
+@router.get("/users/assignable")
+async def get_assignable_users(request: Request):
+    """Get list of users that can be assigned to deliverables - Officers only"""
+    user = await require_auth(request)
+    
+    # Check if user is an officer or HoP
+    user_role = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
+    if user_role not in ['procurement_officer', 'hop', 'procurement_manager', 'admin']:
+        raise HTTPException(status_code=403, detail="Only officers can view assignable users")
+    
+    # Get all active users
+    users = await db.users.find(
+        {"status": {"$ne": "disabled"}},
+        {"_id": 0, "id": 1, "name": 1, "email": 1, "role": 1}
+    ).sort("name", 1).to_list(500)
+    
+    return {"users": users, "count": len(users)}
