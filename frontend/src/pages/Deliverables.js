@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import Layout from '../components/Layout';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,11 @@ import { canCreate, Module } from '../utils/permissions';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Helper to check if user is an officer
+const isOfficer = (role) => {
+  return ['procurement_officer', 'hop', 'procurement_manager', 'admin'].includes(role?.toLowerCase());
+};
 
 const Deliverables = () => {
   const { user } = useAuth();
