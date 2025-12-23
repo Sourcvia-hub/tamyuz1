@@ -1,5 +1,8 @@
 """
 Reports and Analytics Routes - Comprehensive reporting and dashboard data
+Includes:
+- Standard Reports: Shows only ACTIVE models/items
+- Expert Reports: Shows EVERYTHING (all statuses)
 """
 from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import StreamingResponse
@@ -16,55 +19,52 @@ from utils.permissions import Permission
 router = APIRouter(prefix="/reports", tags=["Reports & Analytics"])
 
 
-# ============== PROCUREMENT OVERVIEW ==============
+# ============== STANDARD REPORT (ACTIVE ONLY) ==============
 
 @router.get("/procurement-overview")
 async def get_procurement_overview(request: Request):
-    """Get comprehensive procurement overview with trends"""
+    """Get procurement overview - ACTIVE ITEMS ONLY"""
     await require_permission(request, "dashboard", Permission.VIEWER)
     
     now = datetime.now(timezone.utc)
     thirty_days_ago = now - timedelta(days=30)
-    # ninety_days_ago reserved for future trend analysis
     
-    # Vendor stats
-    total_vendors = await db.vendors.count_documents({})
-    approved_vendors = await db.vendors.count_documents({"status": "approved"})
+    # Vendor stats - ACTIVE ONLY
+    active_vendors = await db.vendors.count_documents({"status": {"$in": ["active", "approved"]}})
     active_vendors_30d = await db.vendors.count_documents({
+        "status": {"$in": ["active", "approved"]},
         "updated_at": {"$gte": thirty_days_ago.isoformat()}
     })
     
-    # Contract stats
-    total_contracts = await db.contracts.count_documents({})
+    # Contract stats - ACTIVE ONLY
     active_contracts = await db.contracts.count_documents({"status": "active"})
     expiring_soon = await db.contracts.count_documents({
+        "status": "active",
         "end_date": {
             "$gte": now.isoformat(),
             "$lte": (now + timedelta(days=30)).isoformat()
         }
     })
     
-    # Contract value aggregation
+    # Contract value - ACTIVE ONLY
     contract_value_pipeline = [
-        {"$match": {"status": {"$in": ["active", "approved"]}}},
+        {"$match": {"status": "active"}},
         {"$group": {"_id": None, "total_value": {"$sum": "$value"}}}
     ]
     contract_value = await db.contracts.aggregate(contract_value_pipeline).to_list(1)
     total_contract_value = contract_value[0]["total_value"] if contract_value else 0
     
-    # PO stats
-    total_pos = await db.purchase_orders.count_documents({})
-    issued_pos = await db.purchase_orders.count_documents({"status": "issued"})
+    # PO stats - ISSUED/ACTIVE ONLY
+    active_pos = await db.purchase_orders.count_documents({"status": {"$in": ["issued", "active", "approved"]}})
     
     po_value_pipeline = [
+        {"$match": {"status": {"$in": ["issued", "active", "approved"]}}},
         {"$group": {"_id": None, "total_value": {"$sum": "$total_amount"}}}
     ]
     po_value = await db.purchase_orders.aggregate(po_value_pipeline).to_list(1)
     total_po_value = po_value[0]["total_value"] if po_value else 0
     
-    # Deliverables stats (replaced invoices)
-    total_deliverables = await db.deliverables.count_documents({})
-    pending_deliverables = await db.deliverables.count_documents({"status": {"$in": ["submitted", "under_review", "validated", "pending_hop_approval"]}})
+    # Deliverables stats - APPROVED ONLY
     approved_deliverables = await db.deliverables.count_documents({"status": {"$in": ["approved", "paid"]}})
     
     deliverable_value_pipeline = [
@@ -74,44 +74,200 @@ async def get_procurement_overview(request: Request):
     deliverable_value = await db.deliverables.aggregate(deliverable_value_pipeline).to_list(1)
     total_deliverable_value = deliverable_value[0]["total_value"] if deliverable_value else 0
     
-    # Business Request stats
-    total_brs = await db.tenders.count_documents({})
+    # Business Request stats - AWARDED ONLY
     awarded_brs = await db.tenders.count_documents({"status": "awarded"})
     
+    # Resource stats - ACTIVE ONLY
+    active_resources = await db.resources.count_documents({"status": {"$in": ["active", "approved"]}})
+    
+    # Asset stats - ACTIVE/IN_USE ONLY
+    active_assets = await db.assets.count_documents({"status": {"$in": ["available", "in_use"]}})
+    
     return {
+        "report_type": "standard",
+        "filter": "active_only",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "summary": {
+            "total_active_spend": total_contract_value + total_po_value,
+            "active_contracts": active_contracts,
+            "active_vendors": active_vendors
+        },
+        "vendors": {
+            "active": active_vendors,
+            "active_30d": active_vendors_30d
+        },
+        "contracts": {
+            "active": active_contracts,
+            "expiring_soon": expiring_soon,
+            "total_value": total_contract_value
+        },
+        "purchase_orders": {
+            "active": active_pos,
+            "total_value": total_po_value
+        },
+        "deliverables": {
+            "approved": approved_deliverables,
+            "total_value": total_deliverable_value
+        },
+        "business_requests": {
+            "awarded": awarded_brs
+        },
+        "resources": {
+            "active": active_resources
+        },
+        "assets": {
+            "active": active_assets
+        }
+    }
+
+
+# ============== EXPERT REPORT (EVERYTHING) ==============
+
+@router.get("/expert-overview")
+async def get_expert_overview(request: Request):
+    """Get comprehensive procurement overview - ALL ITEMS (Expert Report)"""
+    await require_permission(request, "dashboard", Permission.VIEWER)
+    
+    now = datetime.now(timezone.utc)
+    thirty_days_ago = now - timedelta(days=30)
+    
+    # Vendor stats - ALL
+    total_vendors = await db.vendors.count_documents({})
+    approved_vendors = await db.vendors.count_documents({"status": {"$in": ["active", "approved"]}})
+    pending_vendors = await db.vendors.count_documents({"status": "pending"})
+    inactive_vendors = await db.vendors.count_documents({"status": "inactive"})
+    high_risk_vendors = await db.vendors.count_documents({"risk_score": {"$gte": 70}})
+    
+    # Contract stats - ALL
+    total_contracts = await db.contracts.count_documents({})
+    active_contracts = await db.contracts.count_documents({"status": "active"})
+    draft_contracts = await db.contracts.count_documents({"status": "draft"})
+    pending_contracts = await db.contracts.count_documents({"status": {"$in": ["pending_signature", "pending_approval", "pending_review", "pending_hop_approval"]}})
+    expired_contracts = await db.contracts.count_documents({"status": "expired"})
+    expiring_soon = await db.contracts.count_documents({
+        "status": "active",
+        "end_date": {"$gte": now.isoformat(), "$lte": (now + timedelta(days=30)).isoformat()}
+    })
+    
+    # Contract value - ALL
+    contract_value_pipeline = [
+        {"$group": {"_id": None, "total_value": {"$sum": "$value"}}}
+    ]
+    contract_value = await db.contracts.aggregate(contract_value_pipeline).to_list(1)
+    total_contract_value = contract_value[0]["total_value"] if contract_value else 0
+    
+    # PO stats - ALL
+    total_pos = await db.purchase_orders.count_documents({})
+    issued_pos = await db.purchase_orders.count_documents({"status": "issued"})
+    draft_pos = await db.purchase_orders.count_documents({"status": "draft"})
+    pending_pos = await db.purchase_orders.count_documents({"status": {"$in": ["pending_approval", "pending_review", "pending_hop_approval"]}})
+    
+    po_value_pipeline = [
+        {"$group": {"_id": None, "total_value": {"$sum": "$total_amount"}}}
+    ]
+    po_value = await db.purchase_orders.aggregate(po_value_pipeline).to_list(1)
+    total_po_value = po_value[0]["total_value"] if po_value else 0
+    
+    # Deliverables stats - ALL
+    total_deliverables = await db.deliverables.count_documents({})
+    draft_deliverables = await db.deliverables.count_documents({"status": "draft"})
+    pending_deliverables = await db.deliverables.count_documents({"status": {"$in": ["submitted", "under_review", "validated", "pending_hop_approval"]}})
+    approved_deliverables = await db.deliverables.count_documents({"status": {"$in": ["approved", "paid"]}})
+    rejected_deliverables = await db.deliverables.count_documents({"status": "rejected"})
+    
+    deliverable_value_pipeline = [
+        {"$group": {"_id": None, "total_value": {"$sum": "$amount"}}}
+    ]
+    deliverable_value = await db.deliverables.aggregate(deliverable_value_pipeline).to_list(1)
+    total_deliverable_value = deliverable_value[0]["total_value"] if deliverable_value else 0
+    
+    # Business Request stats - ALL
+    total_brs = await db.tenders.count_documents({})
+    draft_brs = await db.tenders.count_documents({"status": "draft"})
+    published_brs = await db.tenders.count_documents({"status": "published"})
+    pending_brs = await db.tenders.count_documents({"status": {"$in": ["pending_evaluation", "pending_review", "pending_approval", "pending_hop_approval"]}})
+    awarded_brs = await db.tenders.count_documents({"status": "awarded"})
+    rejected_brs = await db.tenders.count_documents({"status": "rejected"})
+    
+    # Resource stats - ALL
+    total_resources = await db.resources.count_documents({})
+    active_resources = await db.resources.count_documents({"status": {"$in": ["active", "approved"]}})
+    pending_resources = await db.resources.count_documents({"status": {"$in": ["pending", "pending_review", "pending_hop_approval"]}})
+    
+    # Asset stats - ALL
+    total_assets = await db.assets.count_documents({})
+    available_assets = await db.assets.count_documents({"status": "available"})
+    in_use_assets = await db.assets.count_documents({"status": "in_use"})
+    maintenance_assets = await db.assets.count_documents({"status": "maintenance"})
+    retired_assets = await db.assets.count_documents({"status": "retired"})
+    
+    return {
+        "report_type": "expert",
+        "filter": "all_items",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {
             "total_spend": total_contract_value + total_po_value,
             "pending_payments": await db.deliverables.count_documents({"status": {"$in": ["submitted", "validated", "pending_hop_approval"]}}),
-            "active_contracts": active_contracts,
-            "approved_vendors": approved_vendors
+            "total_contracts": total_contracts,
+            "total_vendors": total_vendors,
+            "total_pos": total_pos,
+            "total_deliverables": total_deliverables,
+            "total_brs": total_brs,
+            "total_resources": total_resources,
+            "total_assets": total_assets
         },
         "vendors": {
             "total": total_vendors,
-            "approved": approved_vendors,
-            "active_30d": active_vendors_30d,
+            "active": approved_vendors,
+            "pending": pending_vendors,
+            "inactive": inactive_vendors,
+            "high_risk": high_risk_vendors,
             "approval_rate": round((approved_vendors / total_vendors * 100), 1) if total_vendors > 0 else 0
         },
         "contracts": {
             "total": total_contracts,
             "active": active_contracts,
+            "draft": draft_contracts,
+            "pending_approval": pending_contracts,
+            "expired": expired_contracts,
             "expiring_soon": expiring_soon,
             "total_value": total_contract_value
         },
         "purchase_orders": {
             "total": total_pos,
             "issued": issued_pos,
+            "draft": draft_pos,
+            "pending_approval": pending_pos,
             "total_value": total_po_value
         },
         "deliverables": {
             "total": total_deliverables,
+            "draft": draft_deliverables,
             "pending": pending_deliverables,
             "approved": approved_deliverables,
+            "rejected": rejected_deliverables,
             "total_value": total_deliverable_value
         },
         "business_requests": {
             "total": total_brs,
+            "draft": draft_brs,
+            "published": published_brs,
+            "pending_approval": pending_brs,
             "awarded": awarded_brs,
+            "rejected": rejected_brs,
             "conversion_rate": round((awarded_brs / total_brs * 100), 1) if total_brs > 0 else 0
+        },
+        "resources": {
+            "total": total_resources,
+            "active": active_resources,
+            "pending_approval": pending_resources
+        },
+        "assets": {
+            "total": total_assets,
+            "available": available_assets,
+            "in_use": in_use_assets,
+            "maintenance": maintenance_assets,
+            "retired": retired_assets
         }
     }
 
