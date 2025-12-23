@@ -779,10 +779,10 @@ async def update_evaluation(tender_id: str, data: UpdateEvaluationRequest, reque
     if not tender:
         raise HTTPException(status_code=404, detail="Business Request not found")
     
-    # Allow update in evaluation_complete or returned states
-    allowed_statuses = ["evaluation_complete", "returned_for_revision", "pending_review", "pending_approval"]
+    # Allow update in various evaluation states including legacy status
+    allowed_statuses = ["evaluation_complete", "returned_for_revision", "pending_review", "pending_approval", "pending_additional_approval"]
     if tender.get("status") not in allowed_statuses:
-        raise HTTPException(status_code=400, detail=f"Cannot update evaluation in '{tender.get('status')}' status")
+        raise HTTPException(status_code=400, detail=f"Cannot update evaluation in '{tender.get('status')}' status. Allowed: {allowed_statuses}")
     
     # Build update data
     update_data = {
