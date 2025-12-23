@@ -455,7 +455,7 @@ async def hop_final_decision(tender_id: str, data: HoPDecisionRequest, request: 
     """
     user = await require_auth(request)
     
-    if user.role not in ["procurement_manager", "admin"]:
+    if user.role not in ["procurement_manager", "admin", "hop"]:
         raise HTTPException(status_code=403, detail="Only HoP/Manager can make final decisions")
     
     tender = await db.tenders.find_one({"id": tender_id})
