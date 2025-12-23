@@ -494,6 +494,16 @@ const ContractDetail = () => {
 
         {/* Main Contract Info Card */}
         {!isEditing && (
+        <>
+        {/* Approval Workflow Panel */}
+        <EntityWorkflowPanel
+          entityType="contract"
+          entityId={id}
+          entityTitle={contract?.title}
+          onStatusChange={fetchContract}
+          showAuditTrail={true}
+        />
+
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex justify-between items-start mb-6">
             <div className="flex-1">
