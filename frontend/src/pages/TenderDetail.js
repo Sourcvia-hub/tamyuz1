@@ -660,8 +660,8 @@ const TenderDetail = () => {
               </button>
             )}
             
-            {/* Officer: Update Evaluation */}
-            {isOfficer && ['evaluation_complete', 'returned_for_revision', 'review_complete', 'approval_complete', 'pending_additional_approval'].includes(tender.status) && (
+            {/* Officer: Update Evaluation - available at any workflow stage */}
+            {isOfficer && ['evaluation_complete', 'returned_for_revision', 'review_complete', 'approval_complete', 'pending_additional_approval', 'pending_review', 'pending_approval'].includes(tender.status) && (
               <button
                 onClick={() => setShowUpdateEvaluationModal(true)}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
@@ -680,8 +680,8 @@ const TenderDetail = () => {
               </button>
             )}
             
-            {/* Officer: Forward for Approval */}
-            {isOfficer && ['evaluation_complete', 'review_complete', 'returned_for_revision', 'pending_additional_approval'].includes(tender.status) && (
+            {/* Officer: Forward for Approval - can skip review step */}
+            {isOfficer && ['evaluation_complete', 'review_complete', 'returned_for_revision', 'pending_additional_approval', 'pending_review'].includes(tender.status) && (
               <button
                 onClick={() => { fetchActiveUsers(); setShowApprovalModal(true); }}
                 className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
@@ -690,8 +690,8 @@ const TenderDetail = () => {
               </button>
             )}
             
-            {/* Officer: Skip to HoP */}
-            {isOfficer && ['evaluation_complete', 'review_complete', 'approval_complete', 'returned_for_revision', 'pending_additional_approval'].includes(tender.status) && (
+            {/* Officer: Skip to HoP - can be used at any stage */}
+            {isOfficer && ['evaluation_complete', 'review_complete', 'approval_complete', 'returned_for_revision', 'pending_additional_approval', 'pending_review', 'pending_approval'].includes(tender.status) && (
               <button
                 onClick={handleSkipToHoP}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
