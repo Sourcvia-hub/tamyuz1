@@ -4717,6 +4717,9 @@ class SourceviaBackendTester:
         # NEW: Business Request Workflow Testing (as requested in review)
         self.test_business_request_workflow()
         
+        # NEW: Enhanced Evaluation Workflow Testing (PRIORITY TEST from review request)
+        self.test_enhanced_evaluation_workflow()
+        
         # NEW: Test the updated Deliverables system with HoP approval workflow (PRIORITY TEST)
         self.test_deliverables_hop_workflow()
         
