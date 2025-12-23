@@ -58,8 +58,13 @@ const TenderDetail = () => {
   const [workflowNotes, setWorkflowNotes] = useState('');
   const [updateEvalForm, setUpdateEvalForm] = useState({
     evaluation_notes: '',
-    recommendation: ''
+    recommendation: '',
+    selected_proposal_id: '',
+    technical_score: 0,
+    financial_score: 0,
+    overall_score: 0
   });
+  const [reevaluationLoading, setReevaluationLoading] = useState(false);
   
   // Form states
   const [proposalForm, setProposalForm] = useState({ vendor_id: '', technical_proposal: '', financial_proposal: '' });
