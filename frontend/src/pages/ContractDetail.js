@@ -592,6 +592,7 @@ const ContractDetail = () => {
             </div>
           )}
         </div>
+        </>
         )}
 
         {/* Vendor Information */}
