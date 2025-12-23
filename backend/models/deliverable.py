@@ -107,8 +107,15 @@ class Deliverable(BaseModel):
     rejected_by: Optional[str] = None
     rejected_at: Optional[datetime] = None
     
-    # Supporting Documents
+    # Supporting Documents & Attachments
     documents: List[str] = []  # Document IDs/URLs
+    attachments: List[Dict[str, Any]] = []  # [{filename, stored_filename, upload_date, file_size, file_type, uploaded_by}]
+    
+    # Assignment (Officer assigns to user)
+    assigned_to: Optional[str] = None  # User ID
+    assigned_to_name: Optional[str] = None  # User name for display
+    assigned_by: Optional[str] = None  # Officer who assigned
+    assigned_at: Optional[datetime] = None
     
     # Payment Information (after approval)
     payment_reference: Optional[str] = None  # e.g., PAF-2025-0001
