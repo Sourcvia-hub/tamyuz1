@@ -337,6 +337,8 @@ const MyApprovals = () => {
               { key: 'contract', label: '📄 Contracts' },
               { key: 'deliverable', label: '📦 Deliverables' },
               { key: 'asset', label: '🏢 Assets' },
+              { key: 'vendor', label: '🏪 Vendors' },
+              { key: 'po', label: '📦 POs' },
             ].map(filter => (
               <button
                 key={filter.key}
