@@ -431,9 +431,47 @@ const TenderDetail = () => {
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Enhanced Evaluation Workflow Panel */}
         <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="font-semibold mb-3">Available Actions</h3>
+          <h3 className="font-semibold mb-3">📋 Evaluation Workflow</h3>
+          
+          {/* Workflow Status Indicators */}
+          {(tender.status !== 'draft' && tender.status !== 'published') && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="flex flex-wrap gap-2 text-sm">
+                {tender.reviewers?.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="font-medium">Reviewers:</span>
+                    {tender.reviewers.map((r, idx) => (
+                      <span key={idx} className={`px-2 py-0.5 rounded ${
+                        r.status === 'validated' ? 'bg-green-100 text-green-700' :
+                        r.status === 'returned' ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {r.user_name} ({r.status})
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {tender.approvers?.length > 0 && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="font-medium">Approvers:</span>
+                    {tender.approvers.map((a, idx) => (
+                      <span key={idx} className={`px-2 py-0.5 rounded ${
+                        a.status === 'approved' ? 'bg-green-100 text-green-700' :
+                        a.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        a.status === 'returned' ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {a.user_name} ({a.status})
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
           <div className="flex flex-wrap gap-2">
             {/* Officer: Add Proposal */}
             {isOfficer && ['draft', 'published'].includes(tender.status) && (
@@ -455,18 +493,48 @@ const TenderDetail = () => {
               </button>
             )}
             
-            {/* Officer: Forward to Additional Approver */}
-            {isOfficer && tender.status === 'evaluation_complete' && (
+            {/* Officer: Update Evaluation */}
+            {isOfficer && ['evaluation_complete', 'returned_for_revision', 'review_complete', 'approval_complete'].includes(tender.status) && (
               <button
-                onClick={() => { fetchApprovers(); setShowForwardModal(true); }}
+                onClick={() => setShowUpdateEvaluationModal(true)}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
               >
-                👤 Forward to Approver
+                ✏️ Update Evaluation
               </button>
             )}
             
-            {/* Officer: Forward to HoP */}
-            {isOfficer && tender.status === 'evaluation_complete' && (
+            {/* Officer: Forward for Review */}
+            {isOfficer && ['evaluation_complete', 'returned_for_revision'].includes(tender.status) && (
+              <button
+                onClick={() => { fetchActiveUsers(); setShowReviewModal(true); }}
+                className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+              >
+                👥 Forward for Review
+              </button>
+            )}
+            
+            {/* Officer: Forward for Approval */}
+            {isOfficer && ['evaluation_complete', 'review_complete', 'returned_for_revision'].includes(tender.status) && (
+              <button
+                onClick={() => { fetchActiveUsers(); setShowApprovalModal(true); }}
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
+              >
+                ✅ Forward for Approval
+              </button>
+            )}
+            
+            {/* Officer: Skip to HoP */}
+            {isOfficer && ['evaluation_complete', 'review_complete', 'approval_complete', 'returned_for_revision'].includes(tender.status) && (
+              <button
+                onClick={handleSkipToHoP}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+              >
+                ⏭️ Skip to HoP
+              </button>
+            )}
+            
+            {/* Officer: Forward to HoP (after all approvals) */}
+            {isOfficer && tender.status === 'approval_complete' && (
               <button
                 onClick={handleForwardToHoP}
                 className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
@@ -475,7 +543,49 @@ const TenderDetail = () => {
               </button>
             )}
             
-            {/* Additional Approver: Approve/Reject */}
+            {/* Reviewer: Validate/Return */}
+            {tender.status === 'pending_review' && tender.reviewers?.some(r => r.user_id === user?.id && r.status === 'pending') && (
+              <>
+                <button
+                  onClick={() => handleReviewerDecision('validated')}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  ✓ Validate
+                </button>
+                <button
+                  onClick={() => handleReviewerDecision('returned')}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                >
+                  ↩ Return to Officer
+                </button>
+              </>
+            )}
+            
+            {/* Approver: Approve/Reject/Return */}
+            {tender.status === 'pending_approval' && tender.approvers?.some(a => a.user_id === user?.id && a.status === 'pending') && (
+              <>
+                <button
+                  onClick={() => handleApproverDecision('approved')}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                >
+                  ✓ Approve
+                </button>
+                <button
+                  onClick={() => handleApproverDecision('returned')}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700"
+                >
+                  ↩ Return to Officer
+                </button>
+                <button
+                  onClick={() => handleApproverDecision('rejected')}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                >
+                  ✗ Reject
+                </button>
+              </>
+            )}
+            
+            {/* Legacy: Additional Approver */}
             {workflowStatus?.actions?.can_approve_as_additional && (
               <>
                 <button
