@@ -275,11 +275,10 @@ class VendorDDAIService:
             raise Exception(f"Field extraction failed: {str(e)}")
     
     async def run_risk_assessment(self, document_text: str, extracted_fields: Dict[str, Any]) -> Dict[str, Any]:
-        """Run AI risk assessment on vendor document using Emergent LLM"""
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        """Run AI risk assessment on vendor document using OpenAI"""
         
-        if not self.emergent_key:
-            raise ValueError("EMERGENT_LLM_KEY required for risk assessment")
+        if not self.client:
+            raise ValueError("OPENAI_API_KEY required for risk assessment")
         
         # Prepare context for risk assessment
         context = f"""
@@ -291,16 +290,7 @@ RAW DOCUMENT TEXT:
 """
         
         try:
-            # Initialize chat with Emergent key
-            chat = LlmChat(
-                api_key=self.emergent_key,
-                session_id=f"vendor-dd-risk-{datetime.now().timestamp()}",
-                system_message=VENDOR_DD_SYSTEM_PROMPT
-            ).with_model("openai", "gpt-4o")
-            
-            # Create message
-            user_message = UserMessage(
-                text=f"""Analyze this vendor due diligence information and provide a risk assessment.
+            user_prompt = f"""Analyze this vendor due diligence information and provide a risk assessment.
 
 {context}
 
@@ -316,14 +306,21 @@ Respond in the following JSON format:
     "ai_confidence_rationale": "...",
     "notes_for_human_review": "..."
 }}"""
+            
+            response = self.client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": VENDOR_DD_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.1
             )
             
-            # Send message and get response
-            response = await chat.send_message(user_message)
+            result_text = response.choices[0].message.content
             
             # Parse JSON response
             try:
-                json_match = re.search(r'\{[\s\S]*\}', response)
+                json_match = re.search(r'\{[\s\S]*\}', result_text)
                 if json_match:
                     assessment = json.loads(json_match.group())
                     # Apply override rules
