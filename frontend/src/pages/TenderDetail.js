@@ -186,7 +186,13 @@ const TenderDetail = () => {
       if (officerEditForm.budget) updateData.budget = parseFloat(officerEditForm.budget);
       if (officerEditForm.request_type) updateData.request_type = officerEditForm.request_type;
       if (officerEditForm.jira_ticket_number !== undefined) updateData.jira_ticket_number = officerEditForm.jira_ticket_number;
-      if (officerEditForm.invited_vendors) updateData.invited_vendors = officerEditForm.invited_vendors;
+      
+      // Ensure invited_vendors is always an array
+      if (officerEditForm.invited_vendors !== undefined) {
+        updateData.invited_vendors = Array.isArray(officerEditForm.invited_vendors) 
+          ? officerEditForm.invited_vendors 
+          : [];
+      }
       
       await axios.patch(`${API}/tenders/${id}/officer-update`, updateData, { withCredentials: true });
       
