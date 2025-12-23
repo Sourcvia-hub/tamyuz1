@@ -1254,7 +1254,7 @@ async def get_entity_audit_trail(entity_type: str, entity_id: str, limit: int = 
     }
     
     collection = collection_map.get(entity_type)
-    if collection:
+    if collection is not None:
         entity = await collection.find_one({"id": entity_id}, {"audit_trail": 1, "workflow_history": 1})
         if entity:
             # Check audit_trail field
