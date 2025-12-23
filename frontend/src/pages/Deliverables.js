@@ -127,7 +127,7 @@ const Deliverables = () => {
       toast({ title: "✅ Submitted", description: "Deliverable submitted for review", variant: "success" });
       fetchDeliverables();
     } catch (error) {
-      toast({ title: "❌ Error", description: error.response?.data?.detail || "Failed to submit", variant: "destructive" });
+      toast({ title: "❌ Error", description: getErrorMessage(error, "Failed to submit"), variant: "destructive" });
     }
   };
 
