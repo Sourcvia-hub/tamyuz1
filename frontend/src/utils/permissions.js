@@ -112,7 +112,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.CONTROLLER],
     [Module.INVOICES]: [Permission.CONTROLLER],
     [Module.ASSETS]: [Permission.CONTROLLER],
-    [Module.SERVICE_REQUESTS]: [Permission.CONTROLLER]
+    [Module.SERVICE_REQUESTS]: [Permission.CONTROLLER],
+    [Module.DELIVERABLES]: [Permission.CONTROLLER]
   },
   hop: {
     [Module.DASHBOARD]: [Permission.CONTROLLER],
@@ -126,7 +127,8 @@ const ROLE_PERMISSIONS = {
     [Module.RESOURCES]: [Permission.CONTROLLER],
     [Module.INVOICES]: [Permission.CONTROLLER],
     [Module.ASSETS]: [Permission.CONTROLLER],
-    [Module.SERVICE_REQUESTS]: [Permission.CONTROLLER]
+    [Module.SERVICE_REQUESTS]: [Permission.CONTROLLER],
+    [Module.DELIVERABLES]: [Permission.CONTROLLER]
   },
   business_user: {
     [Module.DASHBOARD]: [Permission.VIEWER],
