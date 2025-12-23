@@ -202,7 +202,7 @@ const TenderDetail = () => {
       console.error('Error updating tender:', error);
       toast({
         title: "Error",
-        description: error.response?.data?.detail || "Failed to update business case",
+        description: getErrorMessage(error, "Failed to update business case"),
         variant: "destructive"
       });
     } finally {
