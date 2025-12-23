@@ -199,12 +199,14 @@ const Deliverables = () => {
             <h1 className="text-2xl font-bold text-gray-900">Deliverables & Payments</h1>
             <p className="text-gray-600">Manage delivered items, validation, and payment approvals</p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            + New Deliverable
-          </button>
+          {userCanCreate && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              + New Deliverable
+            </button>
+          )}
         </div>
 
         {/* Stats */}
