@@ -169,10 +169,14 @@ class VendorDDAIService:
     """AI Service for Vendor Due Diligence using Emergent LLM Integration"""
     
     def __init__(self):
-        """Initialize with Emergent LLM key"""
-        self.emergent_key = os.environ.get("EMERGENT_LLM_KEY")
-        if not self.emergent_key:
-            logger.warning("No EMERGENT_LLM_KEY provided. AI features will be disabled.")
+        """Initialize with OpenAI API key"""
+        self.openai_key = os.environ.get("OPENAI_API_KEY")
+        if not self.openai_key:
+            logger.warning("No OPENAI_API_KEY provided. AI features will be disabled.")
+        self.client = None
+        if self.openai_key:
+            from openai import OpenAI
+            self.client = OpenAI(api_key=self.openai_key)
         
         # High-risk countries list (configurable)
         self.high_risk_countries = self._load_high_risk_countries()
