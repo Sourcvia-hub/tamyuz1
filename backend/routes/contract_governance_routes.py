@@ -388,11 +388,18 @@ async def assess_contract_risk(
     # Get AI service
     ai_service = get_contract_ai_service()
     
-    # Ensure contract_value is numeric
-    try:
-        contract_value = float(contract.get("value", 0) or 0)
-    except (TypeError, ValueError):
-        contract_value = 0.0
+    # Ensure contract_value is numeric (handle comma-formatted numbers)
+    def safe_float(val):
+        if val is None or val == '':
+            return 0.0
+        try:
+            if isinstance(val, str):
+                val = val.replace(',', '')
+            return float(val)
+        except (TypeError, ValueError):
+            return 0.0
+    
+    contract_value = safe_float(contract.get("value"))
     
     # Calculate risk
     risk_assessment = ai_service.calculate_contract_risk(
