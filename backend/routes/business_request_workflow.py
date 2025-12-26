@@ -634,6 +634,11 @@ async def get_my_pending_approvals(request: Request):
             )
             vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
             
+            # Get requester name
+            requester_id = deliverable.get("submitted_to_hop_by") or deliverable.get("created_by")
+            requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
+            requester_name = requester.get("name", "Officer") if requester else "Officer"
+            
             all_items.append({
                 "id": f"deliverable_{deliverable['id']}",
                 "item_type": "deliverable",
@@ -642,17 +647,20 @@ async def get_my_pending_approvals(request: Request):
                 "item_title": deliverable.get("title"),
                 "status": "pending",
                 "message": f"Deliverable {deliverable.get('deliverable_number')} requires HoP approval for payment",
-                "requested_by_name": "Officer",
+                "requested_by_name": requester_name,
                 "requested_at": deliverable.get("submitted_to_hop_at") or deliverable.get("created_at"),
                 "vendor_name": vendor_name,
                 "amount": deliverable.get("amount", 0)
             })
         
-        # Get assets pending HoP approval
+        # Get assets pending HoP approval (exclude already decided)
         pending_assets = await db.assets.find(
-            {"$or": [
-                {"approval_status": "pending_hop_approval"},
-                {"workflow_status": "pending_hop_approval"}
+            {"$and": [
+                {"$or": [
+                    {"approval_status": "pending_hop_approval"},
+                    {"workflow_status": "pending_hop_approval"}
+                ]},
+                {"hop_decision": {"$nin": ["approved", "rejected"]}}
             ]},
             {"_id": 0}
         ).to_list(50)
@@ -664,6 +672,11 @@ async def get_my_pending_approvals(request: Request):
             )
             vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
             
+            # Get requester name
+            requester_id = asset.get("submitted_for_approval_by") or asset.get("created_by")
+            requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
+            requester_name = requester.get("name", "Officer") if requester else "Officer"
+            
             all_items.append({
                 "id": f"asset_{asset['id']}",
                 "item_type": "asset",
@@ -672,22 +685,30 @@ async def get_my_pending_approvals(request: Request):
                 "item_title": asset.get("name"),
                 "status": "pending",
                 "message": f"Asset {asset.get('asset_number')} registration requires HoP approval",
-                "requested_by_name": "Officer",
+                "requested_by_name": requester_name,
                 "requested_at": asset.get("submitted_for_approval_at") or asset.get("created_at"),
                 "vendor_name": vendor_name,
                 "amount": asset.get("cost", 0)
             })
         
-        # Get vendors pending HoP approval (high-risk vendors)
+        # Get vendors pending HoP approval (high-risk vendors, exclude already decided)
         pending_vendors = await db.vendors.find(
-            {"$or": [
-                {"status": "pending_hop_approval"},
-                {"workflow_status": "pending_hop_approval"}
+            {"$and": [
+                {"$or": [
+                    {"status": "pending_hop_approval"},
+                    {"workflow_status": "pending_hop_approval"}
+                ]},
+                {"hop_decision": {"$nin": ["approved", "rejected"]}}
             ]},
             {"_id": 0}
         ).to_list(50)
         
         for vendor in pending_vendors:
+            # Get requester name
+            requester_id = vendor.get("submitted_for_approval_by") or vendor.get("created_by")
+            requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
+            requester_name = requester.get("name", "Officer") if requester else "Officer"
+            
             all_items.append({
                 "id": f"vendor_{vendor['id']}",
                 "item_type": "vendor",
@@ -696,17 +717,20 @@ async def get_my_pending_approvals(request: Request):
                 "item_title": vendor.get("name_english") or vendor.get("commercial_name", "Unknown Vendor"),
                 "status": "pending",
                 "message": f"Vendor {vendor.get('vendor_number')} requires HoP approval",
-                "requested_by_name": "Officer",
+                "requested_by_name": requester_name,
                 "requested_at": vendor.get("submitted_for_approval_at") or vendor.get("created_at"),
                 "vendor_name": vendor.get("name_english") or vendor.get("commercial_name", "Unknown"),
                 "amount": 0
             })
         
-        # Get purchase orders pending HoP approval
+        # Get purchase orders pending HoP approval (exclude already decided)
         pending_pos = await db.purchase_orders.find(
-            {"$or": [
-                {"status": "pending_hop_approval"},
-                {"workflow_status": "pending_hop_approval"}
+            {"$and": [
+                {"$or": [
+                    {"status": "pending_hop_approval"},
+                    {"workflow_status": "pending_hop_approval"}
+                ]},
+                {"hop_decision": {"$nin": ["approved", "rejected"]}}
             ]},
             {"_id": 0}
         ).to_list(50)
@@ -717,6 +741,11 @@ async def get_my_pending_approvals(request: Request):
                 {"_id": 0, "name_english": 1, "commercial_name": 1}
             )
             vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            
+            # Get requester name
+            requester_id = po.get("submitted_for_approval_by") or po.get("created_by")
+            requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
+            requester_name = requester.get("name", "Officer") if requester else "Officer"
             
             all_items.append({
                 "id": f"po_{po['id']}",
