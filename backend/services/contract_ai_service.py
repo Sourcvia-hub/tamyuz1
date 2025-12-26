@@ -546,9 +546,14 @@ PR DETAILS:
         """Check consistency between PR and Contract"""
         warnings = []
         
-        # Check value mismatch
-        pr_budget = pr_details.get("budget", 0)
-        contract_value = contract_details.get("value", 0)
+        # Check value mismatch - ensure numeric conversion
+        try:
+            pr_budget = float(pr_details.get("budget", 0) or 0)
+            contract_value = float(contract_details.get("value", 0) or 0)
+        except (TypeError, ValueError):
+            pr_budget = 0
+            contract_value = 0
+            
         if pr_budget and contract_value:
             variance = abs(contract_value - pr_budget) / pr_budget * 100 if pr_budget > 0 else 0
             if variance > 20:
