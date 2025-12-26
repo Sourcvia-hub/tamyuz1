@@ -648,7 +648,7 @@ async def get_my_pending_approvals(request: Request):
             requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
             requester_name = requester.get("name", "Officer") if requester else "Officer"
             
-            all_items.append({
+            entity_items.append({
                 "id": f"contract_{contract['id']}",
                 "item_type": "contract_approval",
                 "item_id": contract["id"],
@@ -686,7 +686,7 @@ async def get_my_pending_approvals(request: Request):
             requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
             requester_name = requester.get("name", "Officer") if requester else "Officer"
             
-            all_items.append({
+            entity_items.append({
                 "id": f"deliverable_{deliverable['id']}",
                 "item_type": "deliverable",
                 "item_id": deliverable["id"],
@@ -724,7 +724,7 @@ async def get_my_pending_approvals(request: Request):
             requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
             requester_name = requester.get("name", "Officer") if requester else "Officer"
             
-            all_items.append({
+            entity_items.append({
                 "id": f"asset_{asset['id']}",
                 "item_type": "asset",
                 "item_id": asset["id"],
@@ -756,7 +756,7 @@ async def get_my_pending_approvals(request: Request):
             requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
             requester_name = requester.get("name", "Officer") if requester else "Officer"
             
-            all_items.append({
+            entity_items.append({
                 "id": f"vendor_{vendor['id']}",
                 "item_type": "vendor",
                 "item_id": vendor["id"],
@@ -794,7 +794,7 @@ async def get_my_pending_approvals(request: Request):
             requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
             requester_name = requester.get("name", "Officer") if requester else "Officer"
             
-            all_items.append({
+            entity_items.append({
                 "id": f"po_{po['id']}",
                 "item_type": "po",
                 "item_id": po["id"],
