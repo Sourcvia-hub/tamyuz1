@@ -755,7 +755,7 @@ async def get_my_pending_approvals(request: Request):
                 "item_title": po.get("title") or f"PO {po.get('po_number')}",
                 "status": "pending",
                 "message": f"Purchase Order {po.get('po_number')} requires HoP approval",
-                "requested_by_name": "Officer",
+                "requested_by_name": requester_name,
                 "requested_at": po.get("submitted_for_approval_at") or po.get("created_at"),
                 "vendor_name": vendor_name,
                 "amount": po.get("total_value", 0)
