@@ -238,12 +238,23 @@ async def get_pending_purchase_orders(request: Request, status: str = "pending")
     
     if status == "approved":
         pos = await db.purchase_orders.find(
-            {"status": {"$in": ["issued", "approved", "completed"]}},
+            {"$and": [
+                {"status": {"$in": ["issued", "approved", "completed"]}},
+                {"$or": [
+                    {"workflow_status": {"$in": ["approved", None]}},
+                    {"workflow_status": {"$exists": False}}
+                ]},
+                {"hop_decision": {"$nin": ["rejected"]}}
+            ]},
             {"_id": 0}
         ).sort("updated_at", -1).to_list(50)
     else:
+        # Include POs with pending workflow status
         pos = await db.purchase_orders.find(
-            {"status": {"$in": ["draft", "pending_approval"]}},
+            {"$or": [
+                {"status": {"$in": ["draft", "pending_approval", "pending_hop_approval"]}},
+                {"workflow_status": "pending_hop_approval"}
+            ]},
             {"_id": 0}
         ).sort("updated_at", -1).to_list(50)
     
