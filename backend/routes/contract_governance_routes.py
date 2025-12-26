@@ -388,12 +388,18 @@ async def assess_contract_risk(
     # Get AI service
     ai_service = get_contract_ai_service()
     
+    # Ensure contract_value is numeric
+    try:
+        contract_value = float(contract.get("value", 0) or 0)
+    except (TypeError, ValueError):
+        contract_value = 0.0
+    
     # Calculate risk
     risk_assessment = ai_service.calculate_contract_risk(
         classification=contract.get("outsourcing_classification", "not_outsourcing"),
         vendor_risk_score=vendor_risk_score,
         context_questionnaire=context_questionnaire,
-        contract_value=contract.get("value", 0),
+        contract_value=contract_value,
         duration_months=duration_months
     )
     
