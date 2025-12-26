@@ -807,6 +807,17 @@ async def get_my_pending_approvals(request: Request):
                 "amount": po.get("total_value", 0)
             })
     
+    # Deduplicate items by item_id (keep the first occurrence - from entity query which has better data)
+    seen_item_ids = set()
+    deduplicated_items = []
+    for item in all_items:
+        item_id = item.get("item_id")
+        if item_id and item_id not in seen_item_ids:
+            seen_item_ids.add(item_id)
+            deduplicated_items.append(item)
+    
+    all_items = deduplicated_items
+    
     # Sort all items by requested_at (handle both datetime and string types)
     def get_sort_key(item):
         val = item.get("requested_at", "")
