@@ -577,11 +577,14 @@ async def get_my_pending_approvals(request: Request):
     
     # 2. If user is HoP, include pending contracts, deliverables, and assets
     if is_hop:
-        # Get contracts pending HoP approval (check both status fields)
+        # Get contracts pending HoP approval (check both status fields, exclude already decided)
         pending_contracts = await db.contracts.find(
-            {"$or": [
-                {"status": "pending_hop_approval"},
-                {"workflow_status": "pending_hop_approval"}
+            {"$and": [
+                {"$or": [
+                    {"status": "pending_hop_approval"},
+                    {"workflow_status": "pending_hop_approval"}
+                ]},
+                {"hop_decision": {"$nin": ["approved", "rejected"]}}
             ]},
             {"_id": 0}
         ).to_list(50)
@@ -593,6 +596,11 @@ async def get_my_pending_approvals(request: Request):
             )
             vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
             
+            # Get requester name
+            requester_id = contract.get("hop_approval_requested_by") or contract.get("created_by")
+            requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
+            requester_name = requester.get("name", "Officer") if requester else "Officer"
+            
             all_items.append({
                 "id": f"contract_{contract['id']}",
                 "item_type": "contract_approval",
@@ -601,17 +609,20 @@ async def get_my_pending_approvals(request: Request):
                 "item_title": contract.get("title"),
                 "status": "pending",
                 "message": f"Contract {contract.get('contract_number')} requires HoP approval",
-                "requested_by_name": "Officer",
+                "requested_by_name": requester_name,
                 "requested_at": contract.get("hop_submitted_at") or contract.get("created_at"),
                 "vendor_name": vendor_name,
                 "amount": contract.get("value", 0)
             })
         
-        # Get deliverables pending HoP approval
+        # Get deliverables pending HoP approval (exclude already decided)
         pending_deliverables = await db.deliverables.find(
-            {"$or": [
-                {"status": "pending_hop_approval"},
-                {"workflow_status": "pending_hop_approval"}
+            {"$and": [
+                {"$or": [
+                    {"status": "pending_hop_approval"},
+                    {"workflow_status": "pending_hop_approval"}
+                ]},
+                {"hop_decision": {"$nin": ["approved", "rejected"]}}
             ]},
             {"_id": 0}
         ).to_list(50)
