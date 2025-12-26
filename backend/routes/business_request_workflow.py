@@ -565,14 +565,51 @@ async def get_my_pending_approvals(request: Request):
         {"_id": 0}
     ).sort("requested_at", -1).to_list(50)
     
-    # Enrich with item details
+    # Enrich with item details and filter out stale notifications
     for notif in notifications:
-        if notif.get("item_type") == "business_request":
+        item_type = notif.get("item_type")
+        item_id = notif.get("item_id")
+        
+        # Skip notifications for items that have already been decided
+        if item_type == "business_request":
             tender = await db.tenders.find_one(
-                {"id": notif["item_id"]},
-                {"_id": 0, "title": 1, "tender_number": 1, "budget": 1, "status": 1, "selected_proposal_id": 1}
+                {"id": item_id},
+                {"_id": 0, "title": 1, "tender_number": 1, "budget": 1, "status": 1, "selected_proposal_id": 1, "hop_decision": 1}
             )
+            if not tender or tender.get("hop_decision") in ["approved", "rejected"]:
+                # Mark notification as processed
+                await db.approval_notifications.update_one(
+                    {"id": notif.get("id")},
+                    {"$set": {"status": "processed"}}
+                )
+                continue
             notif["item_details"] = tender
+        elif item_type in ["contract", "contract_approval"]:
+            contract = await db.contracts.find_one({"id": item_id}, {"_id": 0, "hop_decision": 1, "status": 1, "workflow_status": 1})
+            if not contract or contract.get("hop_decision") in ["approved", "rejected"]:
+                await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
+                continue
+        elif item_type in ["po", "po_approval", "purchase_order", "purchase_order_approval"]:
+            po = await db.purchase_orders.find_one({"id": item_id}, {"_id": 0, "hop_decision": 1, "status": 1, "workflow_status": 1})
+            if not po or po.get("hop_decision") in ["approved", "rejected"]:
+                await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
+                continue
+        elif item_type in ["vendor", "vendor_approval"]:
+            vendor = await db.vendors.find_one({"id": item_id}, {"_id": 0, "hop_decision": 1, "status": 1, "workflow_status": 1})
+            if not vendor or vendor.get("hop_decision") in ["approved", "rejected"]:
+                await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
+                continue
+        elif item_type in ["asset", "asset_approval"]:
+            asset = await db.assets.find_one({"id": item_id}, {"_id": 0, "hop_decision": 1, "approval_status": 1, "workflow_status": 1})
+            if not asset or asset.get("hop_decision") in ["approved", "rejected"]:
+                await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
+                continue
+        elif item_type in ["deliverable", "deliverable_approval"]:
+            deliverable = await db.deliverables.find_one({"id": item_id}, {"_id": 0, "hop_decision": 1, "status": 1, "workflow_status": 1})
+            if not deliverable or deliverable.get("hop_decision") in ["approved", "rejected"]:
+                await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
+                continue
+        
         all_items.append(notif)
     
     # 2. If user is HoP, include pending contracts, deliverables, and assets
