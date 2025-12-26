@@ -33,8 +33,8 @@ const Layout = ({ children }) => {
     { name: 'Reports & Analytics', path: '/reports', icon: '📈', roles: ['procurement_manager', 'admin', 'procurement_officer', 'viewer', 'hop', 'senior_manager'] },
     { name: 'Bulk Import', path: '/bulk-import', icon: '📤', roles: ['procurement_manager', 'admin', 'procurement_officer', 'hop'] },
     { name: 'User Management', path: '/user-management', icon: '👥', roles: ['procurement_manager', 'admin', 'hop'] },
-    { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin', 'hop'] },
-    { name: 'Access Management', path: '/access-management', icon: '🚪', roles: ['procurement_manager', 'admin', 'hop'] },
+    { name: 'CCTV Live View', path: '/cctv', icon: '📹', roles: ['procurement_manager', 'admin', 'hop', 'procurement_officer'] },
+    { name: 'Access Management', path: '/access-management', icon: '🚪', roles: ['procurement_manager', 'admin', 'hop', 'procurement_officer'] },
     { name: 'Admin Settings', path: '/admin/settings', icon: '⚙️', roles: ['procurement_manager', 'system_admin', 'admin', 'hop'] },
   ];
 
