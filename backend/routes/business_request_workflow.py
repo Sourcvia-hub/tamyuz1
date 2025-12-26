@@ -557,7 +557,8 @@ async def get_my_pending_approvals(request: Request):
     user_role = user.role.value.lower() if hasattr(user.role, 'value') else str(user.role).lower()
     is_hop = user_role in ["procurement_manager", "admin", "hop"]
     
-    all_items = []
+    notification_items = []
+    entity_items = []
     
     # 1. Get standard approval notifications
     notifications = await db.approval_notifications.find(
