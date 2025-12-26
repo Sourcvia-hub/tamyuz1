@@ -610,6 +610,15 @@ async def get_my_pending_approvals(request: Request):
                 await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
                 continue
         
+        # Enrich with requester name if missing
+        if not notif.get("requested_by_name") or notif.get("requested_by_name") == "Unknown":
+            requester_id = notif.get("requested_by")
+            if requester_id:
+                requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1})
+                notif["requested_by_name"] = requester.get("name", "Officer") if requester else "Officer"
+            else:
+                notif["requested_by_name"] = "Officer"
+        
         all_items.append(notif)
     
     # 2. If user is HoP, include pending contracts, deliverables, and assets
