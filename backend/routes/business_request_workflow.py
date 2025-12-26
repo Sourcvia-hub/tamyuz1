@@ -620,7 +620,7 @@ async def get_my_pending_approvals(request: Request):
             else:
                 notif["requested_by_name"] = "Officer"
         
-        all_items.append(notif)
+        notification_items.append(notif)
     
     # 2. If user is HoP, include pending contracts, deliverables, and assets
     if is_hop:
