@@ -546,13 +546,20 @@ PR DETAILS:
         """Check consistency between PR and Contract"""
         warnings = []
         
-        # Check value mismatch - ensure numeric conversion
-        try:
-            pr_budget = float(pr_details.get("budget", 0) or 0)
-            contract_value = float(contract_details.get("value", 0) or 0)
-        except (TypeError, ValueError):
-            pr_budget = 0
-            contract_value = 0
+        # Check value mismatch - ensure numeric conversion with comma handling
+        def safe_float(val):
+            if val is None or val == '':
+                return 0.0
+            try:
+                # Handle comma-formatted numbers
+                if isinstance(val, str):
+                    val = val.replace(',', '')
+                return float(val)
+            except (TypeError, ValueError):
+                return 0.0
+        
+        pr_budget = safe_float(pr_details.get("budget"))
+        contract_value = safe_float(contract_details.get("value"))
             
         if pr_budget and contract_value:
             variance = abs(contract_value - pr_budget) / pr_budget * 100 if pr_budget > 0 else 0
