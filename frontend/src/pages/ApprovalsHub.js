@@ -508,7 +508,7 @@ const POItem = ({ item, getStatusBadge, navigate }) => (
       <div>
         <h4 className="font-semibold text-gray-900">{item.po_number || 'New PO'}</h4>
         <p className="text-sm text-gray-500">
-          {item.vendor_info?.name_english || item.vendor_info?.commercial_name || 'N/A'}
+          {item.vendor_display_name || item.vendor_info?.name_english || item.vendor_info?.commercial_name || item.vendor_info?.vendor_number || 'N/A'}
         </p>
         <div className="flex gap-2 mt-2">
           <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusBadge(item.status)}`}>
