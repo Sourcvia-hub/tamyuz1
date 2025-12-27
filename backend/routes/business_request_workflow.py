@@ -785,9 +785,11 @@ async def get_my_pending_approvals(request: Request):
         for po in pending_pos:
             vendor = await db.vendors.find_one(
                 {"id": po.get("vendor_id")},
-                {"_id": 0, "name_english": 1, "commercial_name": 1}
+                {"_id": 0, "name_english": 1, "commercial_name": 1, "vendor_number": 1}
             )
-            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            vendor_name = "Unknown"
+            if vendor:
+                vendor_name = vendor.get("name_english") or vendor.get("commercial_name") or vendor.get("vendor_number") or "Unknown Vendor"
             
             # Get requester name
             requester_id = po.get("submitted_for_approval_by") or po.get("created_by")
