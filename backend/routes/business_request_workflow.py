@@ -679,9 +679,11 @@ async def get_my_pending_approvals(request: Request):
         for deliverable in pending_deliverables:
             vendor = await db.vendors.find_one(
                 {"id": deliverable.get("vendor_id")},
-                {"_id": 0, "name_english": 1, "commercial_name": 1}
+                {"_id": 0, "name_english": 1, "commercial_name": 1, "vendor_number": 1}
             )
-            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            vendor_name = "Unknown"
+            if vendor:
+                vendor_name = vendor.get("name_english") or vendor.get("commercial_name") or vendor.get("vendor_number") or "Unknown Vendor"
             
             # Get requester name
             requester_id = deliverable.get("submitted_to_hop_by") or deliverable.get("created_by")
