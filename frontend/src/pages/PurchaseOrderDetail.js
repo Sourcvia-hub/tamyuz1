@@ -175,6 +175,18 @@ const PurchaseOrderDetail = () => {
                 Cancel Edit
               </button>
             )}
+            <button
+              onClick={() => exportPOToPDF(po, vendor, po.line_items)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              📄 Export PDF
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center gap-2"
+            >
+              🖨️ Print
+            </button>
           </div>
         </div>
 
