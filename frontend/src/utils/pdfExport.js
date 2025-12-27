@@ -279,7 +279,7 @@ export const exportPOToPDF = (po, vendor, lineItems = []) => {
     y = addSectionTitle(doc, 'Line Items', y);
     y += 3;
     
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       head: [['#', 'Description', 'Qty', 'Unit Price', 'Total']],
       body: lineItems.map((item, index) => [
