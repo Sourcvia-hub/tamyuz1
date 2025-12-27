@@ -719,9 +719,11 @@ async def get_my_pending_approvals(request: Request):
         for asset in pending_assets:
             vendor = await db.vendors.find_one(
                 {"id": asset.get("vendor_id")},
-                {"_id": 0, "name_english": 1, "commercial_name": 1}
+                {"_id": 0, "name_english": 1, "commercial_name": 1, "vendor_number": 1}
             )
-            vendor_name = vendor.get("name_english") or vendor.get("commercial_name", "Unknown") if vendor else "Unknown"
+            vendor_name = "Unknown"
+            if vendor:
+                vendor_name = vendor.get("name_english") or vendor.get("commercial_name") or vendor.get("vendor_number") or "Unknown Vendor"
             
             # Get requester name
             requester_id = asset.get("submitted_for_approval_by") or asset.get("created_by")
