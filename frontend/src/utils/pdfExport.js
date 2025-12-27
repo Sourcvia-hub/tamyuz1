@@ -413,7 +413,7 @@ export const exportPRToPDF = (tender, proposals = []) => {
     y = addSectionTitle(doc, 'Proposals Summary', y);
     y += 3;
     
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       head: [['Vendor', 'Proposed Value', 'Status', 'Score']],
       body: proposals.map(p => [
