@@ -263,11 +263,16 @@ async def get_pending_purchase_orders(request: Request, status: str = "pending")
     for po in pos:
         vendor = await db.vendors.find_one(
             {"id": po.get("vendor_id")},
-            {"_id": 0, "name_english": 1, "commercial_name": 1}
+            {"_id": 0, "name_english": 1, "commercial_name": 1, "vendor_number": 1}
         )
+        # Create a display name with fallback
+        vendor_display_name = None
+        if vendor:
+            vendor_display_name = vendor.get("name_english") or vendor.get("commercial_name") or vendor.get("vendor_number") or "Unknown Vendor"
         enriched.append({
             **po,
-            "vendor_info": vendor
+            "vendor_info": vendor,
+            "vendor_display_name": vendor_display_name or "Unknown Vendor"
         })
     
     return {"purchase_orders": enriched, "count": len(enriched)}
