@@ -288,6 +288,10 @@ const MyApprovals = () => {
       case 'purchase_order_approval':
         navigate(`/purchase-orders/${notification.item_id}`);
         break;
+      case 'resource':
+      case 'resource_approval':
+        navigate(`/resources/${notification.item_id}`);
+        break;
       default:
         console.log('Unknown item type:', itemType);
         break;
