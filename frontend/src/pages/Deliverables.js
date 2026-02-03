@@ -492,7 +492,7 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                     vendor_id: vendorId 
                   });
                   if (vendorId) {
-                    setSelectedVendor({ value: vendorId, label: vendor?.name_english || vendor?.commercial_name || 'Unknown Vendor' });
+                    setSelectedVendor({ value: vendorId, label: vendor?.name_english || vendor?.commercial_name || vendor?.vendor_number || 'Unknown Vendor' });
                     setVendorLocked(true);
                   } else {
                     setSelectedVendor(null);
