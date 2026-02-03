@@ -23,6 +23,11 @@ Enterprise procurement management platform with approval workflows, contract gov
 
 #### Bug Fixes Completed
 1. **PDF Export Fix** - Resolved `doc.autoTable is not a function` error
+2. **PO & Resource stuck in approvals** - Fixed items remaining in "My Approvals" after HoP approval:
+   - Added resources to the `my-pending-approvals` endpoint query
+   - Added resource notification filtering to mark processed notifications
+   - Fixed PO approval endpoint (was using wrong entity type)
+   - Added full resource support to frontend (labels, colors, navigation, approve/reject handlers)
    - Changed import from `import 'jspdf-autotable'` to `import autoTable from 'jspdf-autotable'`
    - Updated calls from `doc.autoTable(...)` to `autoTable(doc, ...)`
    - File: `/app/frontend/src/utils/pdfExport.js`
