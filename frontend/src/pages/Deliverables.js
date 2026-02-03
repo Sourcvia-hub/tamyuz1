@@ -525,7 +525,7 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
               </div>
             ) : (
               <SearchableSelect
-                options={vendors.map(v => ({ value: v.id, label: v.name_english || v.commercial_name || 'Unknown' }))}
+                options={vendors.map(v => ({ value: v.id, label: v.name_english || v.commercial_name || v.vendor_number || 'Unknown' }))}
                 value={selectedVendor}
                 onChange={(option) => {
                   setSelectedVendor(option);
