@@ -44,6 +44,11 @@ Enterprise procurement management platform with approval workflows, contract gov
    - Export PDF button (generates branded PDF documents)
    - Print button (triggers browser print dialog)
 
+3. **Admin Scoring Configuration** - New admin settings page with configurable:
+   - **Proposal Evaluation Weights**: Technical, Financial, Experience, Compliance scores
+   - **Vendor Registration Weights**: Financial Stability, Experience, Certifications, Location, Capacity, References
+   - **Contract Classification Criteria**: Value thresholds (Low/Medium/High/Critical), Outsourcing indicators, SAMA NOC triggers
+
 ### Previous Session Work
 - Reports & Analytics page with Regular/Expert differentiation
 - My Approvals page bug fixes (loading, navigation, duplicates)
