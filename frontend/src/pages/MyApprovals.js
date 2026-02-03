@@ -89,6 +89,11 @@ const MyApprovals = () => {
           decision: 'approved',
           notes: ''
         }, { withCredentials: true });
+      } else if (itemType === 'resource') {
+        await axios.post(`${API}/entity-workflow/resource/${notification.item_id}/hop-decision`, {
+          decision: 'approved',
+          notes: ''
+        }, { withCredentials: true });
       }
       toast({ title: "✅ Approved", description: "Request approved successfully", variant: "success" });
       fetchPendingApprovals();
