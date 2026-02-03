@@ -401,6 +401,7 @@ const MyApprovals = () => {
               { key: 'asset', label: '🏢 Assets' },
               { key: 'vendor', label: '🏪 Vendors' },
               { key: 'po', label: '📦 POs' },
+              { key: 'resource', label: '👤 Resources' },
             ].map(filter => (
               <button
                 key={filter.key}
