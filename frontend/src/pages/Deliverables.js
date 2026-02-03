@@ -537,8 +537,9 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                 options={vendors.map(v => ({ value: v.id, label: v.name_english || v.commercial_name || v.vendor_number || 'Unknown' }))}
                 value={selectedVendor}
                 onChange={(option) => {
+                  const vendorId = typeof option === 'object' ? option?.value : option;
                   setSelectedVendor(option);
-                  setFormData({ ...formData, vendor_id: option?.value || '' });
+                  setFormData({ ...formData, vendor_id: vendorId || '' });
                 }}
                 placeholder="Select vendor..."
               />
