@@ -39,8 +39,11 @@ const Attachments = ({
     }
     
     try {
+      // Get the correct upload route name for this entity type
+      const uploadRoute = ENTITY_TYPE_MAP[entityType]?.uploadRoute || entityType;
+      
       const response = await axios.post(
-        `${API}/upload/${entityType}/${entityId}`,
+        `${API}/upload/${uploadRoute}/${entityId}`,
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
