@@ -469,6 +469,21 @@ const VendorDetail = () => {
           </div>
         </div>
 
+        {/* Attachments Section */}
+        <Attachments
+          entityType="vendor"
+          entityId={id}
+          attachments={vendor.attachments || []}
+          onUploadSuccess={(newFiles) => {
+            setVendor(prev => ({
+              ...prev,
+              attachments: [...(prev.attachments || []), ...newFiles]
+            }));
+          }}
+          canUpload={canEdit(user?.role, Module.VENDORS)}
+          title="Vendor Documents"
+        />
+
         {/* Audit Trail */}
         <AuditTrail 
           auditTrail={auditLog} 
