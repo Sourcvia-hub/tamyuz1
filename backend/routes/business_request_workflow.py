@@ -610,6 +610,11 @@ async def get_my_pending_approvals(request: Request):
             if not deliverable or deliverable.get("hop_decision") in ["approved", "rejected"]:
                 await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
                 continue
+        elif item_type in ["resource", "resource_approval"]:
+            resource = await db.resources.find_one({"id": item_id}, {"_id": 0, "hop_decision": 1, "status": 1, "workflow_status": 1})
+            if not resource or resource.get("hop_decision") in ["approved", "rejected"]:
+                await db.approval_notifications.update_one({"id": notif.get("id")}, {"$set": {"status": "processed"}})
+                continue
         
         # Enrich with requester name if missing
         if not notif.get("requested_by_name") or notif.get("requested_by_name") == "Unknown":
