@@ -284,10 +284,10 @@ export const exportPOToPDF = (po, vendor, lineItems = []) => {
       head: [['#', 'Description', 'Qty', 'Unit Price', 'Total']],
       body: lineItems.map((item, index) => [
         index + 1,
-        item.description || item.item_description || 'N/A',
+        item.description || item.name || item.item_description || 'N/A',
         item.quantity || 0,
-        formatCurrency(item.unit_price),
-        formatCurrency(item.total || (item.quantity * item.unit_price))
+        formatCurrency(item.unit_price || item.price),
+        formatCurrency(item.total || (item.quantity * (item.unit_price || item.price || 0)))
       ]),
       theme: 'striped',
       headStyles: { fillColor: [37, 99, 235], fontSize: 9 },
