@@ -4779,6 +4779,160 @@ async def seed_facilities_data(request: Request):
     
     return {"message": "Seed data created successfully"}
 
+# ==================== SYSTEM CONFIGURATION ENDPOINTS ====================
+
+# Default scoring configurations
+DEFAULT_PROPOSAL_EVALUATION_WEIGHTS = {
+    "technical_score": {"weight": 40, "description": "Technical capability and approach"},
+    "financial_score": {"weight": 30, "description": "Price competitiveness"},
+    "experience_score": {"weight": 15, "description": "Relevant experience and track record"},
+    "compliance_score": {"weight": 15, "description": "Compliance with requirements"}
+}
+
+DEFAULT_VENDOR_REGISTRATION_WEIGHTS = {
+    "financial_stability": {"weight": 25, "description": "Financial health and stability"},
+    "experience": {"weight": 20, "description": "Years of experience and track record"},
+    "certifications": {"weight": 15, "description": "Quality certifications and standards"},
+    "location": {"weight": 15, "description": "Geographic location and local presence"},
+    "capacity": {"weight": 15, "description": "Operational capacity and resources"},
+    "references": {"weight": 10, "description": "Client references and testimonials"}
+}
+
+DEFAULT_CONTRACT_CLASSIFICATION_CRITERIA = {
+    "value_thresholds": {
+        "low": {"max": 100000, "description": "Low value contracts (< 100K SAR)"},
+        "medium": {"min": 100000, "max": 500000, "description": "Medium value (100K - 500K SAR)"},
+        "high": {"min": 500000, "max": 2000000, "description": "High value (500K - 2M SAR)"},
+        "critical": {"min": 2000000, "description": "Critical value (> 2M SAR)"}
+    },
+    "outsourcing_indicators": {
+        "cloud_services": {"triggers_outsourcing": True, "description": "Cloud-based services"},
+        "data_processing": {"triggers_outsourcing": True, "description": "External data processing"},
+        "system_access": {"triggers_outsourcing": True, "description": "Access to internal systems"},
+        "offshore_delivery": {"triggers_material_outsourcing": True, "description": "Services delivered from outside KSA"}
+    },
+    "sama_noc_triggers": {
+        "material_outsourcing": True,
+        "cloud_computing": True,
+        "data_outside_ksa": True,
+        "critical_infrastructure": True
+    }
+}
+
+class ScoringConfigUpdate(BaseModel):
+    config_type: str  # 'proposal_evaluation', 'vendor_registration', 'contract_classification'
+    config_data: Dict[str, Any]
+
+@api_router.get("/admin/scoring-config")
+async def get_scoring_config(request: Request):
+    """Get all scoring configuration settings"""
+    user = await require_auth(request)
+    
+    # Only admin/HoP can view
+    if user.role not in ["procurement_manager", "system_admin", "hop", "admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Try to get from database, fallback to defaults
+    config = await db.system_config.find_one({"type": "scoring_config"}, {"_id": 0})
+    
+    if not config:
+        config = {
+            "type": "scoring_config",
+            "proposal_evaluation": DEFAULT_PROPOSAL_EVALUATION_WEIGHTS,
+            "vendor_registration": DEFAULT_VENDOR_REGISTRATION_WEIGHTS,
+            "contract_classification": DEFAULT_CONTRACT_CLASSIFICATION_CRITERIA,
+            "updated_at": None,
+            "updated_by": None
+        }
+    
+    return config
+
+@api_router.put("/admin/scoring-config")
+async def update_scoring_config(data: ScoringConfigUpdate, request: Request):
+    """Update scoring configuration"""
+    user = await require_auth(request)
+    
+    # Only admin/HoP can modify
+    if user.role not in ["procurement_manager", "system_admin", "hop", "admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    valid_types = ["proposal_evaluation", "vendor_registration", "contract_classification"]
+    if data.config_type not in valid_types:
+        raise HTTPException(status_code=400, detail=f"Invalid config type. Must be one of: {valid_types}")
+    
+    # Validate weights sum to 100 for scoring configs
+    if data.config_type in ["proposal_evaluation", "vendor_registration"]:
+        total_weight = sum(item.get("weight", 0) for item in data.config_data.values())
+        if total_weight != 100:
+            raise HTTPException(status_code=400, detail=f"Weights must sum to 100. Current total: {total_weight}")
+    
+    # Update or create config
+    existing = await db.system_config.find_one({"type": "scoring_config"})
+    
+    if existing:
+        await db.system_config.update_one(
+            {"type": "scoring_config"},
+            {"$set": {
+                data.config_type: data.config_data,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "updated_by": user.id,
+                "updated_by_name": user.name
+            }}
+        )
+    else:
+        new_config = {
+            "type": "scoring_config",
+            "proposal_evaluation": DEFAULT_PROPOSAL_EVALUATION_WEIGHTS,
+            "vendor_registration": DEFAULT_VENDOR_REGISTRATION_WEIGHTS,
+            "contract_classification": DEFAULT_CONTRACT_CLASSIFICATION_CRITERIA,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_by": user.id,
+            "updated_by_name": user.name
+        }
+        new_config[data.config_type] = data.config_data
+        await db.system_config.insert_one(new_config)
+    
+    # Log the change
+    await db.audit_logs.insert_one({
+        "id": str(uuid.uuid4()),
+        "entity_type": "system_config",
+        "entity_id": "scoring_config",
+        "action": f"updated_{data.config_type}",
+        "user_id": user.id,
+        "user_name": user.name,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "changes": data.config_data
+    })
+    
+    return {"success": True, "message": f"{data.config_type} configuration updated successfully"}
+
+@api_router.post("/admin/scoring-config/reset")
+async def reset_scoring_config(request: Request):
+    """Reset all scoring configurations to defaults"""
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_manager", "system_admin", "hop", "admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    default_config = {
+        "type": "scoring_config",
+        "proposal_evaluation": DEFAULT_PROPOSAL_EVALUATION_WEIGHTS,
+        "vendor_registration": DEFAULT_VENDOR_REGISTRATION_WEIGHTS,
+        "contract_classification": DEFAULT_CONTRACT_CLASSIFICATION_CRITERIA,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user.id,
+        "updated_by_name": user.name,
+        "reset_to_defaults": True
+    }
+    
+    await db.system_config.update_one(
+        {"type": "scoring_config"},
+        {"$set": default_config},
+        upsert=True
+    )
+    
+    return {"success": True, "message": "All scoring configurations reset to defaults"}
+
 # ==================== APP SETUP ====================
 
 # Add request logging middleware for debugging CORS and auth issues
