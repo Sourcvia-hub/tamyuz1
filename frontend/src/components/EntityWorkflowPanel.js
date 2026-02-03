@@ -267,6 +267,16 @@ const EntityWorkflowPanel = ({
         </div>
       )}
 
+      {/* Pending HoP Approval Info */}
+      {currentStatus === 'pending_hop_approval' && !workflowStatus?.hop_decision && (
+        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+          <p className="text-sm text-orange-800">
+            <strong>⏳ Pending HoP Approval:</strong> This {entityType} is waiting for Head of Procurement decision.
+            {isHoP && ' You can approve or reject this item.'}
+          </p>
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2">
         {/* Officer: Forward for Review */}
