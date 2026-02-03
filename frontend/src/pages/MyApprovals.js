@@ -299,6 +299,7 @@ const MyApprovals = () => {
     if (type.includes('asset')) return 'asset';
     if (type.includes('vendor')) return 'vendor';
     if (type.includes('po') || type.includes('purchase_order')) return 'po';
+    if (type.includes('resource')) return 'resource';
     return type;
   };
 
@@ -315,6 +316,7 @@ const MyApprovals = () => {
     asset: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'asset').length,
     vendor: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'vendor').length,
     po: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'po').length,
+    resource: pendingApprovals.filter(i => getItemTypeCategory(i.item_type) === 'resource').length,
   };
 
   if (loading) {
