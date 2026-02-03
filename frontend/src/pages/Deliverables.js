@@ -484,7 +484,10 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                   setSelectedContract(null); // Clear contract when PO is selected
                   const po = purchaseOrders.find(p => p.id === option?.value);
                   const vendorId = po?.vendor_id || '';
+                  console.log('PO Selected:', po?.po_number, 'vendorId:', vendorId);
+                  console.log('Vendors count:', vendors.length);
                   const vendor = vendors.find(v => v.id === vendorId);
+                  console.log('Found vendor:', vendor);
                   setFormData({ 
                     ...formData, 
                     po_id: option?.value || '', 
@@ -492,7 +495,9 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                     vendor_id: vendorId 
                   });
                   if (vendorId) {
-                    setSelectedVendor({ value: vendorId, label: vendor?.name_english || vendor?.commercial_name || vendor?.vendor_number || 'Unknown Vendor' });
+                    const vendorLabel = vendor?.name_english || vendor?.commercial_name || vendor?.vendor_number || 'Unknown Vendor';
+                    console.log('Setting vendor label:', vendorLabel);
+                    setSelectedVendor({ value: vendorId, label: vendorLabel });
                     setVendorLocked(true);
                   } else {
                     setSelectedVendor(null);
