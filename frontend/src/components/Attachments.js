@@ -4,6 +4,19 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Map entity types to API route names and storage folder names
+const ENTITY_TYPE_MAP = {
+  vendor: { uploadRoute: 'vendor', downloadModule: 'vendors' },
+  contract: { uploadRoute: 'contract', downloadModule: 'contracts' },
+  purchase_order: { uploadRoute: 'purchase-order', downloadModule: 'purchase_orders' },
+  tender: { uploadRoute: 'tender', downloadModule: 'tenders' },
+  proposal: { uploadRoute: 'proposal', downloadModule: 'proposals' },
+  invoice: { uploadRoute: 'invoice', downloadModule: 'invoices' },
+  resource: { uploadRoute: 'resource', downloadModule: 'resources' },
+  deliverable: { uploadRoute: 'deliverable', downloadModule: 'deliverables' },
+  asset: { uploadRoute: 'asset', downloadModule: 'assets' },
+};
+
 const Attachments = ({ 
   entityType, // 'vendor', 'contract', 'purchase_order', 'tender', 'deliverable', 'asset', 'resource'
   entityId,
