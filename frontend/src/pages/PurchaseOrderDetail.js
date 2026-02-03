@@ -178,7 +178,7 @@ const PurchaseOrderDetail = () => {
               </button>
             )}
             <button
-              onClick={() => exportPOToPDF(po, { name_english: po.vendor_name, vendor_number: po.vendor_id }, po.line_items)}
+              onClick={() => exportPOToPDF(po, { name_english: po.vendor_name, vendor_number: po.vendor_id }, po.items || [])}
               className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
             >
               📄 Export PDF
