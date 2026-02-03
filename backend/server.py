@@ -4933,6 +4933,50 @@ async def reset_scoring_config(request: Request):
     
     return {"success": True, "message": "All scoring configurations reset to defaults"}
 
+# ==================== EXTERNAL SYSTEM URL ENDPOINTS ====================
+
+@api_router.get("/admin/external-system-url/{system_type}")
+async def get_external_system_url(system_type: str, request: Request):
+    """Get external system URL (cctv or access_management)"""
+    await require_auth(request)
+    
+    if system_type not in ["cctv", "access_management"]:
+        raise HTTPException(status_code=400, detail="Invalid system type. Must be 'cctv' or 'access_management'")
+    
+    config = await db.system_config.find_one(
+        {"type": "external_system_urls"},
+        {"_id": 0}
+    )
+    
+    url = config.get(system_type, "") if config else ""
+    return {"system_type": system_type, "url": url}
+
+@api_router.put("/admin/external-system-url/{system_type}")
+async def set_external_system_url(system_type: str, request: Request):
+    """Set external system URL (admin only)"""
+    user = await require_auth(request)
+    
+    if user.role not in ["procurement_manager", "system_admin", "hop", "admin"]:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if system_type not in ["cctv", "access_management"]:
+        raise HTTPException(status_code=400, detail="Invalid system type")
+    
+    body = await request.json()
+    url = body.get("url", "")
+    
+    await db.system_config.update_one(
+        {"type": "external_system_urls"},
+        {"$set": {
+            system_type: url,
+            f"{system_type}_updated_at": datetime.now(timezone.utc).isoformat(),
+            f"{system_type}_updated_by": user.id
+        }},
+        upsert=True
+    )
+    
+    return {"success": True, "message": f"{system_type} URL updated successfully"}
+
 # ==================== APP SETUP ====================
 
 # Add request logging middleware for debugging CORS and auth issues
