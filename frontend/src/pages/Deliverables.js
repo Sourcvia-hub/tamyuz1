@@ -482,7 +482,9 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                 onChange={(option) => {
                   setSelectedPO(option);
                   setSelectedContract(null); // Clear contract when PO is selected
-                  const po = purchaseOrders.find(p => p.id === option?.value);
+                  // option is the value directly (string) not {value, label}
+                  const poId = typeof option === 'object' ? option?.value : option;
+                  const po = purchaseOrders.find(p => p.id === poId);
                   const vendorId = po?.vendor_id || '';
                   console.log('PO Selected:', po?.po_number, 'vendorId:', vendorId);
                   console.log('Vendors count:', vendors.length);
@@ -490,7 +492,7 @@ const CreateDeliverableModal = ({ contracts, purchaseOrders, vendors, onClose, o
                   console.log('Found vendor:', vendor);
                   setFormData({ 
                     ...formData, 
-                    po_id: option?.value || '', 
+                    po_id: poId || '', 
                     contract_id: '',
                     vendor_id: vendorId 
                   });
