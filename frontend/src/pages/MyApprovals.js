@@ -216,6 +216,7 @@ const MyApprovals = () => {
       asset: '🏢 Asset',
       vendor: '🏪 Vendor',
       po: '📦 Purchase Order',
+      resource: '👤 Resource',
     };
     return labels[category] || type;
   };
@@ -229,6 +230,7 @@ const MyApprovals = () => {
       asset: '🏢',
       vendor: '🏪',
       po: '📦',
+      resource: '👤',
     };
     return icons[category] || '📝';
   };
@@ -242,6 +244,7 @@ const MyApprovals = () => {
       asset: 'bg-orange-100 text-orange-800',
       vendor: 'bg-teal-100 text-teal-800',
       po: 'bg-indigo-100 text-indigo-800',
+      resource: 'bg-pink-100 text-pink-800',
     };
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
