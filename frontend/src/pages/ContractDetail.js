@@ -991,6 +991,21 @@ const ContractDetail = () => {
           </div>
         </div>
 
+        {/* Attachments Section */}
+        <Attachments
+          entityType="contract"
+          entityId={id}
+          attachments={contract.attachments || []}
+          onUploadSuccess={(newFiles) => {
+            setContract(prev => ({
+              ...prev,
+              attachments: [...(prev.attachments || []), ...newFiles]
+            }));
+          }}
+          canUpload={canEdit(user?.role, Module.CONTRACTS)}
+          title="Contract Documents"
+        />
+
         {/* Audit Trail */}
         <AuditTrail 
           auditTrail={auditTrail} 
