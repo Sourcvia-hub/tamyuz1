@@ -140,7 +140,7 @@ const MyApprovals = () => {
           notes: notes || ''
         }, { withCredentials: true });
       } else if (itemType === 'po') {
-        await axios.post(`${API}/entity-workflow/purchase_order/${notification.item_id}/hop-decision`, {
+        await axios.post(`${API}/entity-workflow/po/${notification.item_id}/hop-decision`, {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
