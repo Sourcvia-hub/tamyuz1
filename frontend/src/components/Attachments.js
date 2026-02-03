@@ -127,8 +127,11 @@ const Attachments = ({
 
   const handleDownload = async (attachment) => {
     try {
+      // Get the correct download module name for this entity type
+      const downloadModule = ENTITY_TYPE_MAP[entityType]?.downloadModule || `${entityType}s`;
+      
       const response = await axios.get(
-        `${API}/download/${entityType}/${entityId}/${attachment.stored_filename}`,
+        `${API}/download/${downloadModule}/${entityId}/${attachment.stored_filename}`,
         {
           responseType: 'blob',
           withCredentials: true
