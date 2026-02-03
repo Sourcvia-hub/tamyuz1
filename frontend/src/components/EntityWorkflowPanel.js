@@ -257,6 +257,16 @@ const EntityWorkflowPanel = ({
         </div>
       )}
 
+      {/* Status Info when no workflow started */}
+      {!currentStatus && workflowStatus?.requires_workflow && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>ℹ️ Workflow Required:</strong> This {entityType} needs HoP approval. 
+            Use "Forward to HoP" to initiate the approval process.
+          </p>
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-2">
         {/* Officer: Forward for Review */}
