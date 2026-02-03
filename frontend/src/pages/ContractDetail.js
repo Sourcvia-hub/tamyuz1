@@ -14,6 +14,8 @@ import ContractDDQuestionnaire from '../components/ContractDDQuestionnaire';
 import AuditTrail from '../components/AuditTrail';
 import EntityWorkflowPanel from '../components/EntityWorkflowPanel';
 import { exportContractToPDF } from '../utils/pdfExport';
+import Attachments from '../components/Attachments';
+import { canEdit, Module } from '../utils/permissions';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
