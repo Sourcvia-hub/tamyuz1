@@ -1064,6 +1064,21 @@ const TenderDetail = () => {
           )}
         </div>
 
+        {/* Attachments Section */}
+        <Attachments
+          entityType="tender"
+          entityId={id}
+          attachments={tender.attachments || []}
+          onUploadSuccess={(newFiles) => {
+            setTender(prev => ({
+              ...prev,
+              attachments: [...(prev.attachments || []), ...newFiles]
+            }));
+          }}
+          canUpload={canEdit(user?.role, Module.TENDERS)}
+          title="Business Request Documents"
+        />
+
         {/* Audit Trail */}
         <AuditTrail 
           auditTrail={auditTrail} 
