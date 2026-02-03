@@ -815,6 +815,38 @@ async def get_my_pending_approvals(request: Request):
                 "vendor_name": vendor_name,
                 "amount": po.get("total_value", 0)
             })
+        
+        # Get resources pending HoP approval (exclude already decided)
+        pending_resources = await db.resources.find(
+            {"$and": [
+                {"$or": [
+                    {"status": "pending_hop_approval"},
+                    {"workflow_status": "pending_hop_approval"}
+                ]},
+                {"hop_decision": {"$nin": ["approved", "rejected"]}}
+            ]},
+            {"_id": 0}
+        ).to_list(50)
+        
+        for resource in pending_resources:
+            # Get requester name
+            requester_id = resource.get("submitted_for_approval_by") or resource.get("created_by")
+            requester = await db.users.find_one({"id": requester_id}, {"_id": 0, "name": 1}) if requester_id else None
+            requester_name = requester.get("name", "Officer") if requester else "Officer"
+            
+            entity_items.append({
+                "id": f"resource_{resource['id']}",
+                "item_type": "resource",
+                "item_id": resource["id"],
+                "item_number": resource.get("resource_number"),
+                "item_title": resource.get("name") or f"Resource {resource.get('resource_number')}",
+                "status": "pending",
+                "message": f"Resource {resource.get('name') or resource.get('resource_number')} requires HoP approval",
+                "requested_by_name": requester_name,
+                "requested_at": resource.get("submitted_for_approval_at") or resource.get("created_at"),
+                "vendor_name": "",
+                "amount": 0
+            })
     
     # Combine and deduplicate: prefer entity query results over notifications
     # Entity items have more accurate requester info from the entity itself
