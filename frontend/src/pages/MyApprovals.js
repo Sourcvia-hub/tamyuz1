@@ -144,6 +144,11 @@ const MyApprovals = () => {
           decision: 'rejected',
           notes: notes || ''
         }, { withCredentials: true });
+      } else if (itemType === 'resource') {
+        await axios.post(`${API}/entity-workflow/resource/${notification.item_id}/hop-decision`, {
+          decision: 'rejected',
+          notes: notes || ''
+        }, { withCredentials: true });
       }
       toast({ title: "❌ Rejected", description: "Request rejected", variant: "warning" });
       setNotesModal({ open: false, item: null, action: null });
