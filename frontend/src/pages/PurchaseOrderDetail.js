@@ -525,6 +525,21 @@ const PurchaseOrderDetail = () => {
               </div>
             )}
 
+            {/* Attachments Section */}
+            <Attachments
+              entityType="purchase_order"
+              entityId={id}
+              attachments={po.attachments || []}
+              onUploadSuccess={(newFiles) => {
+                setPO(prev => ({
+                  ...prev,
+                  attachments: [...(prev.attachments || []), ...newFiles]
+                }));
+              }}
+              canUpload={canEdit(user?.role, Module.PURCHASE_ORDERS)}
+              title="PO Documents"
+            />
+
             {/* Audit Trail */}
             <AuditTrail 
               auditTrail={auditTrail} 
